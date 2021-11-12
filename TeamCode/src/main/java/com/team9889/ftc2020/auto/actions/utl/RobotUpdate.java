@@ -18,10 +18,6 @@ public class RobotUpdate extends Action {
     @Override
     public void update() {
         Robot.getInstance().update();
-//        if (Robot.getInstance().getIntake().ringsIntaken >= 3) {
-//            Robot.getInstance().getIntake().SetFrontIntakePower(0);
-//            Robot.getInstance().getIntake().SetBackIntakePower(0);
-//        }
 
         while (timer.milliseconds() < 20) {
 

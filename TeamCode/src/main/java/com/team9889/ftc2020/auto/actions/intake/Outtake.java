@@ -36,17 +36,11 @@ public class Outtake extends Action {
 
     @Override
     public void update() {
-//        if(timer.milliseconds() > 100 && timer.milliseconds() < 200) {
         if(outtake) {
-            Robot.getInstance().getIntake().SetFrontIntakePower(-0.3);
+            Robot.getInstance().getIntake().SetIntake(-0.3);
         } else {
-            Robot.getInstance().getIntake().SetFrontIntakePower(0);
+            Robot.getInstance().getIntake().SetIntake(0);
         }
-//        }
-//        else if(timer.milliseconds() > 200) {
-//            if (outtake) Robot.getInstance().getIntake().SetRollerPower(1);
-//            else Robot.getInstance().getIntake().SetRollerPower(0);
-//        }
     }
 
     @Override

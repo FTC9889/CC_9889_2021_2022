@@ -7,136 +7,76 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 
 public class Intake extends Subsystem {
-    public int numSinceIntakeOn = 0;
-    public int ringsIntaken = 0;
-    boolean intakeReady = true;
-    double currentPower = 0;
-    public double current = 0;
-
-    public boolean frontIntakeOn = false;
-    public boolean backIntakeOn = false;
-    public boolean passThroughIntakeOn = false;
-    public boolean passThroughIntakeOnPartial = false;
-    public boolean outtake = false;
-
-    boolean auto = false;
-
-    public enum ArmPositions {
-        DOWN, UP, HALF, NULL
+    public enum IntakeHeightState {
+        UP, DOWN, NULL
     }
-    public ArmPositions wantedArmPos = ArmPositions.NULL;
-    public ArmPositions currentArmPos = ArmPositions.NULL;
+    public IntakeHeightState intakeHeightState = IntakeHeightState.NULL;
+
+    public boolean intake = false;
+    public boolean outtake = false;
 
     @Override
     public void init(boolean auto) {
         if (auto) {
-            Robot.getInstance().leftArm.setPosition(0);
-            Robot.getInstance().rightArm.setPosition(1);
-        }
 
-        this.auto = auto;
+        }
     }
 
     @Override
-    public void outputToTelemetry(Telemetry telemetry) {
-        telemetry.addData("Ring Intaken", ringsIntaken);
-        telemetry.addData("Current", current);
-    }
+    public void outputToTelemetry(Telemetry telemetry) { }
 
     @Override
     public void update() {
-//        if (ringsIntaken >= 4) {
-//            frontIntakeOn = false;
-//            backIntakeOn = false;
-//        }
-
-        if (frontIntakeOn) {
+        if (intake) {
             if (outtake)
-                SetFrontIntakePower(-1);
+                SetIntake(-1);
             else
-                SetFrontIntakePower(1);
+                SetIntake(1);
         } else {
-            SetFrontIntakePower(0);
-        }
-        if (backIntakeOn) {
-            if (outtake)
-                SetBackIntakePower(-1);
-            else
-                SetBackIntakePower(1);
-        } else {
-            SetBackIntakePower(0);
-        }
-
-        if (passThroughIntakeOnPartial) {
-            if (outtake)
-                SetPassThroughPower(-.4);
-            else
-                SetPassThroughPower(.4);
-        } else if (passThroughIntakeOn) {
-            if (outtake)
-                SetPassThroughPower(-1);
-            else
-                SetPassThroughPower(1);
-        } else {
-            SetPassThroughPower(0);
+            SetIntake(0);
         }
 
 
-        if (current > 5500 &&
-                intakeReady && numSinceIntakeOn > 10) {
-            intakeReady = false;
-            ringsIntaken++;
-        } else if (current <= 5500) {
-            intakeReady = true;
-        }
+        switch (intakeHeightState) {
+            case UP:
+                IntakeUp();
+                break;
 
-        numSinceIntakeOn++;
-
-        if (currentArmPos != wantedArmPos) {
-            switch (wantedArmPos) {
-                case UP:
-                    Robot.getInstance().leftArm.setPosition(0);
-                    Robot.getInstance().rightArm.setPosition(1);
-                    break;
-
-                case HALF:
-                    Robot.getInstance().leftArm.setPosition(0.5);
-                    Robot.getInstance().rightArm.setPosition(0.5);
-                    break;
-
-                case DOWN:
-                    Robot.getInstance().leftArm.setPosition(1);
-                    Robot.getInstance().rightArm.setPosition(0);
-                    break;
-
-                case NULL:
-                    break;
-            }
-
-            currentArmPos = wantedArmPos;
+            case DOWN:
+                IntakeDown();
+                break;
         }
     }
 
     @Override
     public void stop() {
-        SetFrontIntakePower(0);
-        SetBackIntakePower(0);
+        SetIntake(0);
     }
 
-    public void SetFrontIntakePower(double power){
-        Robot.getInstance().frontIntake.setPower(power);
+    public void SetIntake(double power){
+        Robot.getInstance().intake.setPower(power);
     }
 
-    public void SetBackIntakePower(double power){
-        Robot.getInstance().backIntake.setPower(power);
+    public void StartIntake() {
+        intake = true;
+        outtake = false;
     }
 
-    public void SetPassThroughPower(double power){
-        if (power != currentPower) {
-            Robot.getInstance().passThrough.setPower(power);
-            numSinceIntakeOn = 0;
-            intakeReady = false;
-            currentPower = power;
-        }
+    public void StartOuttake() {
+        intake = true;
+        outtake = false;
+    }
+
+    public void StopIntake() {
+        intake = false;
+        outtake = false;
+    }
+
+    public void IntakeUp() {
+        Robot.getInstance().intakeLift.setPosition(1);
+    }
+
+    public void IntakeDown() {
+        Robot.getInstance().intakeLift.setPosition(0);
     }
 }

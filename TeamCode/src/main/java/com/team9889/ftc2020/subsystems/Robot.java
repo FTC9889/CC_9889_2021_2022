@@ -2,8 +2,9 @@ package com.team9889.ftc2020.subsystems;
 
 import android.util.Log;
 
+import com.qualcomm.hardware.rev.RevTouchSensor;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -41,18 +42,17 @@ public class Robot{
     public Motor fLDrive, fRDrive, bLDrive, bRDrive;
     public RevIMU imu = null;
 
-    public Motor frontIntake;
-    public Motor backIntake;
-    public Motor passThrough;
-    public Servo leftArm, rightArm;
+    public Motor intake;
+    public Servo intakeLift;
 
-    public Motor flyWheel;
-    public Servo fwArm, fwLock, fwFlap;
-    public DistanceSensor hopperDist;
+    public Motor lift;
+    public RevTouchSensor downLimit;
 
-    public Servo wgGrabber, wgLeft, wgRight, autoWG;
+    public Servo dumperGate;
 
-    public Servo xCam, yCam;
+    public CRServo carousel;
+
+    public Servo camYAxis;
 
     public RevBulkData bulkDataMaster, bulkDataSlave;
     public ExpansionHubEx revHubMaster, revHubSlave;
@@ -76,17 +76,18 @@ public class Robot{
 
     private MecanumDrive mMecanumDrive = new MecanumDrive();
     private Intake mIntake = new Intake();
-    private FlyWheel mFW = new FlyWheel();
-    private WobbleGoal mWG = new WobbleGoal();
+    private Lift mLift = new Lift();
+    private Dumper mDumper = new Dumper();
+    private Carousel mCarousel = new Carousel();
     private Camera mCamera = new Camera();
 
     public RoadRunner rr;
     public StandardTrackingWheelLocalizer localizer;
 
-    public boolean blue = false, blueGoal = false;
+    public boolean blue = false;
 
     // List of subsystems
-    private List<Subsystem> subsystems = Arrays.asList(mMecanumDrive, mIntake, mFW, mWG, mCamera);
+    private List<Subsystem> subsystems = Arrays.asList(mMecanumDrive, mIntake, mLift, mDumper, mCarousel, mCamera);
 
     public void init(HardwareMap hardwareMap, boolean auto){
         this.hardwareMap = hardwareMap;
@@ -96,15 +97,17 @@ public class Robot{
 
         RobotLog.a("Robot Init Started at " + format.format(currentData));
 
-        // Rev Hubs
+        //Rev Hubs
         revHubMaster = hardwareMap.get(ExpansionHubEx.class, Constants.kRevHubMaster);
         revHubSlave = hardwareMap.get(ExpansionHubEx.class, Constants.kRevHubSlave);
 
-        // Camera
+        //Camera
         webcam = hardwareMap.get(WebcamName.class, Constants.kWebcam);
         camera = OpenCvCameraFactory.getInstance().createWebcam(webcam);
+//        camXAxis = hardwareMap.get(Servo.class, Constants.CameraConstants.kCamX);
+        camYAxis = hardwareMap.get(Servo.class, Constants.CameraConstants.kCamY);
 
-        // Drive
+        //Drive
         fLDrive = new Motor(hardwareMap, Constants.DriveConstants.kLeftDriveMasterId, 1,
                 DcMotorSimple.Direction.FORWARD, true, true, true);
         bLDrive = new Motor(hardwareMap, Constants.DriveConstants.kLeftDriveSlaveId, 1,
@@ -115,36 +118,22 @@ public class Robot{
                 DcMotorSimple.Direction.REVERSE, true, true, true);
 
         //Intake
-        frontIntake = new Motor(hardwareMap, Constants.IntakeConstants.kFrontIntakeMotorId, 1,
-                DcMotorSimple.Direction.FORWARD, false, true, true);
-        backIntake = new Motor(hardwareMap, Constants.IntakeConstants.kBackIntakeMotorId, 1,
-                DcMotorSimple.Direction.REVERSE, false, true, true);
-        passThrough = new Motor(hardwareMap, Constants.IntakeConstants.kPassThroughId, 1,
-                DcMotorSimple.Direction.REVERSE, false, true, true);
+        intake = new Motor(hardwareMap, Constants.IntakeConstants.kIntake, 1,
+                DcMotorSimple.Direction.FORWARD, false, true, false);
 
-        leftArm = hardwareMap.get(Servo.class, Constants.IntakeConstants.kLeftArm);
-        rightArm = hardwareMap.get(Servo.class, Constants.IntakeConstants.kRightArm);
+        intakeLift = hardwareMap.get(Servo.class, Constants.IntakeConstants.kIntakeLift);
 
-        //FlyWheel
-//        flyWheel = new Motor(hardwareMap, Constants.ShooterConstants.kFlyWheel, 1,
-//                DcMotorSimple.Direction.REVERSE, false, false, true);
-        flyWheel = new Motor(hardwareMap, Constants.ShooterConstants.kFlyWheel, 1,
-                DcMotorSimple.Direction.REVERSE, false, false, true);
+        //Lift
+        lift = new Motor(hardwareMap, Constants.LiftConstants.kLift, 1,
+                DcMotorSimple.Direction.FORWARD, true, false, true);
 
-        fwArm = hardwareMap.get(Servo.class, Constants.ShooterConstants.kFWArm);
-        fwLock = hardwareMap.get(Servo.class, Constants.ShooterConstants.kFWLock);
-        fwFlap = hardwareMap.get(Servo.class, Constants.ShooterConstants.kFWFlap);
+        downLimit = hardwareMap.get(RevTouchSensor.class, Constants.LiftConstants.kDownLimit);
 
-        hopperDist = hardwareMap.get(DistanceSensor.class, Constants.ShooterConstants.kHopperDist);
+        //Dumper
+        dumperGate = hardwareMap.get(Servo.class, Constants.DumperConstants.kGate);
 
-        wgGrabber = hardwareMap.get(Servo.class, Constants.WobbleGoalConstants.kWGGrabber);
-        wgLeft = hardwareMap.get(Servo.class, Constants.WobbleGoalConstants.kWGLeft);
-        wgLeft.setDirection(Servo.Direction.REVERSE);
-        wgRight = hardwareMap.get(Servo.class, Constants.WobbleGoalConstants.kWGRight);
-        autoWG = hardwareMap.get(Servo.class, Constants.WobbleGoalConstants.kAutoWG);
-
-        xCam = hardwareMap.get(Servo.class, Constants.CameraConstants.kCameraXId);
-        yCam = hardwareMap.get(Servo.class, Constants.CameraConstants.kCameraYId);
+        //Carousel
+        carousel = hardwareMap.crservo.get(Constants.CarouselConstants.kCarousel);
 
         imu = new RevIMU("imu1", hardwareMap);
 
@@ -167,10 +156,11 @@ public class Robot{
             bulkDataSlave = revHubSlave.getBulkInputData();
 
             // Update Motors
-            flyWheel.update(bulkDataSlave);
-            frontIntake.update(bulkDataSlave);
-            backIntake.update(bulkDataSlave);
-            passThrough.update(bulkDataSlave);
+            fRDrive.update(bulkDataMaster);
+            fLDrive.update(bulkDataMaster);
+            bRDrive.update(bulkDataMaster);
+            bLDrive.update(bulkDataMaster);
+            lift.update(bulkDataSlave);
 
             // Update Subsystems
             for (Subsystem subsystem : subsystems)
@@ -184,7 +174,7 @@ public class Robot{
                 }
             }
 
-            Robot.getInstance().getIntake().current = passThrough.motor.getCurrentDraw(ExpansionHubEx.CurrentDrawUnits.MILLIAMPS);
+//            Robot.getInstance().getIntake().current = intake.motor.getCurrentDraw(ExpansionHubEx.CurrentDrawUnits.MILLIAMPS);
         } catch (Exception e){
             Log.v("Exception@robot.update", "" + e);
         }
@@ -195,8 +185,6 @@ public class Robot{
     public void outputToTelemetry(Telemetry telemetry) {
         for (Subsystem subsystem : subsystems)
             subsystem.outputToTelemetry(telemetry);
-
-        telemetry.addData("Current", passThrough.motor.getCurrentDraw(ExpansionHubEx.CurrentDrawUnits.MILLIAMPS));
     }
 
     // Stop all subsystems
@@ -215,12 +203,16 @@ public class Robot{
         return mIntake;
     }
 
-    public FlyWheel getFlyWheel(){
-        return mFW;
+    public Lift getLift(){
+        return mLift;
     }
 
-    public WobbleGoal getWobbleGoal(){
-        return mWG;
+    public Dumper getDumper(){
+        return mDumper;
+    }
+
+    public Carousel getCarousel(){
+        return mCarousel;
     }
 
     public Camera getCamera(){

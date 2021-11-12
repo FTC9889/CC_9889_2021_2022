@@ -67,14 +67,8 @@ public class Constants {
 
     //Settings for Intake
     public static class IntakeConstants {
-        public final static String kFrontIntakeMotorId = "fi";
-        public final static String kBackIntakeMotorId = "bi";
-        public final static String kPassThroughId = "pass";
-        public final static String kRingDetector = "frontring";
-        public final static String kLeftDist = "leftdist";
-        public final static String kRightDist = "rightdist";
-        public final static String kLeftArm = "leftarm";
-        public final static String kRightArm = "rightarm";
+        public final static String kIntake = "intake";
+        public final static String kIntakeLift = "intake_lift";
     }
 
     /*---------------------
@@ -84,37 +78,42 @@ public class Constants {
     ---------------------*/
 
     //Settings for Lift
-    public static class ShooterConstants {
-        public final static String kFlyWheel = "fw";
-        public final static String kFWArm = "fwarm";
-        public final static String kFWLock = "lock";
-        public final static String kFWFlap = "flap";
-        public final static String kHopperDist = "hopperdetector";
+    public static class LiftConstants {
+        public final static String kLift = "lift";
+        public final static String kDownLimit = "down_limit";
     }
 
     /*---------------------
     |                     |
-    |    Wobble Goal!     |
+    |       Dumper!       |
     |                     |
     ---------------------*/
 
     //Settings for Lift
-    public static class WobbleGoalConstants {
-        public final static String kWGGrabber = "wggrabber";
-        public final static String kWGLeft = "wgleft";
-        public final static String kWGRight = "wgright";
-        public final static String kAutoWG = "autowg";
+    public static class DumperConstants {
+        public final static String kGate = "gate";
     }
 
     /*---------------------
     |                     |
-    |        Camera!      |
+    |      Carousel!      |
+    |                     |
+    ---------------------*/
+
+    //Settings for Lift
+    public static class CarouselConstants {
+        public final static String kCarousel = "carousel";
+    }
+
+    /*---------------------
+    |                     |
+    |       Camera!       |
     |                     |
     ---------------------*/
 
     //Settings for Camera
     public static class CameraConstants {
-        public final static String kCameraXId = "camerax";
-        public final static String kCameraYId = "cameray";
+        public final static String kCamX = "cam_x";
+        public final static String kCamY = "cam_y";
     }
 }

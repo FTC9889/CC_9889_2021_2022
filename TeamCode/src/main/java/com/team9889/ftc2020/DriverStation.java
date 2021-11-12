@@ -26,66 +26,68 @@ public class DriverStation {
         return gamepad1.right_stick_x;
     }
 
-    boolean getStartFrontIntaking(){
+    boolean getIntake(){
         return gamepad1.a;
     }
 
-    boolean getStartBackIntaking(){
-        return gamepad1.x;
-    }
-
-    boolean getStopIntaking() {
+    boolean getStopIntake() {
         return gamepad1.b || gamepad2.left_trigger > .3;
     }
 
-    boolean getStartOuttaking() {
+    boolean getOuttake() {
         return gamepad1.y;
     }
 
-    boolean getArmsDown() {return gamepad2.dpad_down;}
+    private boolean intakeHeightToggle = true;
+    private boolean intakeDown = false;
+    public  boolean intakeCodePress = false;
+    boolean getIntakeHeight() {
+        if ((gamepad1.x || intakeCodePress) && intakeHeightToggle) {
+            intakeDown = !intakeDown;
+            intakeHeightToggle = false;
+        } else if (!gamepad1.x && !intakeCodePress)
+            intakeHeightToggle = true;
 
-    boolean getArmsUp()  {return gamepad2.dpad_left;}
-
-    boolean getDropWG() {return gamepad2.right_bumper;}
-
-    private boolean wgToggle = true;
-    private boolean wgDown = false;
-    public  boolean codePress = false;
-    boolean getWG() {
-        if((gamepad1.left_bumper && wgToggle) || codePress) {
-            wgDown = !wgDown;
-
-            wgToggle = false;
-            codePress = false;
-        } else if(!gamepad1.left_bumper && !codePress)
-            wgToggle = true;
-
-        return wgDown;
+        return intakeDown;
     }
 
-    private boolean intakeFlipToggle = true;
-    private boolean intakeFlipDown = false;
-    boolean getIntakeFlip() {
-        if (gamepad1.right_bumper){
-            intakeFlipDown = false;
-        } else if(gamepad1.left_bumper && intakeFlipToggle) {
-            intakeFlipDown = !intakeFlipDown;
-            intakeFlipToggle = false;
-        } else if(!gamepad1.left_bumper || gamepad1.right_bumper)
-            intakeFlipToggle = true;
-        return intakeFlipDown;
+    double getLiftUp() {
+        return gamepad1.right_trigger;
     }
 
-    private boolean fwToggle = true;
-    public boolean fwOn = false;
-    boolean getFW() {
-        if(gamepad1.right_trigger > 0.3 && fwToggle) {
-            fwOn = !fwOn;
-            fwToggle = false;
-        } else if(gamepad1.right_trigger <= 0.1)
-            fwToggle = true;
+    double getLiftDown() {
+        return gamepad1.left_trigger;
+    }
 
-        return fwOn;
+    boolean getSetLift() {
+        return gamepad1.left_bumper;
+    }
+
+    private boolean liftToggle = true;
+    private boolean liftDown = true;
+    public  boolean liftCodePress = false;
+    boolean getLiftHeight() {
+        if ((getSetLift() || liftCodePress) && liftToggle) {
+            liftDown = !liftDown;
+            liftToggle = false;
+        } else if (!getSetLift() && !liftCodePress)
+            liftToggle = true;
+
+        return liftDown;
+    }
+
+
+    private boolean dumperToggle = true;
+    private boolean dumperOpen = true;
+    public  boolean dumperCodePress = false;
+    boolean getDumperOpen() {
+        if ((gamepad1.right_bumper || dumperCodePress) && dumperToggle) {
+            dumperOpen = !dumperOpen;
+            dumperToggle = false;
+        } else if (!getSetLift() && !dumperCodePress)
+            dumperToggle = true;
+
+        return dumperOpen;
     }
 
 //    private boolean aimToggle = true;
@@ -158,18 +160,6 @@ public class DriverStation {
             psThirdToggle = true;
 
         return psThird;
-    }
-
-    private boolean intakeToggle = true;
-    private boolean intakeOn = false;
-    boolean getIntake() {
-        if(gamepad1.dpad_up && intakeToggle) {
-            intakeOn = !intakeOn;
-            intakeToggle = false;
-        } else if(!gamepad1.dpad_up)
-            intakeToggle = true;
-
-        return intakeOn;
     }
 
     private boolean goalToggle = true;
