@@ -9,11 +9,13 @@ import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.RobotLog;
-import com.team9889.lib.roadrunner.drive.RoadRunner;
+
+import com.team9889.ftc2020.DriverStation;
+import com.team9889.ftc2020.subsystems.Robot;
+import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 
 import java.util.List;
 
@@ -47,7 +49,6 @@ import static com.team9889.lib.roadrunner.drive.DriveConstants.kV;
  * user to reset the position of the bot in the event that it drifts off the path.
  * Pressing B/O (Xbox/PS4) will cede control back to the tuning process.
  */
-@Disabled
 @Config
 @Autonomous(group = "drive")
 public class DriveVelocityPIDTuner extends LinearOpMode {
@@ -73,7 +74,8 @@ public class DriveVelocityPIDTuner extends LinearOpMode {
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        RoadRunner drive = new RoadRunner(hardwareMap);
+        Robot.getInstance().init(hardwareMap, true, new DriverStation(gamepad1, gamepad2));
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         Mode mode = Mode.TUNING_MODE;
 

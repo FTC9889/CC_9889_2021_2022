@@ -1,8 +1,10 @@
 package com.team9889.ftc2020.subsystems;
 
+import android.util.Log;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.team9889.ftc2020.auto.AutoModeBase;
-import com.team9889.lib.detectors.ScanForRS;
+import com.team9889.lib.detectors.ScanForWorm;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Point;
@@ -15,16 +17,16 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
 public class Camera extends Subsystem{
-    ScanForRS scanForRS = new ScanForRS();
+    ScanForWorm scanForWorm = new ScanForWorm();
 
     public enum CameraStates {
-        RSRIGHT, RSLEFT, NULL
+        WORM, NULL
     }
     public CameraStates currentCamState = CameraStates.NULL;
     public CameraStates wantedCamState = CameraStates.NULL;
 
     enum Pipelines {
-        RS, NULL
+        WORM, NULL
     }
     public Pipelines currentPipeline = Pipelines.NULL;
 
@@ -41,7 +43,7 @@ public class Camera extends Subsystem{
             {
                 Robot.getInstance().camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
                 if (auto) {
-                    setScanForRS();
+                    setScanForWorm();
                 } else {
 
                 }
@@ -57,7 +59,10 @@ public class Camera extends Subsystem{
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
         if (auto) {
+            telemetry.addData("Team Shipping Element", getPosOfTarget());
+            telemetry.addData("Box", getWormPos());
 
+            Log.i("Box", "" + getWormPos() + ", Pos: " + getPosOfTarget());
         }
     }
 
@@ -65,12 +70,8 @@ public class Camera extends Subsystem{
     public void update() {
         if (currentCamState != wantedCamState) {
             switch (wantedCamState) {
-                case RSRIGHT:
-                    setCamPositions(.64, .9);
-                    break;
-
-                case RSLEFT:
-                    setCamPositions(.4, .9);
+                case WORM:
+                    setCamPositions(0, 0.9);
                     break;
 
                 case NULL:
@@ -86,30 +87,37 @@ public class Camera extends Subsystem{
         Robot.getInstance().camera.stopStreaming();
     }
 
-    public AutoModeBase.Boxes getRSBox () {
-        AutoModeBase.Boxes box = AutoModeBase.Boxes.CLOSE;
-        if (Math.abs(getPosOfTarget().y) == 0) {
-            box = AutoModeBase.Boxes.CLOSE;
-        } else if (Math.abs(getPosOfTarget().y) < 15) {
-            box = AutoModeBase.Boxes.MIDDLE;
-        } else if (Math.abs(getPosOfTarget().y) >= 15) {
-            box = AutoModeBase.Boxes.FAR;
+    public AutoModeBase.Boxes getWormPos() {
+        AutoModeBase.Boxes box = AutoModeBase.Boxes.LEFT;
+
+        if (Robot.getInstance().isRed) {
+            if (Math.abs(getPosOfTarget().x) == 40) {
+                box = AutoModeBase.Boxes.LEFT;
+            } else if (Math.abs(getPosOfTarget().x) < 25) {
+                box = AutoModeBase.Boxes.MIDDLE;
+            } else if (Math.abs(getPosOfTarget().x) >= 20) {
+                box = AutoModeBase.Boxes.RIGHT;
+            }
+        } else {
+            if (Math.abs(getPosOfTarget().x) == 40) {
+                box = AutoModeBase.Boxes.RIGHT;
+            } else if (Math.abs(getPosOfTarget().x) < 25) {
+                box = AutoModeBase.Boxes.LEFT;
+            } else if (Math.abs(getPosOfTarget().x) >= 20) {
+                box = AutoModeBase.Boxes.MIDDLE;
+            }
         }
 
         return box;
     }
 
-    public void setScanForRS () {
-        Robot.getInstance().camera.setPipeline(scanForRS);
-        currentPipeline = Pipelines.RS;
+    public void setScanForWorm() {
+        Robot.getInstance().camera.setPipeline(scanForWorm);
+        currentPipeline = Pipelines.WORM;
     }
 
-    public void setRSCamPosRight() {
-        wantedCamState = CameraStates.RSRIGHT;
-    }
-
-    public void setRSCamPosLeft() {
-        wantedCamState = CameraStates.RSLEFT;
+    public void setWormCamPos() {
+        wantedCamState = CameraStates.WORM;
     }
 
     public void setCamPositions(double x, double y) {
@@ -120,8 +128,8 @@ public class Camera extends Subsystem{
     public Point getPosOfTarget () {
         Point posToReturn = new Point();
         switch (currentPipeline) {
-            case RS:
-                posToReturn = scanForRS.getPoint();
+            case WORM:
+                posToReturn = scanForWorm.getPoint();
                 break;
         }
 

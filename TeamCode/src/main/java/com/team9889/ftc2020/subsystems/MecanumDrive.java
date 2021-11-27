@@ -3,19 +3,12 @@ package com.team9889.ftc2020.subsystems;
 import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.control.PIDCoefficients;
-import com.acmerobotics.roadrunner.control.PIDFController;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2020.Constants;
-import com.team9889.lib.CruiseLib;
 import com.team9889.lib.control.math.cartesian.Rotation2d;
-import com.team9889.lib.roadrunner.drive.DriveConstants;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.opencv.core.Point;
 
 /**
  * Created by Eric on 9/7/2019.
@@ -25,15 +18,14 @@ import org.opencv.core.Point;
 public class MecanumDrive extends Subsystem {
     public double x, y, xSpeed, ySpeed, turnSpeed;
 
-    public double theta;
-    public boolean resetPos = false;
-
     public Rotation2d gyroAngle = new Rotation2d();
     public double angleFromAuton = 0;
 
     ElapsedTime timer = new ElapsedTime();
 
     private String filename = "gyro.txt";
+
+    boolean auto;
 
     @Override
     public void init(boolean auto) {
@@ -45,12 +37,14 @@ public class MecanumDrive extends Subsystem {
             angleFromAuton = Constants.pose.getHeading();
         }
 
+        this.auto = auto;
+
         timer.reset();
     }
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
-        telemetry.addData("Pos", Robot.getInstance().rr.getLocalizer().getPoseEstimate());
+//        telemetry.addData("Pos", Robot.getInstance().rr.getLocalizer().getPoseEstimate());
 
         telemetry.addData("Gyro", gyroAngle.getTheda(AngleUnit.DEGREES) - angleFromAuton);
     }
@@ -59,10 +53,12 @@ public class MecanumDrive extends Subsystem {
     public void update() {
         getAngle();
 
-        setFieldCentricPower(xSpeed, ySpeed, turnSpeed, Robot.getInstance().blue);
-        xSpeed = 0;
-        ySpeed = 0;
-        turnSpeed = 0;
+        if (!auto) {
+            setFieldCentricPower(xSpeed, ySpeed, turnSpeed, Robot.getInstance().blue);
+            xSpeed = 0;
+            ySpeed = 0;
+            turnSpeed = 0;
+        }
     }
 
     @Override
@@ -87,7 +83,7 @@ public class MecanumDrive extends Subsystem {
     }
 
     public void setFieldCentricPower(double x, double y, double rotation, boolean blue){
-        double angle = gyroAngle.getTheda(AngleUnit.RADIANS) + Math.toRadians(90);
+        double angle = gyroAngle.getTheda(AngleUnit.RADIANS);
 
         if (blue) {
             x = -x;

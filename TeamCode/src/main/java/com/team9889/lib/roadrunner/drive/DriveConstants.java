@@ -33,9 +33,9 @@ public class DriveConstants {
      * If using the built-in motor velocity PID, update MOTOR_VELO_PID with the tuned coefficients
      * from DriveVelocityPIDTuner.
      */
-    public static final boolean RUN_USING_ENCODER = false;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(0, 0, 0,
-      getMotorVelocityF(MAX_RPM / 60.0 * TICKS_PER_REV));
+    public static final boolean RUN_USING_ENCODER = true;
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(11, 0, 0.3,
+            9);
 
     /*
      * These are physical constants that can be determined from your robot (including the track
@@ -46,8 +46,8 @@ public class DriveConstants {
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
     public static double WHEEL_RADIUS = 1.8898; // in
-    public static double GEAR_RATIO = 0.8; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 15.0; // in
+    public static double GEAR_RATIO = 1.25 * 1.0089120564990751639482091810997; // output (wheel) speed / input (motor) speed
+    public static double TRACK_WIDTH = 12.8; // in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -55,10 +55,9 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
-
-    public static double kV = 0.0123;
-    public static double kA = 0.002;
-    public static double kStatic = 0.08970;
+    public static double kV = 0.016;
+    public static double kA = 0.004;
+    public static double kStatic = 0;
 
     /*
      * These values are used to generate the trajectories for you robot. To ensure proper operation,
@@ -75,35 +74,35 @@ public class DriveConstants {
      * This is only 85% of the theoretical maximum velocity of the bot, following the recommendation above.
      * This is capped at 85% because there are a number of variables that will prevent your bot from actually
      * reaching this maximum velocity: voltage dropping over the game, bot weight, general mechanical inefficiencies, etc.
-     * However, you can push this higher yourself if you'd like. Perhaps raise it to 90-95% of the theoretically 
+     * However, you can push this higher yourself if you'd like. Perhaps raise it to 90-95% of the theoretically
      * max velocity. The theoretically maximum velocity is 53.82863495723619 in/s.
      * Just make sure that your bot can actually reach this maximum velocity. Path following will be detrimentally
      * affected if it is aiming for a velocity not actually possible.
-     * 
+     *
      * The maximum acceleration is somewhat arbitrary and it is recommended that you tweak this yourself based on
      * actual testing. Just set it at a reasonable value and keep increasing until your path following starts
      * to degrade. As of now, it simply mirrors the velocity, resulting in 45.75433971365076 in/s/s
      *
      * Maximum Angular Velocity is calculated as: maximum velocity / trackWidth * (180 / Math.PI) but capped at 360°/s.
      * You are free to raise this on your own if you would like. It is best determined through experimentation.
-     
+
      */
-    public static double MAX_VEL = 50;
-    public static double MAX_ACCEL = 50;
-    public static double MAX_ANG_VEL = Math.toRadians(180);
-    public static double MAX_ANG_ACCEL = Math.toRadians(180);
+    public static double MAX_VEL = 65;
+    public static double MAX_ACCEL = 45.75433971365076;
+    public static double MAX_ANG_VEL = Math.toRadians(238.32096);
+    public static double MAX_ANG_ACCEL = Math.toRadians(238.32096);
 
 
     public static double encoderTicksToInches(double ticks) {
-        return WHEEL_RADIUS * 2.0 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
+        return WHEEL_RADIUS * 2 * Math.PI * GEAR_RATIO * ticks / TICKS_PER_REV;
     }
 
     public static double rpmToVelocity(double rpm) {
-        return rpm * GEAR_RATIO * 2.0 * Math.PI * WHEEL_RADIUS / 60.0;
+        return rpm * GEAR_RATIO * 2 * Math.PI * WHEEL_RADIUS / 60.0;
     }
 
     public static double getMotorVelocityF(double ticksPerSecond) {
-      // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx
-      return 32767.0 / ticksPerSecond;
+        // see https://docs.google.com/document/d/1tyWrXDfMidwYyP_5H4mZyVgaEswhOC35gvdmP-V-5hA/edit#heading=h.61g9ixenznbx
+        return 32767 / ticksPerSecond;
     }
 }

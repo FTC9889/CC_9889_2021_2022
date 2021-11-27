@@ -7,6 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  */
 
 public class Dumper extends Subsystem {
+
     public enum GateState {
         OPEN, CLOSED, NULL
     }
@@ -16,15 +17,7 @@ public class Dumper extends Subsystem {
     @Override
     public void init(boolean auto) {
         if (auto) {
-            switch (gateState) {
-                case OPEN:
-                    SetGatePosition(1);
-                    break;
-
-                case CLOSED:
-                    SetGatePosition(0);
-                    break;
-            }
+            gateState = GateState.CLOSED;
         }
     }
 
@@ -33,6 +26,15 @@ public class Dumper extends Subsystem {
 
     @Override
     public void update() {
+        switch (gateState) {
+            case CLOSED:
+                SetGatePosition(0.8);
+                break;
+
+            case OPEN:
+                SetGatePosition(0.55);
+                break;
+        }
     }
 
     @Override

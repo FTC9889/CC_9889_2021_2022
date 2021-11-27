@@ -18,8 +18,8 @@ import com.acmerobotics.roadrunner.trajectory.TrajectoryMarker;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.acmerobotics.roadrunner.util.Angle;
-import com.team9889.lib.roadrunner.trajectorysequence.sequencesegment.SequenceSegment;
 
+import com.team9889.lib.roadrunner.trajectorysequence.sequencesegment.SequenceSegment;
 import com.team9889.lib.roadrunner.trajectorysequence.sequencesegment.TrajectorySegment;
 import com.team9889.lib.roadrunner.trajectorysequence.sequencesegment.TurnSegment;
 import com.team9889.lib.roadrunner.trajectorysequence.sequencesegment.WaitSegment;
@@ -580,12 +580,16 @@ public class TrajectorySequenceBuilder {
 
             if (segment instanceof WaitSegment) {
                 List<TrajectoryMarker> newMarkers = new ArrayList<>(segment.getMarkers());
+
+                newMarkers.addAll(sequenceSegments.get(segmentIndex).getMarkers());
                 newMarkers.add(new TrajectoryMarker(segmentOffsetTime, marker.getCallback()));
 
                 WaitSegment thisSegment = (WaitSegment) segment;
                 newSegment = new WaitSegment(thisSegment.getStartPose(), thisSegment.getDuration(), newMarkers);
             } else if (segment instanceof TurnSegment) {
                 List<TrajectoryMarker> newMarkers = new ArrayList<>(segment.getMarkers());
+
+                newMarkers.addAll(sequenceSegments.get(segmentIndex).getMarkers());
                 newMarkers.add(new TrajectoryMarker(segmentOffsetTime, marker.getCallback()));
 
                 TurnSegment thisSegment = (TurnSegment) segment;

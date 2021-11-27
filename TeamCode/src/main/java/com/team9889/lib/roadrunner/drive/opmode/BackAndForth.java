@@ -4,10 +4,11 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import com.team9889.ftc2020.DriverStation;
 import com.team9889.ftc2020.subsystems.Robot;
-import com.team9889.lib.roadrunner.drive.RoadRunner;
+import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 
 /*
  * Op mode for preliminary tuning of the follower PID coefficients (located in the drive base
@@ -25,7 +26,6 @@ import com.team9889.lib.roadrunner.drive.RoadRunner;
  * This opmode is designed as a convenient, coarse tuning for the follower PID coefficients. It
  * is recommended that you use the FollowerPIDTuner opmode for further fine tuning.
  */
-@Disabled
 @Config
 @Autonomous(group = "drive")
 public class BackAndForth extends LinearOpMode {
@@ -34,8 +34,8 @@ public class BackAndForth extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Robot.getInstance().init(hardwareMap, false);
-        RoadRunner drive = new RoadRunner(hardwareMap);
+        Robot.getInstance().init(hardwareMap, true, new DriverStation(gamepad1, gamepad2));
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
                 .forward(DISTANCE)

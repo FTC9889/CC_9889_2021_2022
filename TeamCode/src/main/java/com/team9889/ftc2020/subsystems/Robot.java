@@ -7,14 +7,14 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
 import com.team9889.ftc2020.Constants;
+import com.team9889.ftc2020.DriverStation;
 import com.team9889.ftc2020.auto.actions.ActionVariables;
 import com.team9889.lib.hardware.Motor;
 import com.team9889.lib.hardware.RevIMU;
-import com.team9889.lib.roadrunner.drive.RoadRunner;
+import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 import com.team9889.lib.roadrunner.drive.StandardTrackingWheelLocalizer;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -34,7 +34,7 @@ import java.util.List;
  * Created by Eric on 7/26/2019.
  */
 
-public class Robot{
+public class Robot {
 
     public WebcamName webcam;
     public OpenCvCamera camera;
@@ -61,6 +61,8 @@ public class Robot{
 
     public ActionVariables actionVariables = new ActionVariables();
 
+    public boolean isRed = true;
+
     ElapsedTime robotTimer = new ElapsedTime();
 
     public double result = Double.POSITIVE_INFINITY;
@@ -81,15 +83,17 @@ public class Robot{
     private Carousel mCarousel = new Carousel();
     private Camera mCamera = new Camera();
 
-    public RoadRunner rr;
+    public SampleMecanumDrive rr;
     public StandardTrackingWheelLocalizer localizer;
+
+    public DriverStation driverStation;
 
     public boolean blue = false;
 
     // List of subsystems
     private List<Subsystem> subsystems = Arrays.asList(mMecanumDrive, mIntake, mLift, mDumper, mCarousel, mCamera);
 
-    public void init(HardwareMap hardwareMap, boolean auto){
+    public void init(HardwareMap hardwareMap, boolean auto, DriverStation driverStation){
         this.hardwareMap = hardwareMap;
 
         Date currentData = new Date();
@@ -109,13 +113,13 @@ public class Robot{
 
         //Drive
         fLDrive = new Motor(hardwareMap, Constants.DriveConstants.kLeftDriveMasterId, 1,
-                DcMotorSimple.Direction.FORWARD, true, true, true);
+                DcMotorSimple.Direction.FORWARD, true, false, true);
         bLDrive = new Motor(hardwareMap, Constants.DriveConstants.kLeftDriveSlaveId, 1,
-                DcMotorSimple.Direction.FORWARD, true, true, true);
+                DcMotorSimple.Direction.FORWARD, true, false, true);
         fRDrive = new Motor(hardwareMap, Constants.DriveConstants.kRightDriveMasterId, 1,
-                DcMotorSimple.Direction.REVERSE, true, true, true);
+                DcMotorSimple.Direction.REVERSE, true, false, true);
         bRDrive = new Motor(hardwareMap, Constants.DriveConstants.kRightDriveSlaveId, 1,
-                DcMotorSimple.Direction.REVERSE, true, true, true);
+                DcMotorSimple.Direction.REVERSE, true, false, true);
 
         //Intake
         intake = new Motor(hardwareMap, Constants.IntakeConstants.kIntake, 1,
@@ -125,7 +129,7 @@ public class Robot{
 
         //Lift
         lift = new Motor(hardwareMap, Constants.LiftConstants.kLift, 1,
-                DcMotorSimple.Direction.FORWARD, true, false, true);
+                DcMotorSimple.Direction.FORWARD, true, true, true);
 
         downLimit = hardwareMap.get(RevTouchSensor.class, Constants.LiftConstants.kDownLimit);
 
@@ -135,21 +139,25 @@ public class Robot{
         //Carousel
         carousel = hardwareMap.crservo.get(Constants.CarouselConstants.kCarousel);
 
-        imu = new RevIMU("imu1", hardwareMap);
+        imu = new RevIMU("imu", hardwareMap);
 
         // Init all subsystems
         for (Subsystem subsystem : subsystems) {
             subsystem.init(auto);
         }
 
-        rr = new RoadRunner(hardwareMap);
-        localizer = (StandardTrackingWheelLocalizer) rr.getLocalizer();
+        rr = new SampleMecanumDrive(hardwareMap);
+//        localizer = (StandardTrackingWheelLocalizer) rr.getLocalizer();
+
+        this.driverStation = driverStation;
 
         robotTimer.reset();
     }
 
     // Update data from Hubs and Apply new data
     public void update() {
+        Log.i("Update", "");
+
         // Update Bulk Data
         try {
             bulkDataMaster = revHubMaster.getBulkInputData();
@@ -166,15 +174,15 @@ public class Robot{
             for (Subsystem subsystem : subsystems)
                 subsystem.update();
 
-            result = Double.POSITIVE_INFINITY;
-            for (VoltageSensor sensor : hardwareMap.voltageSensor) {
-                double voltage = sensor.getVoltage();
-                if (voltage > 0){
-                    result = Math.min(result, voltage);
-                }
-            }
-
-//            Robot.getInstance().getIntake().current = intake.motor.getCurrentDraw(ExpansionHubEx.CurrentDrawUnits.MILLIAMPS);
+//            result = Double.POSITIVE_INFINITY;
+//            for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+//                double voltage = sensor.getVoltage();
+//                if (voltage > 0){
+//                    result = Math.min(result, voltage);
+//                }
+//            }
+//
+//            Robot.getInstance().getLift().current = lift.motor.getCurrentDraw(ExpansionHubEx.CurrentDrawUnits.MILLIAMPS);
         } catch (Exception e){
             Log.v("Exception@robot.update", "" + e);
         }

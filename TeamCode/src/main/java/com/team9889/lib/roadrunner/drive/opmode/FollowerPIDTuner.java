@@ -3,10 +3,11 @@ package com.team9889.lib.roadrunner.drive.opmode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import com.team9889.ftc2020.DriverStation;
 import com.team9889.ftc2020.subsystems.Robot;
-import com.team9889.lib.roadrunner.drive.RoadRunner;
+import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequence;
 
 /*
@@ -22,7 +23,6 @@ import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequence;
  * If you are using SampleTankDrive, you should be tuning AXIAL_PID, CROSS_TRACK_PID, and HEADING_PID.
  * These coefficients can be tuned live in dashboard.
  */
-@Disabled
 @Config
 @Autonomous(group = "drive")
 public class FollowerPIDTuner extends LinearOpMode {
@@ -30,8 +30,8 @@ public class FollowerPIDTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Robot.getInstance().init(hardwareMap, false);
-        RoadRunner drive = new RoadRunner(hardwareMap);
+        Robot.getInstance().init(hardwareMap, true, new DriverStation(gamepad1, gamepad2));
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         Pose2d startPose = new Pose2d(-DISTANCE / 2, -DISTANCE / 2, 0);
 

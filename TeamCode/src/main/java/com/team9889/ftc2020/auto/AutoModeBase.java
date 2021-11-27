@@ -3,7 +3,6 @@ package com.team9889.ftc2020.auto;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2020.Team9889Linear;
 import com.team9889.ftc2020.auto.actions.Action;
-import com.team9889.ftc2020.auto.actions.utl.RobotUpdate;
 
 /**
  * Created by joshua9889 on 8/5/2017.
@@ -29,7 +28,7 @@ public abstract class AutoModeBase extends Team9889Linear {
     }
 
     public enum Boxes {
-        CLOSE, MIDDLE, FAR
+        LEFT, MIDDLE, RIGHT
     }
     public Boxes box;
 
@@ -51,9 +50,7 @@ public abstract class AutoModeBase extends Team9889Linear {
         waitForStart(true, currentAutoRunning);
         autoTimer.reset();
 
-        box = Robot.getCamera().getRSBox();
-
-        ThreadAction(new RobotUpdate());
+        box = Robot.getCamera().getWormPos();
 
         // If the opmode is still running, run auto
         if (opModeIsActive() && !isStopRequested()) {

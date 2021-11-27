@@ -1,6 +1,9 @@
 package com.team9889.ftc2020.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.team9889.lib.CruiseLib;
 import com.team9889.lib.control.controllers.PID;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -16,16 +19,29 @@ public class Lift extends Subsystem {
     public enum LiftState {
         DOWN, LAYER1, LAYER2, LAYER3, SHARED, NULL
     }
-    public LiftState wantedLiftState = LiftState.NULL, currentLiftState = LiftState.NULL;
+    public LiftState wantedLiftState = LiftState.NULL, currentLiftState = LiftState.NULL,
+            defaultLiftState = LiftState.LAYER3;
 
-    public static double layer1 = 5, layer2 = 10, layer3 = 15, shared = 5;
+    public enum ScoreState {
+        RELEASE, DOWN, NULL
+    }
+    public ScoreState scoreState = ScoreState.NULL;
+    double scoreStateTime = 0;
+    Vector2d scorePose = new Vector2d(), sinceScorePos = new Vector2d();
 
-    public static PID liftPID = new PID(0, 0, 0);
+    public static double layer1 = 3, layer2 = 8, layer3 = 13.5, shared = 8;
+
+    public static PID liftPID = new PID(0.6, 0, 0);
+
+    public boolean isDown = true;
+    public static double maxCurrent = 6500;
+    double current = 0;
+    ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void init(boolean auto) {
         if (auto) {
-
+            wantedLiftState = LiftState.DOWN;
         }
     }
 
@@ -33,46 +49,97 @@ public class Lift extends Subsystem {
     public void outputToTelemetry(Telemetry telemetry) {
         telemetry.addData("Is Lift Down", IsDown());
         telemetry.addData("Lift Height", GetLiftHeight());
+        telemetry.addData("Default Lift State", defaultLiftState);
+        telemetry.addData("Lift State", currentLiftState);
     }
 
     @Override
     public void update() {
+        if (wantedLiftState == LiftState.DOWN && currentLiftState != LiftState.DOWN) {
+            timer.reset();
+        }
         switch (wantedLiftState) {
             case DOWN:
                 if (!IsDown()) {
-                    Robot.getInstance().lift.setPower(-0.5);
+                    SetLiftPower(-0.5);
+                    if (timer.milliseconds() > 800) {
+                        isDown = true;
+                    }
                 } else {
-                    Robot.getInstance().lift.setPower(0);
+                    SetLiftPower(0);
                 }
                 break;
 
             case LAYER1:
                 if (Math.abs(GetLiftHeight() - layer1) > liftTolerance) {
                     SetLiftPower(liftPID.update(GetLiftHeight(), layer1));
+                } else {
+                    SetLiftPower(0);
                 }
                 break;
 
             case LAYER2:
                 if (Math.abs(GetLiftHeight() - layer2) > liftTolerance) {
                     SetLiftPower(liftPID.update(GetLiftHeight(), layer2));
+                } else {
+                    SetLiftPower(0);
                 }
                 break;
 
             case LAYER3:
                 if (Math.abs(GetLiftHeight() - layer3) > liftTolerance) {
                     SetLiftPower(liftPID.update(GetLiftHeight(), layer3));
+                } else {
+                    SetLiftPower(0);
                 }
                 break;
 
             case SHARED:
                 if (Math.abs(GetLiftHeight() - shared) > liftTolerance) {
                     SetLiftPower(liftPID.update(GetLiftHeight(), shared));
+                } else {
+                    SetLiftPower(0);
                 }
                 break;
 
             case NULL:
                 break;
         }
+        currentLiftState = wantedLiftState;
+
+        switch (scoreState) {
+            case RELEASE:
+                Robot.getInstance().driverStation.dumperOpen = true;
+                Robot.getInstance().getDumper().gateState = Dumper.GateState.OPEN;
+
+                scorePose = new Vector2d(Robot.getInstance().fLDrive.getPosition(), Robot.getInstance().fRDrive.getPosition());
+
+                if ((Robot.getInstance().robotTimer.milliseconds() - scoreStateTime) >= 500) {
+                    scoreState = ScoreState.DOWN;
+                    scoreStateTime = Robot.getInstance().robotTimer.milliseconds();
+                }
+                break;
+
+            case DOWN:
+                if (Math.abs(Robot.getInstance().fLDrive.getPosition() - scorePose.getX()) > 250 &&
+                        Math.abs(Robot.getInstance().fRDrive.getPosition() - scorePose.getY()) > 250) {
+                    Robot.getInstance().driverStation.dumperOpen = false;
+                    Robot.getInstance().getDumper().gateState = Dumper.GateState.CLOSED;
+
+                    Robot.getInstance().driverStation.liftDown = true;
+                    wantedLiftState = LiftState.DOWN;
+
+                    if (IsDown()) {
+                        scoreState = ScoreState.NULL;
+                    }
+                }
+                break;
+
+            case NULL:
+                scoreStateTime = Robot.getInstance().robotTimer.milliseconds();
+                break;
+        }
+
 
         if (IsDown()) {
             Robot.getInstance().lift.resetEncoder();
@@ -85,9 +152,19 @@ public class Lift extends Subsystem {
     }
 
     public void SetLiftPower(double power){
-        if (IsDown()) {
+        power = CruiseLib.limitValue(power, -0.3, -1, 0.3, 1);
+
+        if (power < 0 && current > maxCurrent) {
+            isDown = true;
+            Robot.getInstance().lift.setPower(0);
+        }
+
+        if (isDown) {
             if (power > 0) {
                 Robot.getInstance().lift.setPower(power);
+                isDown = false;
+            } else {
+                Robot.getInstance().lift.setPower(0);
             }
         } else {
             Robot.getInstance().lift.setPower(power);
@@ -101,6 +178,7 @@ public class Lift extends Subsystem {
     }
 
     public boolean IsDown() {
-        return Robot.getInstance().downLimit.isPressed();
+//        return Robot.getInstance().downLimit.isPressed();
+        return isDown;
     }
 }

@@ -91,8 +91,8 @@ android {
     // http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html
     buildTypes {
         release {
-            signingConfig signingConfigs.release
-
+            // Disable debugging for release versions so it can be uploaded to Google Play.
+            //debuggable true
             ndk {
                 abiFilters "armeabi-v7a"
             }

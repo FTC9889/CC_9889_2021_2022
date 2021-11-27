@@ -4,8 +4,10 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.team9889.lib.roadrunner.drive.RoadRunner;
-import com.team9889.lib.roadrunner.drive.StandardTrackingWheelLocalizer;
+
+import com.team9889.ftc2020.DriverStation;
+import com.team9889.ftc2020.subsystems.Robot;
+import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -18,7 +20,8 @@ import com.team9889.lib.roadrunner.drive.StandardTrackingWheelLocalizer;
 public class LocalizationTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        RoadRunner drive = new RoadRunner(hardwareMap);
+        Robot.getInstance().init(hardwareMap, false, new DriverStation(gamepad1, gamepad2));
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -36,13 +39,9 @@ public class LocalizationTest extends LinearOpMode {
             drive.update();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
-            StandardTrackingWheelLocalizer localizer = (StandardTrackingWheelLocalizer) drive.getLocalizer();
             telemetry.addData("x", poseEstimate.getX());
             telemetry.addData("y", poseEstimate.getY());
             telemetry.addData("heading", poseEstimate.getHeading());
-            telemetry.addData("Left", localizer.leftEncoder.getCurrentPosition());
-            telemetry.addData("Right", localizer.rightEncoder.getCurrentPosition());
-            telemetry.addData("Front", localizer.frontEncoder.getCurrentPosition());
             telemetry.update();
         }
     }

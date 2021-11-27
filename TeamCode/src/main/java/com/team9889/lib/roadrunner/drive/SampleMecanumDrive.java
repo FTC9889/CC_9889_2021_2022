@@ -18,16 +18,15 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityCons
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import com.team9889.ftc2020.subsystems.Robot;
+import com.team9889.lib.hardware.Motor;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequence;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequenceRunner;
-import com.team9889.lib.roadrunner.util.LynxModuleUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,11 +50,11 @@ import static com.team9889.lib.roadrunner.drive.DriveConstants.kV;
  * Simple mecanum drive hardware implementation for REV hardware.
  */
 @Config
-public class RoadRunner extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8, 0, 1);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(12, 0, .2);
+public class SampleMecanumDrive extends MecanumDrive {
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(9, 0, 0.05);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(1, 0, 0.2);
 
-    public static double LATERAL_MULTIPLIER = 1;
+    public static double LATERAL_MULTIPLIER = 1.1183334950043651178581821709187;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -69,18 +68,20 @@ public class RoadRunner extends MecanumDrive {
     private TrajectoryFollower follower;
 
 //    private DcMotorEx leftFront, leftRear, rightRear, rightFront;
-    private List<DcMotorEx> motors;
+    private List<Motor> motors;
 
     private BNO055IMU imu;
     private VoltageSensor batteryVoltageSensor;
 
-    public RoadRunner(HardwareMap hardwareMap) {
+    protected Robot Robot = com.team9889.ftc2020.subsystems.Robot.getInstance();
+
+    public SampleMecanumDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.5, 0.5, Math.toRadians(.1)), .5);
+                new Pose2d(1, 1, Math.toRadians(5.0)), 1);
 
-        LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
+//        LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
         batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
 
@@ -88,25 +89,28 @@ public class RoadRunner extends MecanumDrive {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-//        imu = hardwareMap.get(BNO055IMU.class, "imu1");
-//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-//        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
-//        imu.initialize(parameters);
+        // TODO: adjust the names of the following hardware devices to match your configuration
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
+        imu.initialize(parameters);
 
-//        BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
+        // TODO: if your hub is mounted vertically, remap the IMU axes so that the z-axis points
+        // upward (normal to the floor) using a command like the following:
+        // BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
 
-//        leftFront = hardwareMap.get(DcMotorEx.class, "lf");
-//        leftRear = hardwareMap.get(DcMotorEx.class, "lb");
-//        rightRear = hardwareMap.get(DcMotorEx.class, "rb");
-//        rightFront = hardwareMap.get(DcMotorEx.class, "rf");
+//        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+//        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
+//        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
+//        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
 
-        motors = Arrays.asList(Robot.getInstance().fLDrive.motor, Robot.getInstance().bLDrive.motor,
-                Robot.getInstance().bRDrive.motor, Robot.getInstance().fRDrive.motor);
+        motors = Arrays.asList(Robot.getInstance().fLDrive, Robot.getInstance().bLDrive,
+                Robot.getInstance().bRDrive, Robot.getInstance().fRDrive);
 
-        for (DcMotorEx motor : motors) {
-            MotorConfigurationType motorConfigurationType = motor.getMotorType().clone();
+        for (Motor motor : motors) {
+            MotorConfigurationType motorConfigurationType = motor.motor.getMotorType().clone();
             motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
-            motor.setMotorType(motorConfigurationType);
+            motor.motor.setMotorType(motorConfigurationType);
         }
 
         if (RUN_USING_ENCODER) {
@@ -120,11 +124,9 @@ public class RoadRunner extends MecanumDrive {
         }
 
         // TODO: reverse any motors using DcMotor.setDirection()
-//        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
-//        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+
         // TODO: if desired, use setLocalizer() to change the localization method
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
-        setLocalizer(new StandardTrackingWheelLocalizer(hardwareMap));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
@@ -204,14 +206,14 @@ public class RoadRunner extends MecanumDrive {
     }
 
     public void setMode(DcMotor.RunMode runMode) {
-        for (DcMotorEx motor : motors) {
-            motor.setMode(runMode);
+        for (Motor motor : motors) {
+            motor.motor.setMode(runMode);
         }
     }
 
     public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior) {
-        for (DcMotorEx motor : motors) {
-            motor.setZeroPowerBehavior(zeroPowerBehavior);
+        for (Motor motor : motors) {
+            motor.motor.setZeroPowerBehavior(zeroPowerBehavior);
         }
     }
 
@@ -221,8 +223,8 @@ public class RoadRunner extends MecanumDrive {
                 coefficients.f * 12 / batteryVoltageSensor.getVoltage()
         );
 
-        for (DcMotorEx motor : motors) {
-            motor.setPIDFCoefficients(runMode, compensatedCoefficients);
+        for (Motor motor : motors) {
+            motor.motor.setPIDFCoefficients(runMode, compensatedCoefficients);
         }
     }
 
@@ -250,8 +252,8 @@ public class RoadRunner extends MecanumDrive {
     @Override
     public List<Double> getWheelPositions() {
         List<Double> wheelPositions = new ArrayList<>();
-        for (DcMotorEx motor : motors) {
-            wheelPositions.add(encoderTicksToInches(motor.getCurrentPosition()));
+        for (Motor motor : motors) {
+            wheelPositions.add(encoderTicksToInches(motor.motor.getCurrentPosition()));
         }
         return wheelPositions;
     }
@@ -259,28 +261,23 @@ public class RoadRunner extends MecanumDrive {
     @Override
     public List<Double> getWheelVelocities() {
         List<Double> wheelVelocities = new ArrayList<>();
-        for (DcMotorEx motor : motors) {
-            wheelVelocities.add(encoderTicksToInches(motor.getVelocity()));
+        for (Motor motor : motors) {
+            wheelVelocities.add(encoderTicksToInches(motor.motor.getVelocity()));
         }
         return wheelVelocities;
     }
 
     @Override
     public void setMotorPowers(double v, double v1, double v2, double v3) {
-        Robot.getInstance().fLDrive.motor.setPower(v);
-        Robot.getInstance().bLDrive.motor.setPower(v1);
-        Robot.getInstance().bRDrive.motor.setPower(v2);
-        Robot.getInstance().fRDrive.motor.setPower(v3);
-//        leftFront.setPower(v);
-//        leftRear.setPower(v1);
-//        rightRear.setPower(v2);
-//        rightFront.setPower(v3);
+        motors.get(0).setPower(v);
+        motors.get(1).setPower(v1);
+        motors.get(2).setPower(v2);
+        motors.get(3).setPower(v3);
     }
 
     @Override
     public double getRawExternalHeading() {
-//        return imu.getAngularOrientation().firstAngle;
-        return 0;
+        return imu.getAngularOrientation().firstAngle;
     }
 
     @Override

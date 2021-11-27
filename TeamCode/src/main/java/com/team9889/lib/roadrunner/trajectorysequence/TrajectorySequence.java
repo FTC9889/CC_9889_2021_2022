@@ -1,6 +1,7 @@
 package com.team9889.lib.roadrunner.trajectorysequence;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+
 import com.team9889.lib.roadrunner.trajectorysequence.sequencesegment.SequenceSegment;
 
 import java.util.Collections;

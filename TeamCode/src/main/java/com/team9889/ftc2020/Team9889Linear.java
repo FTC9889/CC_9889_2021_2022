@@ -25,6 +25,8 @@ public abstract class Team9889Linear extends LinearOpMode {
     // Match Timer
     protected ElapsedTime matchTime = new ElapsedTime();
 
+    DriverStation driverStation = new DriverStation(gamepad1, gamepad2);
+
     // Dashboard
     public FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -36,7 +38,7 @@ public abstract class Team9889Linear extends LinearOpMode {
     }
 
     public void waitForStart(boolean autonomous, AutoModeBase.StartPosition startPosition) {
-        Robot.init(hardwareMap, autonomous);
+        Robot.init(hardwareMap, autonomous, driverStation);
         Robot.update();
 
         if (Constants.pose != null) {
@@ -48,13 +50,7 @@ public abstract class Team9889Linear extends LinearOpMode {
         }
 
         if (autonomous) {
-            if (startPosition == AutoModeBase.StartPosition.REDRIGHT ||
-                startPosition == AutoModeBase.StartPosition.BLUERIGHT) {
-                Robot.getCamera().setRSCamPosLeft();
-            } else if (startPosition == AutoModeBase.StartPosition.REDLEFT ||
-                startPosition == AutoModeBase.StartPosition.BLUELEFT) {
-                Robot.getCamera().setRSCamPosRight();
-            }
+            Robot.getCamera().setWormCamPos();
 
             if (startPosition == AutoModeBase.StartPosition.REDLEFT ||
                 startPosition == AutoModeBase.StartPosition.REDRIGHT) {
@@ -75,7 +71,7 @@ public abstract class Team9889Linear extends LinearOpMode {
             // Autonomous Init Loop code
             while(isInInitLoop()){
                 telemetry.addData("Waiting for Start","");
-                telemetry.addData("Box", Robot.getCamera().getRSBox().toString());
+                telemetry.addData("Box", Robot.getCamera().getWormPos().toString());
 
                 telemetry.addData("Delay at beginning", timeToWait / 1000);
 
@@ -112,7 +108,7 @@ public abstract class Team9889Linear extends LinearOpMode {
      * Used to stop everything (Robot and OpMode).
      */
     protected void finalAction(){
-        Constants.pose = Robot.rr.getPoseEstimate();
+//        Constants.pose = Robot.rr.getPoseEstimate();
         Robot.stop();
         requestOpModeStop();
     }

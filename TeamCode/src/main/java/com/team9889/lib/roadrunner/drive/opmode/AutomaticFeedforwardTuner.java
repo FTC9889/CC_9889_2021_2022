@@ -6,10 +6,9 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
-import com.team9889.lib.roadrunner.drive.RoadRunner;
+import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 import com.team9889.lib.roadrunner.util.LoggingUtil;
 import com.team9889.lib.roadrunner.util.RegressionUtil;
 
@@ -32,7 +31,6 @@ import static com.team9889.lib.roadrunner.drive.DriveConstants.rpmToVelocity;
  *   4. Adjust the encoder data based on the velocity tuning data and find kA with another linear
  *      regression.
  */
-@Disabled
 @Config
 @Autonomous(group = "drive")
 public class AutomaticFeedforwardTuner extends LinearOpMode {
@@ -48,7 +46,7 @@ public class AutomaticFeedforwardTuner extends LinearOpMode {
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        RoadRunner drive = new RoadRunner(hardwareMap);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         NanoClock clock = NanoClock.system();
 

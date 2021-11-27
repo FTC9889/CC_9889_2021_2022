@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.Gamepad;
  * Created by MannoMation on 12/14/2018.
  */
 public class DriverStation {
+    boolean gamepad2Lift = false;
+
     private Gamepad gamepad1;
     private Gamepad gamepad2;
 
@@ -39,7 +41,7 @@ public class DriverStation {
     }
 
     private boolean intakeHeightToggle = true;
-    private boolean intakeDown = false;
+    public boolean intakeDown = false;
     public  boolean intakeCodePress = false;
     boolean getIntakeHeight() {
         if ((gamepad1.x || intakeCodePress) && intakeHeightToggle) {
@@ -52,19 +54,23 @@ public class DriverStation {
     }
 
     double getLiftUp() {
-        return gamepad1.right_trigger;
+        return gamepad1.right_trigger + gamepad2.right_trigger;
     }
 
     double getLiftDown() {
-        return gamepad1.left_trigger;
+        return gamepad1.left_trigger + gamepad2.left_trigger;
     }
 
     boolean getSetLift() {
         return gamepad1.left_bumper;
     }
 
+    boolean getScore() {
+        return gamepad1.right_bumper;
+    }
+
     private boolean liftToggle = true;
-    private boolean liftDown = true;
+    public boolean liftDown = true;
     public  boolean liftCodePress = false;
     boolean getLiftHeight() {
         if ((getSetLift() || liftCodePress) && liftToggle) {
@@ -78,105 +84,69 @@ public class DriverStation {
 
 
     private boolean dumperToggle = true;
-    private boolean dumperOpen = true;
+    public boolean dumperOpen = false;
     public  boolean dumperCodePress = false;
     boolean getDumperOpen() {
-        if ((gamepad1.right_bumper || dumperCodePress) && dumperToggle) {
+        if ((gamepad2.dpad_left || dumperCodePress) && dumperToggle) {
             dumperOpen = !dumperOpen;
             dumperToggle = false;
-        } else if (!getSetLift() && !dumperCodePress)
+        } else if (!gamepad2.dpad_left && !dumperCodePress)
             dumperToggle = true;
 
         return dumperOpen;
     }
 
-//    private boolean aimToggle = true;
-//    private boolean aimOn = false;
-//    public boolean codeToggle = false;
-//    boolean getAim() {
-//        if((gamepad2.left_bumper || codeToggle) && aimToggle) {
-//            aimOn = !aimOn;
-//            aimToggle = false;
-//            codeToggle = false;
-//        } else if(!gamepad2.left_bumper && !codeToggle)
-//            aimToggle = true;
-//
-//        return aimOn;
-//    }
 
-    boolean getAim() {
-        return gamepad2.left_bumper;
+    private boolean carouselToggle = true;
+    private boolean carouselOn = false;
+    public  boolean carouselCodePress = false;
+    boolean getCarouselOn() {
+        if ((gamepad1.dpad_down || gamepad2.right_bumper || carouselCodePress) && carouselToggle) {
+            carouselOn = !carouselOn;
+            carouselToggle = false;
+        } else if (!gamepad1.dpad_down && !gamepad2.right_bumper && !carouselCodePress)
+            carouselToggle = true;
+
+        return carouselOn;
     }
 
-    boolean getShoot() {
-        return gamepad1.right_bumper;
+
+    private boolean blueToggle = true;
+    private boolean blue = false;
+    boolean getBlue() {
+        if (gamepad2.dpad_up && blueToggle) {
+            blue = !blue;
+            blueToggle = false;
+        } else if (gamepad2.dpad_up)
+            blueToggle = true;
+
+        return blue;
     }
 
-    private boolean psToggle = true;
-    public boolean psOn = false;
-    boolean getPS() {
-        if(gamepad1.left_trigger > 0.3 && psToggle) {
-            psOn = !psOn;
-            psToggle = false;
-        } else if(gamepad1.left_trigger <= 0.1)
-            psToggle = true;
-
-        return psOn;
-    }
-
-    boolean getAutoPS () {return gamepad1.dpad_right;}
-
-    private boolean psFirstToggle = true;
-    private boolean psFirst = true;
-    boolean getPSFirst() {
-        if(gamepad2.a && psFirstToggle) {
-            psFirst = !psFirst;
-            psFirstToggle = false;
-        } else if(!gamepad2.a)
-            psFirstToggle = true;
-
-        return psFirst;
-    }
-
-    private boolean psSecondToggle = true;
-    private boolean psSecond = true;
-    boolean getPSSecond() {
-        if(gamepad2.b && psSecondToggle) {
-            psSecond = !psSecond;
-            psSecondToggle = false;
-        } else if(!gamepad2.b)
-            psSecondToggle = true;
-
-        return psSecond;
-    }
-
-    private boolean psThirdToggle = true;
-    private boolean psThird = false;
-    boolean getMiddleGoal() {
-        if(gamepad2.y && psThirdToggle) {
-            psThird = !psThird;
-            psThirdToggle = false;
-        } else if(!gamepad2.y)
-            psThirdToggle = true;
-
-        return psThird;
-    }
-
-    private boolean goalToggle = true;
-    private boolean middleGoal = false;
-    boolean getGoal() {
-        if(gamepad2.x && goalToggle) {
-            middleGoal = !middleGoal;
-            goalToggle = false;
-        } else if(!gamepad2.x)
-            goalToggle = true;
-
-        return middleGoal;
-    }
 
     boolean resetIMU() {
         return gamepad1.right_stick_button && gamepad1.left_stick_button;
     }
 
 
+
+    boolean getChangeLift() {
+        return gamepad2.left_bumper;
+    }
+
+    boolean getShared() {
+        return gamepad2.a;
+    }
+
+    boolean getFirstLayer() {
+        return gamepad2.b;
+    }
+
+    boolean getSecondLayer() {
+        return gamepad2.y;
+    }
+
+    boolean getThirdLayer() {
+        return gamepad2.x;
+    }
 }
