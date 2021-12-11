@@ -2,8 +2,6 @@ package com.team9889.lib.control;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
-import org.opencv.core.Point;
-
 /**
  * Created by Eric on 1/17/2020.
  */
@@ -40,7 +38,7 @@ public class Path {
     public Pose2d getPose(){
         return pose;
     }
-    public Point getPoint() {return new Point(pose.getX(), pose.getY());}
+//    public Point getPoint() {return new Point(pose.getX(), pose.getY());}
     public Pose2d getTolerancePose(){
         return tolerancePose;
     }

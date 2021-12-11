@@ -3,7 +3,6 @@ package com.team9889.ftc2020.subsystems;
 import android.util.Log;
 
 import com.qualcomm.hardware.rev.RevTouchSensor;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -50,7 +49,7 @@ public class Robot {
 
     public Servo dumperGate;
 
-    public CRServo carousel;
+    public Motor carousel;
 
     public Servo camYAxis;
 
@@ -93,7 +92,7 @@ public class Robot {
     // List of subsystems
     private List<Subsystem> subsystems = Arrays.asList(mMecanumDrive, mIntake, mLift, mDumper, mCarousel, mCamera);
 
-    public void init(HardwareMap hardwareMap, boolean auto, DriverStation driverStation){
+    public void init(HardwareMap hardwareMap, boolean auto){
         this.hardwareMap = hardwareMap;
 
         Date currentData = new Date();
@@ -137,7 +136,8 @@ public class Robot {
         dumperGate = hardwareMap.get(Servo.class, Constants.DumperConstants.kGate);
 
         //Carousel
-        carousel = hardwareMap.crservo.get(Constants.CarouselConstants.kCarousel);
+        carousel = new Motor(hardwareMap, Constants.CarouselConstants.kCarousel, 1,
+                DcMotorSimple.Direction.FORWARD, true, true, false);
 
         imu = new RevIMU("imu", hardwareMap);
 
@@ -149,7 +149,7 @@ public class Robot {
         rr = new SampleMecanumDrive(hardwareMap);
 //        localizer = (StandardTrackingWheelLocalizer) rr.getLocalizer();
 
-        this.driverStation = driverStation;
+//        this.driverStation = driverStation;
 
         robotTimer.reset();
     }
@@ -199,8 +199,8 @@ public class Robot {
     public void stop(){
         for (Subsystem subsystem : subsystems)
             subsystem.stop();
-        revHubMaster.close();
-        revHubSlave.close();
+//        revHubMaster.close();
+//        revHubSlave.close();
     }
 
     public MecanumDrive getMecanumDrive(){

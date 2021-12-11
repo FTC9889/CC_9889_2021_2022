@@ -44,7 +44,10 @@ public class MecanumDrive extends Subsystem {
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
-//        telemetry.addData("Pos", Robot.getInstance().rr.getLocalizer().getPoseEstimate());
+        telemetry.addData("Left Front", Robot.getInstance().fLDrive.getPosition());
+        telemetry.addData("Right Front", Robot.getInstance().fRDrive.getPosition());
+        telemetry.addData("Left Back", Robot.getInstance().bLDrive.getPosition());
+        telemetry.addData("Right Back", Robot.getInstance().bRDrive.getPosition());
 
         telemetry.addData("Gyro", gyroAngle.getTheda(AngleUnit.DEGREES) - angleFromAuton);
     }

@@ -91,8 +91,8 @@ android {
     // http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html
     buildTypes {
         release {
-            // Disable debugging for release versions so it can be uploaded to Google Play.
-            //debuggable true
+            signingConfig signingConfigs.release
+
             ndk {
                 abiFilters "armeabi-v7a"
             }
@@ -126,7 +126,5 @@ repositories {
     flatDir {
         dirs rootProject.file('libs')
     }
-
     jcenter()
 }
-

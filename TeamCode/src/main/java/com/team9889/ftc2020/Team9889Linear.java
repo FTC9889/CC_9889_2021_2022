@@ -25,8 +25,6 @@ public abstract class Team9889Linear extends LinearOpMode {
     // Match Timer
     protected ElapsedTime matchTime = new ElapsedTime();
 
-    DriverStation driverStation = new DriverStation(gamepad1, gamepad2);
-
     // Dashboard
     public FtcDashboard dashboard = FtcDashboard.getInstance();
 
@@ -38,7 +36,7 @@ public abstract class Team9889Linear extends LinearOpMode {
     }
 
     public void waitForStart(boolean autonomous, AutoModeBase.StartPosition startPosition) {
-        Robot.init(hardwareMap, autonomous, driverStation);
+        Robot.init(hardwareMap, autonomous);
         Robot.update();
 
         if (Constants.pose != null) {

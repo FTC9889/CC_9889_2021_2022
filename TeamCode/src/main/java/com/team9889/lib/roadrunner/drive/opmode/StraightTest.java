@@ -8,7 +8,6 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import com.team9889.ftc2020.DriverStation;
 import com.team9889.ftc2020.subsystems.Robot;
 import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 
@@ -24,7 +23,7 @@ public class StraightTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        Robot.getInstance().init(hardwareMap, true, new DriverStation(gamepad1, gamepad2));
+        Robot.getInstance().init(hardwareMap, true);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         Trajectory trajectory = drive.trajectoryBuilder(new Pose2d())

@@ -16,7 +16,8 @@ import com.team9889.ftc2020.subsystems.Lift;
 public class Teleop extends Team9889Linear {
     @Override
     public void runOpMode() {
-        driverStation = new DriverStation(gamepad1, gamepad2);
+        DriverStation driverStation = new DriverStation(gamepad1, gamepad2);
+        Robot.driverStation = driverStation;
 
         waitForStart(false);
 

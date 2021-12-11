@@ -83,9 +83,11 @@ public class BlueFull extends AutoModeBase {
                 .build();
         Robot.rr.followTrajectory(traj);
 
-        Robot.getCarousel().TurnOn();
+        Robot.carousel.setPower(-0.5);
         runAction(new Wait(3500));
         Robot.getCarousel().TurnOff();
+
+        runAction(new Wait(timeToWait));
 
         traj = Robot.rr.trajectoryBuilder(traj.end(), true)
                 .splineTo(new Vector2d(-60, 45), Math.toRadians(0))

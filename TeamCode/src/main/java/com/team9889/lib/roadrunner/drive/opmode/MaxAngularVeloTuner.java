@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import com.team9889.ftc2020.DriverStation;
 import com.team9889.ftc2020.subsystems.Robot;
 import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 
@@ -33,7 +32,7 @@ public class MaxAngularVeloTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Robot.getInstance().init(hardwareMap, true, new DriverStation(gamepad1, gamepad2));
+        Robot.getInstance().init(hardwareMap, true);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

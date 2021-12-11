@@ -1,9 +1,6 @@
 package com.team9889.ftc2020.subsystems;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.config.Config;
-import com.team9889.lib.CruiseLib;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -13,8 +10,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Carousel extends Subsystem {
-    public static double RPM = 160;
-    boolean lastOn = false;
+    public static double power = 0.65;
 
     @Override
     public void init(boolean auto) {
@@ -29,31 +25,22 @@ public class Carousel extends Subsystem {
 
     @Override
     public void stop() {
-        SetWheelsRPM(0);
+        SetWheelsPower(0);
     }
 
-    public void SetWheelsRPM(double RPM){
-        double power = (RPM / 160) / 2;
-        Log.i("POWER", "" + power);
-        Robot.getInstance().carousel.setPower(-CruiseLib.limitValue(power, 0.5, -0.5));
-//        Robot.getInstance().carousel.setPower(RPM);
+    public void SetWheelsPower(double power){
+        Robot.getInstance().carousel.setPower(power);
     }
 
     public void TurnOn() {
         if (Robot.getInstance().isRed) {
-            SetWheelsRPM(RPM);
+            SetWheelsPower(power);
         } else {
-            SetWheelsRPM(-RPM);
+            SetWheelsPower(-power);
         }
-        lastOn = true;
     }
 
     public void TurnOff() {
-        if (!lastOn) {
-            SetWheelsRPM(.5);
-        }else {
-            SetWheelsRPM(0);
-        }
-        lastOn = false;
+        SetWheelsPower(0);
     }
 }

@@ -5,7 +5,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import com.team9889.ftc2020.DriverStation;
 import com.team9889.ftc2020.subsystems.Robot;
 import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequence;
@@ -30,7 +29,7 @@ public class FollowerPIDTuner extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Robot.getInstance().init(hardwareMap, true, new DriverStation(gamepad1, gamepad2));
+        Robot.getInstance().init(hardwareMap, true);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         Pose2d startPose = new Pose2d(-DISTANCE / 2, -DISTANCE / 2, 0);

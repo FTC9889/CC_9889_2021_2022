@@ -75,7 +75,7 @@ public class Intake extends Subsystem {
                     wantedIntakeHeightState = IntakeHeightState.DOWN;
                     Robot.getInstance().driverStation.intakeDown = true;
                 } else {
-                    SetIntake(-1);
+                    SetIntake(-0.5);
                 }
                 break;
         }

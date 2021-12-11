@@ -29,7 +29,7 @@ public class Lift extends Subsystem {
     double scoreStateTime = 0;
     Vector2d scorePose = new Vector2d(), sinceScorePos = new Vector2d();
 
-    public static double layer1 = 3, layer2 = 8, layer3 = 13.5, shared = 8;
+    public static double layer1 = 3, layer2 = 8, layer3 = 13.5, shared = 11;
 
     public static PID liftPID = new PID(0.6, 0, 0);
 

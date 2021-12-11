@@ -4,7 +4,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import com.team9889.ftc2020.DriverStation;
 import com.team9889.ftc2020.subsystems.Robot;
 import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 
@@ -18,7 +17,7 @@ public class TurnTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Robot.getInstance().init(hardwareMap, true, new DriverStation(gamepad1, gamepad2));
+        Robot.getInstance().init(hardwareMap, true);
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
 
         waitForStart();

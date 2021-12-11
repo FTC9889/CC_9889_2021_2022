@@ -35,7 +35,7 @@ public class Camera extends Subsystem{
     @Override
     public void init(final boolean auto) {
         this.auto = auto;
-
+        
         Robot.getInstance().camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
@@ -51,7 +51,7 @@ public class Camera extends Subsystem{
 
             @Override
             public void onError(int errorCode) {
-                
+
             }
         });
     }
