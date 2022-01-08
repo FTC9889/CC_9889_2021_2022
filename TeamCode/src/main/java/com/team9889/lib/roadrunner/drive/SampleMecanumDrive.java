@@ -22,7 +22,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
-import com.team9889.ftc2020.subsystems.Robot;
+import com.team9889.ftc2021.subsystems.Robot;
 import com.team9889.lib.hardware.Motor;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequence;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
@@ -73,7 +73,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     private BNO055IMU imu;
     private VoltageSensor batteryVoltageSensor;
 
-    protected Robot Robot = com.team9889.ftc2020.subsystems.Robot.getInstance();
+    protected Robot Robot = com.team9889.ftc2021.subsystems.Robot.getInstance();
 
     public SampleMecanumDrive(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);

@@ -23,3 +23,9 @@ android {
 }
 
 apply from: '../build.dependencies.gradle'
+
+dependencies {
+    implementation('com.acmerobotics.dashboard:dashboard:0.4.3') {
+        exclude group: 'org.firstinspires.ftc'
+    }
+}

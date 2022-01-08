@@ -6,7 +6,7 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import com.team9889.ftc2020.subsystems.Robot;
+import com.team9889.ftc2021.subsystems.Robot;
 import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
 
 /*

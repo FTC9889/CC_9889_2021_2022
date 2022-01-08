@@ -26,94 +26,82 @@ import java.util.List;
 public class ScanForFreight extends OpenCvPipeline {
 
     //Outputs
-    private Mat resizeImageOutput = new Mat();
+    private Mat cvResizeOutput = new Mat();
     private Mat blurOutput = new Mat();
     private Mat hsvThreshold0Output = new Mat();
     private Mat hsvThreshold1Output = new Mat();
-    private Mat cvBitwiseOrOutput = new Mat();
-    private Mat maskOutput = new Mat();
+    private Mat cvAddOutput = new Mat();
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
 
-    public static HSV hsv = new HSV(1.618705035971223, 34.16400503732365,
-            171.0157297890501, 255.0, 191.4123785717189, 255.0);
-
-//    static {
-//        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-//    }
+    public static HSV goldHSV = new HSV(0, 180, 0, 255, 0, 255);
+    public static HSV silverHSV = new HSV(0, 180, 0, 255, 0, 255);
 
     /**
      * This is the primary method that runs the entire pipeline and updates the outputs.
      */
     @Override
     public Mat processFrame(Mat input) {
-        // Step Resize_Image0:
-        Mat resizeImageInput = input;
-        double resizeImageWidth = 320.0;
-        double resizeImageHeight = 240.0;
-        int resizeImageInterpolation = Imgproc.INTER_CUBIC;
-        resizeImage(resizeImageInput, resizeImageWidth, resizeImageHeight, resizeImageInterpolation, resizeImageOutput);
+        // Step CV_resize0:
+        Mat cvResizeSrc = input;
+        Size cvResizeDsize = new Size(0, 0);
+        double cvResizeFx = 0.05;
+        double cvResizeFy = 0.05;
+        int cvResizeInterpolation = Imgproc.INTER_LINEAR;
+        cvResize(cvResizeSrc, cvResizeDsize, cvResizeFx, cvResizeFy, cvResizeInterpolation, cvResizeOutput);
 
         // Step Blur0:
-        Mat blurInput = resizeImageOutput;
+        Mat blurInput = cvResizeOutput;
         BlurType blurType = BlurType.get("Box Blur");
-        double blurRadius = 1.8018018018018018;
+        double blurRadius = 3.603603603603604;
         blur(blurInput, blurType, blurRadius, blurOutput);
 
         // Step HSV_Threshold0:
         Mat hsvThreshold0Input = blurOutput;
-        hsvThreshold(hsvThreshold0Input, hsv.getH(), hsv.getS(), hsv.getV(), hsvThreshold0Output);
+        hsvThreshold(hsvThreshold0Input, goldHSV.getH(), goldHSV.getS(), goldHSV.getV(), hsvThreshold0Output);
 
         // Step HSV_Threshold1:
         Mat hsvThreshold1Input = blurOutput;
-        double[] hsvThreshold1Hue = {0.0, 46.844919786096256};
-        double[] hsvThreshold1Saturation = {0.0, 105.0};
-        double[] hsvThreshold1Value = {189.68926553672316, 255.0};
-        hsvThreshold(hsvThreshold1Input, hsvThreshold1Hue, hsvThreshold1Saturation, hsvThreshold1Value, hsvThreshold1Output);
+        hsvThreshold(hsvThreshold1Input, silverHSV.getH(), silverHSV.getS(), silverHSV.getV(), hsvThreshold1Output);
 
-        // Step CV_bitwise_or0:
-        Mat cvBitwiseOrSrc1 = hsvThreshold0Output;
-        Mat cvBitwiseOrSrc2 = hsvThreshold1Output;
-        cvBitwiseOr(cvBitwiseOrSrc1, cvBitwiseOrSrc2, cvBitwiseOrOutput);
-
-        // Step Mask0:
-        Mat maskInput = blurOutput;
-        Mat maskMask = cvBitwiseOrOutput;
-        mask(maskInput, maskMask, maskOutput);
+        // Step CV_add0:
+        Mat cvAddSrc1 = hsvThreshold0Output;
+        Mat cvAddSrc2 = hsvThreshold1Output;
+        cvAdd(cvAddSrc1, cvAddSrc2, cvAddOutput);
 
         // Step Find_Contours0:
-        Mat findContoursInput = cvBitwiseOrOutput;
-        boolean findContoursExternalOnly = false;
+        Mat findContoursInput = cvAddOutput;
+        boolean findContoursExternalOnly = true;
         findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
 
         // Step Filter_Contours0:
         ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-        double filterContoursMinArea = 150.0;
-        double filterContoursMinPerimeter = 0.0;
-        double filterContoursMinWidth = 0.0;
+        double filterContoursMinArea = 30.0;
+        double filterContoursMinPerimeter = 25.0;
+        double filterContoursMinWidth = 0;
         double filterContoursMaxWidth = 1000;
         double filterContoursMinHeight = 0;
         double filterContoursMaxHeight = 1000;
-        double[] filterContoursSolidity = {0.0, 100.0};
-        double filterContoursMaxVertices = 10000.0;
-        double filterContoursMinVertices = 0.0;
+        double[] filterContoursSolidity = {0, 100};
+        double filterContoursMaxVertices = 1000000;
+        double filterContoursMinVertices = 0;
         double filterContoursMinRatio = 0;
         double filterContoursMaxRatio = 1000;
         filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter, filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio, filterContoursOutput);
 
         for (int i = 0; i < filterContoursOutput.size(); i++) {
-            Imgproc.drawContours(blurOutput, filterContoursOutput, i, new Scalar(255, 0, 0));
+            Imgproc.drawContours(cvResizeOutput, filterContoursOutput, i, new Scalar(255, 0, 0));
         }
 
-        return blurOutput;
+        return cvResizeOutput;
     }
 
     /**
-     * This method is a generated getter for the output of a Resize_Image.
-     * @return Mat output from Resize_Image.
+     * This method is a generated getter for the output of a CV_resize.
+     * @return Mat output from CV_resize.
      */
-    public Mat resizeImageOutput() {
-        return resizeImageOutput;
+    public Mat cvResizeOutput() {
+        return cvResizeOutput;
     }
 
     /**
@@ -141,19 +129,11 @@ public class ScanForFreight extends OpenCvPipeline {
     }
 
     /**
-     * This method is a generated getter for the output of a CV_bitwise_or.
-     * @return Mat output from CV_bitwise_or.
+     * This method is a generated getter for the output of a CV_add.
+     * @return Mat output from CV_add.
      */
-    public Mat cvBitwiseOrOutput() {
-        return cvBitwiseOrOutput;
-    }
-
-    /**
-     * This method is a generated getter for the output of a Mask.
-     * @return Mat output from Mask.
-     */
-    public Mat maskOutput() {
-        return maskOutput;
+    public Mat cvAddOutput() {
+        return cvAddOutput;
     }
 
     /**
@@ -174,17 +154,22 @@ public class ScanForFreight extends OpenCvPipeline {
 
 
     /**
-     * Scales and image to an exact size.
-     * @param input The image on which to perform the Resize.
-     * @param width The width of the output in pixels.
-     * @param height The height of the output in pixels.
-     * @param interpolation The type of interpolation.
-     * @param output The image in which to store the output.
+     * Resizes an image.
+     * @param src The image to resize.
+     * @param dSize size to set the image.
+     * @param fx scale factor along X axis.
+     * @param fy scale factor along Y axis.
+     * @param interpolation type of interpolation to use.
+     * @param dst output image.
      */
-    private void resizeImage(Mat input, double width, double height,
-                             int interpolation, Mat output) {
-        Imgproc.resize(input, output, new Size(width, height), 0.0, 0.0, interpolation);
+    private void cvResize(Mat src, Size dSize, double fx, double fy, int interpolation,
+                          Mat dst) {
+        if (dSize==null) {
+            dSize = new Size(0,0);
+        }
+        Imgproc.resize(src, dst, dSize, fx, fy, interpolation);
     }
+
 
     /**
      * An indication of which type of filter to use for a blur.
@@ -268,25 +253,13 @@ public class ScanForFreight extends OpenCvPipeline {
     }
 
     /**
-     * Computes the per channel or of two images.
-     * @param src1 The first image to use.
-     * @param src2 The second image to use.
-     * @param dst the result image when the or is performed.
+     * Calculates the sum of two Mats.
+     * @param src1 the first Mat
+     * @param src2 the second Mat
+     * @param out the Mat that is the sum of the two Mats
      */
-    private void cvBitwiseOr(Mat src1, Mat src2, Mat dst) {
-        Core.bitwise_or(src1, src2, dst);
-    }
-
-    /**
-     * Filter out an area of an image using a binary mask.
-     * @param input The image on which the mask filters.
-     * @param mask The binary image that is used to filter.
-     * @param output The image in which to store the output.
-     */
-    private void mask(Mat input, Mat mask, Mat output) {
-        mask.convertTo(mask, CvType.CV_8UC1);
-        Core.bitwise_xor(output, output, output);
-        input.copyTo(output, mask);
+    private void cvAdd(Mat src1, Mat src2, Mat out) {
+        Core.add(src1, src2, out);
     }
 
     /**
