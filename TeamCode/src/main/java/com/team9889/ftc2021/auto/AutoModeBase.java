@@ -50,7 +50,7 @@ public abstract class AutoModeBase extends Team9889Linear {
         waitForStart(true, currentAutoRunning);
         autoTimer.reset();
 
-        box = Robot.getCamera().getWormPos();
+        box = Robot.getCamera().getTSEPos();
 
         // If the opmode is still running, run auto
         if (opModeIsActive() && !isStopRequested()) {

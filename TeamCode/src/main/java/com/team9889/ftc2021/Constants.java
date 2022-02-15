@@ -1,7 +1,5 @@
 package com.team9889.ftc2021;
 
-import android.graphics.Color;
-
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 /**
@@ -23,7 +21,6 @@ public class Constants {
 
     public final static String kWebcam = "Webcam";
 
-    public static int side = Color.RED;
     public static Pose2d pose;
 
     /*---------------------
@@ -73,6 +70,7 @@ public class Constants {
     //Settings for Intake
     public static class IntakeConstants {
         public final static String kIntake = "intake";
+        public final static String kPassThrough = "pass_through";
         public final static String kIntakeLift = "intake_lift";
     }
 
@@ -87,6 +85,7 @@ public class Constants {
         public final static String kLift = "lift";
         public final static String kAngleAdjust1 = "angle1";
         public final static String kAngleAdjust2 = "angle2";
+        public final static String kAngleAdjust3 = "angle3";
         public final static String kDownLimit = "down_limit";
     }
 
@@ -110,6 +109,8 @@ public class Constants {
     //Settings for Lift
     public static class CarouselConstants {
         public final static String kCarousel = "carousel";
+        public final static String kCarouselRedLimit = "red_limit";
+        public final static String kCarouselBlueLimit = "blue_limit";
     }
 
     /*---------------------

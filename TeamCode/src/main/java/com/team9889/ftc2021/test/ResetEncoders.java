@@ -16,4 +16,9 @@ public class ResetEncoders extends Team9889Linear{
 
 //        Robot.zeroSensors();
     }
+
+    @Override
+    public void initialize() {
+
+    }
 }

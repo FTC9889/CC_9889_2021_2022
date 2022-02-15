@@ -12,6 +12,9 @@ import com.qualcomm.robotcore.util.RobotLog;
 import com.team9889.ftc2021.Constants;
 import com.team9889.ftc2021.DriverStation;
 import com.team9889.ftc2021.auto.actions.ActionVariables;
+import com.team9889.lib.android.FileReader;
+import com.team9889.lib.android.FileWriter;
+import com.team9889.lib.hardware.ModernRoboticsUltrasonic;
 import com.team9889.lib.hardware.Motor;
 import com.team9889.lib.hardware.RevIMU;
 import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
@@ -43,17 +46,20 @@ public class Robot {
     public RevIMU imu = null;
 
     public AnalogInput distLeft, distRight, distForward, distBack;
+//    public ModernRoboticsI2cRangeSensor rangeSensor;
+    public ModernRoboticsUltrasonic rangeSensor;
 
-    public Motor intake;
+    public Motor intake, passThrough;
     public Servo intakeLift;
 
     public Motor lift;
-    public Servo angleAdjust1, angleAdjust2;
+    public Servo angleAdjust1, angleAdjust2, angleAdjust3;
     public RevTouchSensor downLimit;
 
     public Servo dumperGate;
 
     public Motor carousel;
+    public RevTouchSensor redLimit, blueLimit;
 
     public Servo camYAxis;
 
@@ -64,11 +70,15 @@ public class Robot {
 
     public ActionVariables actionVariables = new ActionVariables();
 
-    public boolean isRed = true;
+    public boolean isRed = true, auto;
 
     ElapsedTime robotTimer = new ElapsedTime();
 
     public double result = Double.POSITIVE_INFINITY;
+
+    public FileWriter writer;
+    public FileReader reader;
+    public String[] lines;
 
     private static Robot mInstance = null;
 
@@ -91,8 +101,6 @@ public class Robot {
 
     public DriverStation driverStation;
 
-    public boolean blue = false;
-
     // List of subsystems
     private List<Subsystem> subsystems = Arrays.asList(mMecanumDrive, mIntake, mLift, mDumper, mCarousel, mCamera);
 
@@ -103,6 +111,11 @@ public class Robot {
         SimpleDateFormat format = new SimpleDateFormat("dd.M.yyyy hh:mm:ss");
 
         RobotLog.a("Robot Init Started at " + format.format(currentData));
+        reader = new FileReader("AutoInfo.txt");
+        lines = reader.lines();
+        reader.close();
+
+        writer = new FileWriter("AutoInfo.txt");
 
         //Rev Hubs
         revHubMaster = hardwareMap.get(ExpansionHubEx.class, Constants.kRevHubMaster);
@@ -129,9 +142,14 @@ public class Robot {
 //        distForward = hardwareMap.get(DistanceSensor.class, Constants.DriveConstants.kDistanceForward);
 //        distBack = hardwareMap.get(DistanceSensor.class, Constants.DriveConstants.kDistanceBack);
 
+        rangeSensor = new ModernRoboticsUltrasonic("sensor_range", hardwareMap);
+
         //Intake
         intake = new Motor(hardwareMap, Constants.IntakeConstants.kIntake, 1,
-                DcMotorSimple.Direction.FORWARD, false, true, false);
+                DcMotorSimple.Direction.REVERSE, false, true, false);
+
+        passThrough = new Motor(hardwareMap, Constants.IntakeConstants.kPassThrough, 1,
+                DcMotorSimple.Direction.REVERSE, false, true, false);
 
         intakeLift = hardwareMap.get(Servo.class, Constants.IntakeConstants.kIntakeLift);
 
@@ -141,7 +159,7 @@ public class Robot {
 
         angleAdjust1 = hardwareMap.get(Servo.class, Constants.LiftConstants.kAngleAdjust1);
         angleAdjust2 = hardwareMap.get(Servo.class, Constants.LiftConstants.kAngleAdjust2);
-        angleAdjust2.setDirection(Servo.Direction.REVERSE);
+        angleAdjust3 = hardwareMap.get(Servo.class, Constants.LiftConstants.kAngleAdjust3);
 
         downLimit = hardwareMap.get(RevTouchSensor.class, Constants.LiftConstants.kDownLimit);
 
@@ -152,12 +170,18 @@ public class Robot {
         carousel = new Motor(hardwareMap, Constants.CarouselConstants.kCarousel, 1,
                 DcMotorSimple.Direction.FORWARD, true, true, false);
 
+        redLimit = hardwareMap.get(RevTouchSensor.class, Constants.CarouselConstants.kCarouselRedLimit);
+        blueLimit = hardwareMap.get(RevTouchSensor.class, Constants.CarouselConstants.kCarouselBlueLimit);
+
+
         imu = new RevIMU("imu", hardwareMap);
 
         // Init all subsystems
         for (Subsystem subsystem : subsystems) {
             subsystem.init(auto);
         }
+
+        this.auto = auto;
 
         rr = new SampleMecanumDrive(hardwareMap);
 //        localizer = (StandardTrackingWheelLocalizer) rr.getLocalizer();
@@ -186,6 +210,10 @@ public class Robot {
             // Update Subsystems
             for (Subsystem subsystem : subsystems)
                 subsystem.update();
+
+            if (!auto) {
+                rr.getLocalizer().update();
+            }
 
 //            result = Double.POSITIVE_INFINITY;
 //            for (VoltageSensor sensor : hardwareMap.voltageSensor) {

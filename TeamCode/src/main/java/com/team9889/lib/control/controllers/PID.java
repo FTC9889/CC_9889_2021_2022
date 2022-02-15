@@ -1,7 +1,5 @@
 package com.team9889.lib.control.controllers;
 
-import android.util.Log;
-
 import com.qualcomm.robotcore.util.RobotLog;
 
 /**
@@ -38,15 +36,18 @@ public class PID extends FeedBackController {
     double derivative;
 
     public static void main(String[] args) {
-        PID pid = new PID(.001, 0, 0.0005);
+        PID pid = new PID(.005, 0, 0);
 
-        System.out.println(pid.update(0, 5000));
+        System.out.println(pid.update(10, 110));
+        System.out.println(pid.update(15, 110));
+        System.out.println(pid.update(20, 110));
+        System.out.println(pid.update(25, 110));
+        System.out.println(pid.update(30, 110));
     }
 
     @Override
     public double update(double current, double wanted) {
         error = wanted - current;
-        Log.i("Error", error + "");
 
         if(first){
             // P control first time
@@ -57,19 +58,15 @@ public class PID extends FeedBackController {
             } catch (Exception ignored){}
         } else {
             double currentTime = System.currentTimeMillis() - lastTime;
-            Log.i("Time", currentTime + "");
 
             integral = integral + (error *currentTime);
             if (integral > maxIntegral || i == 0)
                 integral = 0;
             if (currentTime != 0)
                 derivative = (error - error_prior)/currentTime;
-            Log.i("Derivative", derivative + "");
 
 //            .3104 + (-0.0814 * )
             output = (p * error) + (i * integral) + (d * derivative);
-            Log.i("Output Breakdown", p + " * " + error + " * " + ", " + i + " * " + integral + ", " + d + " * " + derivative);
-            Log.i("Output", output + "");
         }
 
         lastTime = System.currentTimeMillis();

@@ -27,6 +27,10 @@ import com.team9889.lib.hardware.Motor;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequence;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 import com.team9889.lib.roadrunner.trajectorysequence.TrajectorySequenceRunner;
+import com.team9889.lib.roadrunner.util.AxesSigns;
+import com.team9889.lib.roadrunner.util.BNO055IMUUtil;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,10 +55,10 @@ import static com.team9889.lib.roadrunner.drive.DriveConstants.kV;
  */
 @Config
 public class SampleMecanumDrive extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(9, 0, 0.05);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(1, 0, 0.2);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(2, 0, 0);
 
-    public static double LATERAL_MULTIPLIER = 1.1183334950043651178581821709187;
+    public static double LATERAL_MULTIPLIER = 1.13;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -79,7 +83,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(1, 1, Math.toRadians(5.0)), 1);
+                new Pose2d(2, 2, Math.toRadians(3.0)), .5);
 
 //        LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
@@ -89,7 +93,6 @@ public class SampleMecanumDrive extends MecanumDrive {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
-        // TODO: adjust the names of the following hardware devices to match your configuration
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
@@ -97,15 +100,14 @@ public class SampleMecanumDrive extends MecanumDrive {
 
         // TODO: if your hub is mounted vertically, remap the IMU axes so that the z-axis points
         // upward (normal to the floor) using a command like the following:
-        // BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
+         BNO055IMUUtil.remapAxes(imu, AxesOrder.XYZ, AxesSigns.NPN);
 
 //        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
 //        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
 //        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
 //        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
 
-        motors = Arrays.asList(Robot.getInstance().fLDrive, Robot.getInstance().bLDrive,
-                Robot.getInstance().bRDrive, Robot.getInstance().fRDrive);
+        motors = Arrays.asList(Robot.fLDrive, Robot.bLDrive, Robot.bRDrive, Robot.fRDrive);
 
         for (Motor motor : motors) {
             MotorConfigurationType motorConfigurationType = motor.motor.getMotorType().clone();
@@ -123,9 +125,6 @@ public class SampleMecanumDrive extends MecanumDrive {
             setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
         }
 
-        // TODO: reverse any motors using DcMotor.setDirection()
-
-        // TODO: if desired, use setLocalizer() to change the localization method
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
@@ -282,7 +281,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public Double getExternalHeadingVelocity() {
-        // TODO: This must be changed to match your configuration
+        // This must be changed to match your configuration
         //                           | Z axis
         //                           |
         //     (Motor Port Side)     |   / X axis

@@ -1,12 +1,9 @@
 package com.team9889.lib;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.team9889.lib.control.math.cartesian.Rotation2d;
 import com.team9889.lib.control.math.cartesian.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
-import java.util.ArrayList;
 
 /**
  * Created by Joshua on 6/23/17.
@@ -42,9 +39,9 @@ public class CruiseLib {
     }
 
     public static double limitValue(double val, double max, double min) {
-        if(val > Math.abs(max)) {
+        if(val > max) {
             return max;
-        } else if(val < -Math.abs(min)) {
+        } else if(val < min) {
             return min;
         } else {
             return val;
@@ -63,6 +60,10 @@ public class CruiseLib {
             return posMax;
         else
             return val;
+    }
+
+    public static int getSign(double input) {
+        return (int)(input / Math.abs(input));
     }
 
     public static double squareMaintainSign(double val) {

@@ -15,7 +15,7 @@ public class CruiseControllerTest {
         for (int i = 0; i < step; i++) {
             double output =  controller.update(i, step);
             System.out.println( "Step: " + i + " | Output: " + output);
-            log.write(output);
+            log.write("" + output);
         }
 
         log.close();

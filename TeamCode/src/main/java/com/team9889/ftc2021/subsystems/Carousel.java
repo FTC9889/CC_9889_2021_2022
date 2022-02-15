@@ -1,6 +1,7 @@
 package com.team9889.ftc2021.subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -10,17 +11,41 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Carousel extends Subsystem {
-    public static double power = 0.65;
+    public static double power = 0.7, wantedPower = 0, addedPower = 0.04, time = 1100;
+    ElapsedTime timer = new ElapsedTime();
+
+    boolean on = false;
 
     @Override
     public void init(boolean auto) {
     }
 
     @Override
-    public void outputToTelemetry(Telemetry telemetry) { }
+    public void outputToTelemetry(Telemetry telemetry) {
+        telemetry.addData("Carousel Limit", GetLimit());
+    }
 
     @Override
     public void update() {
+        if (on) {
+            if (timer.milliseconds() > time) {
+                wantedPower = 1;
+            }
+
+            if (wantedPower < power) {
+                wantedPower += addedPower;
+            }
+
+            if (Robot.getInstance().isRed) {
+                SetWheelsPower(wantedPower);
+            } else {
+                SetWheelsPower(-wantedPower);
+            }
+        } else {
+            timer.reset();
+            SetWheelsPower(0);
+            wantedPower = 0;
+        }
     }
 
     @Override
@@ -33,14 +58,18 @@ public class Carousel extends Subsystem {
     }
 
     public void TurnOn() {
-        if (Robot.getInstance().isRed) {
-            SetWheelsPower(power);
-        } else {
-            SetWheelsPower(-power);
-        }
+        on = true;
     }
 
     public void TurnOff() {
-        SetWheelsPower(0);
+        on = false;
+    }
+
+    public boolean GetLimit() {
+        if (Robot.getInstance().isRed) {
+            return Robot.getInstance().redLimit.isPressed();
+        } else {
+            return Robot.getInstance().blueLimit.isPressed();
+        }
     }
 }

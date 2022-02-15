@@ -30,7 +30,7 @@ public class FileReader {
         try {
             try {
                 String root = Environment.getExternalStorageDirectory().toString();
-                File file = new File(root + "/saved_data/" + filename);
+                File file = new File(root + "/FIRST/saved_data/" + filename);
 
                 reader = new FileInputStream(file);
             } catch (RuntimeException e){

@@ -25,7 +25,8 @@ import java.util.List;
  */
 
 @Config
-public class ScanForWorm extends OpenCvPipeline {
+public class ScanForTSE extends OpenCvPipeline {
+    public static int area = 450;
 
     //Outputs
     private Mat cvResizeOutput = new Mat();
@@ -43,7 +44,7 @@ public class ScanForWorm extends OpenCvPipeline {
         return point;
     }
 
-    public ScanForWorm() {
+    public ScanForTSE() {
 
     }
 
@@ -52,8 +53,8 @@ public class ScanForWorm extends OpenCvPipeline {
         // Step CV_resize0:
         Mat cvResizeSrc = input;
         Size cvResizeDsize = new Size(0, 0);
-        double cvResizeFx = 0.25;
-        double cvResizeFy = 0.25;
+        double cvResizeFx = .5;
+        double cvResizeFy = .5;
         int cvResizeInterpolation = Imgproc.INTER_LINEAR;
         cvResize(cvResizeSrc, cvResizeDsize, cvResizeFx, cvResizeFy, cvResizeInterpolation, cvResizeOutput);
 
@@ -62,6 +63,8 @@ public class ScanForWorm extends OpenCvPipeline {
         BlurType blurType = BlurType.get("Gaussian Blur");
         double blurRadius = 2.702702702702703;
         blur(blurInput, blurType, blurRadius, blurOutput);
+
+        Imgproc.rectangle(blurOutput, new Point(0, 0), new Point(200, 50), new Scalar(0, 0, 0), -1);
 
         // Step HSV_Threshold0:
         Mat hsvThresholdInput = blurOutput;
@@ -74,7 +77,7 @@ public class ScanForWorm extends OpenCvPipeline {
 
         // Step Filter_Contours0:
         ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-        double filterContoursMinArea = 250;
+        double filterContoursMinArea = area;
         double filterContoursMinPerimeter = 0;
         double filterContoursMinWidth = 0;
         double filterContoursMaxWidth = 1000;

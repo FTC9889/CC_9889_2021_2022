@@ -1,5 +1,8 @@
 package com.team9889.ftc2021.auto.actions.lift;
 
+import android.util.Log;
+
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.subsystems.Lift;
 import com.team9889.ftc2021.subsystems.Robot;
@@ -9,34 +12,31 @@ import com.team9889.ftc2021.subsystems.Robot;
  */
 public class LiftGoToHeight extends Action {
     Lift.LiftState liftState;
-    double height = 1000;
+    ElapsedTime timer = new ElapsedTime();
 
     public LiftGoToHeight (Lift.LiftState liftState) {
         this.liftState = liftState;
     }
 
-    public LiftGoToHeight (double height) {
-        this.height = height;
-    }
-
     @Override
     public void start() {
-        if (height == 1000) {
-            Robot.getInstance().getLift().wantedLiftState = liftState;
-        } else {
+        Robot.getInstance().getLift().wantedLiftState = liftState;
+        Robot.getInstance().getLift().done = false;
 
-        }
+        Log.i("Lift Start", "");
+        timer.reset();
     }
 
     @Override
     public void update() {
-
     }
 
     @Override
     public boolean isFinished() {
-        return Robot.getInstance().getLift().currentLiftState ==
-                Robot.getInstance().getLift().wantedLiftState;
+        Log.i("Lift Done", "" + Robot.getInstance().getLift().done);
+
+        return (Robot.getInstance().getLift().done && timer.milliseconds() > 400);
+//         || timer.milliseconds() > 1000
     }
 
     @Override

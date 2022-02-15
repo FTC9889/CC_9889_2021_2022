@@ -7,7 +7,7 @@ import com.team9889.ftc2021.Team9889Linear;
 /**
  * Created by Eric on 12/5/2020.
  */
-@TeleOp
+@TeleOp(group = "Test")
 //@Disabled
 public class TestMotors extends Team9889Linear {
 
@@ -40,6 +40,19 @@ public class TestMotors extends Team9889Linear {
             } else {
                 Robot.bRDrive.setPower(0);
             }
+
+            telemetry.addData("Left Front", Robot.fLDrive.getPosition());
+            telemetry.addData("Right Front", Robot.fRDrive.getPosition());
+            telemetry.addData("Left Back", Robot.bLDrive.getPosition());
+            telemetry.addData("Right Back", Robot.bRDrive.getPosition());
+            telemetry.update();
+
+//            Robot.update();
         }
+    }
+
+    @Override
+    public void initialize() {
+
     }
 }

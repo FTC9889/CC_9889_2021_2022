@@ -3,6 +3,7 @@ package com.team9889.ftc2021.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.team9889.lib.CruiseLib;
 import com.team9889.lib.control.controllers.PID;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -13,9 +14,11 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Lift extends Subsystem {
-    public static double angle = 0, power = 0.1;
+    public static double angle = 0, power = 1, offset1 = -0.02, offset2 = 0, offset3 = 0.01;
 
-    public static double liftTolerance = 8;
+    public static double liftTolerance = 1;
+
+    public boolean done = true;
 
     public enum LiftState {
         DOWN, LAYER1, LAYER2, LAYER3, SHARED, NULL
@@ -32,9 +35,7 @@ public class Lift extends Subsystem {
 
     public static double layer1 = 3, layer2 = 8, layer3 = 13.5, shared = 11;
 
-    public static PID liftPID = new PID(0.6, 0, 0);
-
-    public boolean isDown = true;
+    public static PID liftPID = new PID(0.2, 0, 0);
     public static double maxCurrent = 6500;
     double current = 0;
     ElapsedTime timer = new ElapsedTime();
@@ -43,64 +44,48 @@ public class Lift extends Subsystem {
     public void init(boolean auto) {
         if (auto) {
             wantedLiftState = LiftState.DOWN;
+        } else {
+            wantedLiftState = LiftState.NULL;
+            angle = 0;
         }
     }
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
+        telemetry.addData("Lift Height", GetLiftLength());
+        telemetry.addData("Lift Angle", angle);
+
         telemetry.addData("Is Lift Down", IsDown());
-        telemetry.addData("Lift Height", GetLiftHeight());
-        telemetry.addData("Default Lift State", defaultLiftState);
-        telemetry.addData("Lift State", currentLiftState);
+        telemetry.addData("Lift PID Power", liftPID.getOutput());
     }
 
     @Override
     public void update() {
-        if (wantedLiftState == LiftState.DOWN && currentLiftState != LiftState.DOWN) {
-            timer.reset();
-        }
         switch (wantedLiftState) {
             case DOWN:
+                angle = .58;
+
                 if (!IsDown()) {
-                    SetLiftPower(-0.5);
-                    if (timer.milliseconds() > 800) {
-                        isDown = true;
-                    }
+                    SetLiftPower(-1);
                 } else {
                     SetLiftPower(0);
+                    done = true;
                 }
                 break;
 
             case LAYER1:
-                if (Math.abs(GetLiftHeight() - layer1) > liftTolerance) {
-                    SetLiftPower(liftPID.update(GetLiftHeight(), layer1));
-                } else {
-                    SetLiftPower(0);
-                }
                 break;
 
             case LAYER2:
-                if (Math.abs(GetLiftHeight() - layer2) > liftTolerance) {
-                    SetLiftPower(liftPID.update(GetLiftHeight(), layer2));
-                } else {
-                    SetLiftPower(0);
-                }
+                done = SetLiftPos(25, 11);
                 break;
 
             case LAYER3:
-                if (Math.abs(GetLiftHeight() - layer3) > liftTolerance) {
-                    SetLiftPower(liftPID.update(GetLiftHeight(), layer3));
-                } else {
-                    SetLiftPower(0);
-                }
+                done = SetLiftPos(30, 20);
                 break;
 
             case SHARED:
-                if (Math.abs(GetLiftHeight() - shared) > liftTolerance) {
-                    SetLiftPower(liftPID.update(GetLiftHeight(), shared));
-                } else {
-                    SetLiftPower(0);
-                }
+                done = SetLiftPos(11, 6);
                 break;
 
             case NULL:
@@ -110,27 +95,34 @@ public class Lift extends Subsystem {
 
         switch (scoreState) {
             case RELEASE:
-                Robot.getInstance().driverStation.dumperOpen = true;
+                if (Robot.getInstance().driverStation != null) {
+                    Robot.getInstance().driverStation.dumperOpen = true;
+                }
                 Robot.getInstance().getDumper().gateState = Dumper.GateState.OPEN;
 
                 scorePose = new Vector2d(Robot.getInstance().fLDrive.getPosition(), Robot.getInstance().fRDrive.getPosition());
 
-                if ((Robot.getInstance().robotTimer.milliseconds() - scoreStateTime) >= 500) {
+                if ((Robot.getInstance().robotTimer.milliseconds() - scoreStateTime) >= 250) {
                     scoreState = ScoreState.DOWN;
+                    timer.reset();
                     scoreStateTime = Robot.getInstance().robotTimer.milliseconds();
                 }
                 break;
 
             case DOWN:
-                if (Math.abs(Robot.getInstance().fLDrive.getPosition() - scorePose.getX()) > 250 &&
-                        Math.abs(Robot.getInstance().fRDrive.getPosition() - scorePose.getY()) > 250) {
-                    Robot.getInstance().driverStation.dumperOpen = false;
+                if (Math.abs(Robot.getInstance().fLDrive.getPosition() - scorePose.getX()) > 100 &&
+                        Math.abs(Robot.getInstance().fRDrive.getPosition() - scorePose.getY()) > 100) {
+                    if (Robot.getInstance().driverStation != null) {
+                        Robot.getInstance().driverStation.dumperOpen = false;
+                    }
                     Robot.getInstance().getDumper().gateState = Dumper.GateState.CLOSED;
 
-                    Robot.getInstance().driverStation.liftDown = true;
+                    if (Robot.getInstance().driverStation != null) {
+                        Robot.getInstance().driverStation.liftDown = true;
+                    }
                     wantedLiftState = LiftState.DOWN;
 
-                    if (IsDown()) {
+                    if (IsDown() || timer.milliseconds() > 1500) {
                         scoreState = ScoreState.NULL;
                     }
                 }
@@ -145,6 +137,10 @@ public class Lift extends Subsystem {
         if (IsDown()) {
             Robot.getInstance().lift.resetEncoder();
         }
+
+
+        angle = CruiseLib.limitValue(angle, 1, .21);
+        SetAngleAdjust(angle);
     }
 
     @Override
@@ -152,28 +148,21 @@ public class Lift extends Subsystem {
         SetLiftPower(0);
     }
 
-    public void SetLiftAngle(double angle) {
-        double liftAngle = (Robot.getInstance().lift.getPosition() / 537.6) * 360;
-        if (Math.abs(liftAngle - angle) > liftTolerance) {
-//            SetLiftPower(liftPID.update(liftAngle, angle));
-            SetLiftPower(power * ((liftAngle - angle) / Math.abs(liftAngle - angle)));
+    public boolean SetLiftLength(double length) {
+        if (Math.abs(GetLiftLength() - length) > liftTolerance) {
+            SetLiftPower(liftPID.update(GetLiftLength(), length));
         } else {
             SetLiftPower(0);
+            return true;
         }
+
+        return false;
     }
 
     public void SetLiftPower(double power){
-//        power = CruiseLib.limitValue(power, -0.3, -1, 0.3, 1);
-
-//        if (power < 0 && current > maxCurrent) {
-//            isDown = true;
-//            Robot.getInstance().lift.setPower(0);
-//        }
-
-        if (isDown) {
+        if (IsDown()) {
             if (power > 0) {
                 Robot.getInstance().lift.setPower(power);
-                isDown = false;
             } else {
                 Robot.getInstance().lift.setPower(0);
             }
@@ -183,50 +172,73 @@ public class Lift extends Subsystem {
     }
 
     public void SetAngleAdjust(double pos) {
-        Robot.getInstance().angleAdjust1.setPosition(pos);
-        Robot.getInstance().angleAdjust2.setPosition(pos);
+        pos = CruiseLib.limitValue(pos, 1, 0.21);
+        Robot.getInstance().angleAdjust1.setPosition(pos + offset1);
+        Robot.getInstance().angleAdjust2.setPosition(pos + offset2);
+        Robot.getInstance().angleAdjust3.setPosition(pos + offset3);
     }
 
-    public double GetLiftHeight () {
-        double liftPos = Robot.getInstance().lift.getPosition(), ticksPerRev = 537.6,
-                spoolCircumference = 8.93, stages = 2, angle = 20;
-        return ((liftPos / ticksPerRev) * spoolCircumference * stages) * Math.sin(angle);
+//  Units are Inches
+    public double GetLiftLength() {
+        double spoolRadius = 1.1, ticks = 537.6;
+        double spoolCircumference = 2 * Math.PI * spoolRadius;
+        return ((Robot.getInstance().lift.getPosition() / ticks) * spoolCircumference) * 2;
     }
 
     public boolean IsDown() {
-//        return Robot.getInstance().downLimit.isPressed();
-        return isDown;
+        return Robot.getInstance().downLimit.isPressed();
     }
 
 
-    public Vector2d SetLiftPos (double length, double height) {
-        double hypot = Math.sqrt(Math.pow(height, 2) + Math.pow(length, 2)) / 2;
-        double theta = Math.atan2(height, length) - Math.toRadians(0);
+//  Units are Inches and Degrees
+    public Boolean SetLiftPos(double length, double height) {
+        double midToEnd = 5.625, lengthToEnd = 10, liftArm = 11.75, dumperHeight = 4.25;
+        double hypot = Math.sqrt(Math.pow(height - 6 + (6 - dumperHeight), 2) + Math.pow(length - midToEnd, 2));
+        double theta = Math.atan2(height - 5.625, length + midToEnd) + (Math.toRadians(5.913585024279) / 2);
+//        double theta = Math.toRadians(height);
+//        double hypot = ((length - 7) / Math.cos(Math.toRadians(21.7265))) / 2;
+
+//         - Math.toRadians(8.65)
+
+        boolean done = SetLiftLength(hypot);
+
 
 //        x = cos^(-1)((-4 d^3 + 2 sqrt(-16 d^4 + 4232 d^2 + 16095) - 49 d)/(68 (d^2 + 4)))
-        double motorAngle = Math.acos((-4 * Math.pow(hypot, 3) + 2 * Math.sqrt(-16 * Math.pow(hypot, 4)
-                + 4232 * Math.pow(hypot, 2) + 16095) - 49 * hypot)
-                / (68 * (Math.pow(hypot, 2) + 4)));
+//        double motorAngle = Math.acos((-4 * Math.pow(hypot, 3) + 2 * Math.sqrt(-16 * Math.pow(hypot, 4)
+//                + 4232 * Math.pow(hypot, 2) + 16095) - 49 * hypot)
+//                / (68 * (Math.pow(hypot, 2) + 4)));
+
 
 //        height = sin(theta) * lift_length
-//        cos(B) = c^2 + a^2 - b^2 / 2ca
-        double h = Math.sin(theta) * 11.87;
-        double heightAngle = Math.asin((Math.pow(h, 2) + Math.pow(3.78, 2) - Math.pow(3.78, 2)) / (2 * h * 3.78));
-        if (Double.isNaN(heightAngle)) {
-            heightAngle = 0;
+//        cos(B) = c^2 + a^2 - b^2 / 2ca' 3.25
+        double servoBar = 4.375, liftBar = 2.8125;
+//        double h = Math.sin(theta) * lengthToEnd;
+        double h = Math.sqrt(liftArm*liftArm + lengthToEnd*lengthToEnd - (2 * liftArm * lengthToEnd * Math.cos(theta)));
+//        Angle of servo to h
+//        double heightAngle = Math.acos((h*h + servoBar*servoBar - liftBar*liftBar) / (2*h*servoBar));
+//        Angle of servoBar to liftBar
+        double barsAngle = Math.acos((servoBar*servoBar + liftBar*liftBar - h*h) / (2*servoBar*liftBar));
+        barsAngle *= liftBar / servoBar;
+//        Log.i("Lift", Math.toDegrees(theta) + ", " + h + ", " + Math.toDegrees(barsAngle));
+//        System.out.println(Math.toDegrees(barsAngle));
+
+        if (Double.isNaN(barsAngle)) {
+            if (height < 10)
+                barsAngle = 0;
+            else
+                barsAngle = 1;
         }
 
 //        Servo 300 degrees
-//        Motor 1680 ticks per rev
-        SetLiftAngle(motorAngle);
-        SetAngleAdjust(heightAngle / 300);
-        angle = heightAngle;
+        angle = (Math.toDegrees(barsAngle / 270) / ((double) 20 / 48)) + .21;
 
-        return new Vector2d(motorAngle, heightAngle);
+        return done;
+//        return false;
     }
 
 //    public static void main(String[] args) {
-//        Vector2d lift = SetLiftPos(15, 10);
-//        System.out.println(Math.toDegrees(lift.getX()) + ", " + Math.toDegrees(lift.getY()));
+//        for (int i = 0; i < 360; i++) {
+//            SetLiftPos(0, i);
+//        }
 //    }
 }

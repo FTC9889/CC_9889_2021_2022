@@ -45,38 +45,47 @@ public class Intake extends Subsystem {
 
         switch (intakeState) {
             case ON:
-                if (wantedIntakeHeightState != IntakeHeightState.DOWN) {
-                    currentIntakeHeightState = wantedIntakeHeightState;
-                }
-
-                if (currentIntakeHeightState != IntakeHeightState.DOWN) {
-                    wantedIntakeHeightState = IntakeHeightState.DOWN;
-                    Robot.getInstance().driverStation.intakeDown = true;
-                } else {
+//                if (wantedIntakeHeightState != IntakeHeightState.DOWN) {
+//                    currentIntakeHeightState = wantedIntakeHeightState;
+//                }
+//
+//                if (currentIntakeHeightState != IntakeHeightState.DOWN) {
+//                    wantedIntakeHeightState = IntakeHeightState.DOWN;
+//                    if (Robot.getInstance().driverStation != null) {
+//                        Robot.getInstance().driverStation.intakeDown = true;
+//                    }
+//                } else {
                     SetIntake(power);
-                }
+                    SetPassThrough(power);
+//                }
                 break;
 
             case OFF:
-                if (Robot.getInstance().robotTimer.milliseconds() - timerOffset < 300) {
+//                if (Robot.getInstance().robotTimer.milliseconds() - timerOffset < 300) {
                     SetIntake(0);
-                } else {
-                    wantedIntakeHeightState = IntakeHeightState.UP;
-                    Robot.getInstance().driverStation.intakeDown = false;
-                }
+                    SetPassThrough(0);
+//                } else {
+//                    wantedIntakeHeightState = IntakeHeightState.UP;
+//                    if (Robot.getInstance().driverStation != null) {
+//                        Robot.getInstance().driverStation.intakeDown = false;
+//                    }
+//                }
                 break;
 
             case OUT:
-                if (wantedIntakeHeightState != IntakeHeightState.DOWN) {
-                    currentIntakeHeightState = wantedIntakeHeightState;
-                }
-
-                if (currentIntakeHeightState != IntakeHeightState.DOWN) {
-                    wantedIntakeHeightState = IntakeHeightState.DOWN;
-                    Robot.getInstance().driverStation.intakeDown = true;
-                } else {
+//                if (wantedIntakeHeightState != IntakeHeightState.DOWN) {
+//                    currentIntakeHeightState = wantedIntakeHeightState;
+//                }
+//
+//                if (currentIntakeHeightState != IntakeHeightState.DOWN) {
+//                    wantedIntakeHeightState = IntakeHeightState.DOWN;
+//                    if (Robot.getInstance().driverStation != null) {
+//                        Robot.getInstance().driverStation.intakeDown = true;
+//                    }
+//                } else {
                     SetIntake(-0.5);
-                }
+                    SetPassThrough(-0.5);
+//                }
                 break;
         }
 
@@ -107,6 +116,10 @@ public class Intake extends Subsystem {
 
     public void SetIntake(double power){
         Robot.getInstance().intake.setPower(power);
+    }
+
+    public void SetPassThrough(double power){
+        Robot.getInstance().passThrough.setPower(power);
     }
 
     public void StartIntake() {

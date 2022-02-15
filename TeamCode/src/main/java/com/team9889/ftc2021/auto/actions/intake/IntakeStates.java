@@ -8,12 +8,12 @@ import com.team9889.ftc2021.subsystems.Robot;
 /**
  * Created by Eric on 11/22/2019.
  */
-public class Intake extends Action {
+public class IntakeStates extends Action {
     private ElapsedTime timer = new ElapsedTime();
 
     IntakeState intake;
 
-    public Intake(IntakeState intake) {
+    public IntakeStates(IntakeState intake) {
         this.intake = intake;
     }
 

@@ -7,6 +7,12 @@ import com.team9889.ftc2021.subsystems.Robot;
  * Created by Eric on 12/13/2019.
  */
 public class RobotUpdate extends Action {
+    Robot robot;
+
+    public RobotUpdate (Robot robot) {
+        this.robot = robot;
+    }
+
     @Override
     public void start() {
 
@@ -14,7 +20,7 @@ public class RobotUpdate extends Action {
 
     @Override
     public void update() {
-        Robot.getInstance().update();
+        robot.update();
     }
 
     @Override

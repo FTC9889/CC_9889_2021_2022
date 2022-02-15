@@ -4,11 +4,13 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.team9889.ftc2021.Team9889Linear;
 import com.team9889.lib.control.math.cartesian.Rotation2d;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 /**
  * Created by Eric on 12/27/2021.
  */
 
-@TeleOp
+@TeleOp(group = "Test")
 public class SensorLocalization extends Team9889Linear {
     public double sameWallTolerance = 20; // Inch
 
@@ -24,9 +26,27 @@ public class SensorLocalization extends Team9889Linear {
         while (opModeIsActive()) {
             Robot.update();
 
-            telemetry.addData("Position", Robot.getMecanumDrive().getPositionRed());
+//            telemetry.addData("raw ultrasonic", Robot.rangeSensor.rawUltrasonic());
+//            telemetry.addData("raw optical", Robot.rangeSensor.rawOptical());
+//            telemetry.addData("cm optical", "%.2f cm", Robot.rangeSensor.cmOptical());
+            telemetry.addData("cm", "%.2f cm", Robot.rangeSensor.getDistance(DistanceUnit.CM));
+            telemetry.addData("in", "%.2f in", Robot.rangeSensor.getDistance(DistanceUnit.INCH));
+
+            telemetry.addData("Red Side Ultrasonic Sensor", (double) Robot.bulkDataSlave.getAnalogInputValue(1) * 27.5 / 432);
+            telemetry.addData("Red Front Ultrasonic Sensor", (double) Robot.bulkDataMaster.getAnalogInputValue(1) * 29.75 / 459);
+            telemetry.addData("Blue Side Ultrasonic Sensor", (double) Robot.bulkDataMaster.getAnalogInputValue(0) * 29.25 / 112);
+            telemetry.addData("Blue Front Ultrasonic Sensor", (double) Robot.bulkDataSlave.getAnalogInputValue(0) * 29.75 / 257);
+            telemetry.addData("Red Position", Robot.getMecanumDrive().getPositionRed());
+            telemetry.addData("Blue Position", Robot.getMecanumDrive().getPositionBlue());
+
+            Robot.outputToTelemetry(telemetry);
             telemetry.update();
         }
+    }
+
+    @Override
+    public void initialize() {
+
     }
 }
 

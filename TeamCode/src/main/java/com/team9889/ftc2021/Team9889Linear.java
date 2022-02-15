@@ -1,14 +1,23 @@
 package com.team9889.ftc2021;
 
-import android.graphics.Color;
+import android.util.Log;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.ReadWriteFile;
 import com.team9889.ftc2021.auto.AutoModeBase;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.subsystems.Robot;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+
+import java.io.File;
+
+import static java.lang.Double.parseDouble;
 
 /**
  * Created by joshua9889 on 3/28/2018.
@@ -31,6 +40,10 @@ public abstract class Team9889Linear extends LinearOpMode {
     public int timeToWait = 0;
     boolean buttonReleased = true;
 
+    public String angleRead = "";
+
+    public abstract void initialize();
+
     public void waitForStart(boolean autonomous) {
         this.waitForStart(autonomous, AutoModeBase.StartPosition.REDRIGHT);
     }
@@ -46,30 +59,51 @@ public abstract class Team9889Linear extends LinearOpMode {
                 Robot.rr.getLocalizer().setPoseEstimate(Constants.pose);
             }
         }
+        initialize();
 
         if (autonomous) {
-            Robot.getCamera().setWormCamPos();
+            Robot.getCamera().setTSECamPos();
 
             if (startPosition == AutoModeBase.StartPosition.REDLEFT ||
                 startPosition == AutoModeBase.StartPosition.REDRIGHT) {
-                Constants.side = Color.RED;
+                Robot.isRed = true;
             } else if (startPosition == AutoModeBase.StartPosition.BLUELEFT ||
                     startPosition == AutoModeBase.StartPosition.BLUERIGHT) {
-                Constants.side = Color.BLUE;
+                Robot.isRed = false;
             }
 
             Robot.getCamera().update();
+        } else {
+            for (int i = 0; i < Robot.lines.length; i++) {
+                Log.i("File", Robot.lines[i]);
+            }
+
+            if (Robot.lines.length >= 2) {
+                String[] filePoses = Robot.lines[0].split(",");
+                if (filePoses.length >= 3) {
+                    Robot.rr.setPoseEstimate(new Pose2d(parseDouble(filePoses[0]), parseDouble(filePoses[1]), parseDouble(filePoses[2])));
+                }
+
+                if (Robot.lines[1].contains("Red")) {
+                    Robot.isRed = true;
+                } else {
+                    Robot.isRed = false;
+                }
+            }
         }
 
         telemetry.setMsTransmissionInterval(autonomous ? 50:1000);
+        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
 //        telemetry = dashboard.getTelemetry();
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         if(autonomous){
             // Autonomous Init Loop code
             while(isInInitLoop()){
                 telemetry.addData("Waiting for Start","");
-                telemetry.addData("Box", Robot.getCamera().getWormPos().toString());
+                telemetry.addData("", "\uD83D\uDFE5 Red Auto \uD83D\uDFE5");
+                telemetry.addData("Box", Robot.getCamera().getTSEPos().toString());
 
                 telemetry.addData("Delay at beginning", timeToWait / 1000);
 
@@ -89,7 +123,6 @@ public abstract class Team9889Linear extends LinearOpMode {
                 }
             }
         } else {
-            Robot.blue = Constants.side == Color.BLUE;
 
             // Teleop Init Loop code
             while(isInInitLoop()){
@@ -106,7 +139,16 @@ public abstract class Team9889Linear extends LinearOpMode {
      * Used to stop everything (Robot and OpMode).
      */
     protected void finalAction(){
-//        Constants.pose = Robot.rr.getPoseEstimate();
+        Robot.writer.write((int)Robot.rr.getPoseEstimate().getX() + "," +
+                (int)Robot.rr.getPoseEstimate().getY() + "," + (int)Robot.rr.getPoseEstimate().getHeading());
+        if (Robot.isRed) {
+            Robot.writer.write("Red");
+        } else {
+            Robot.writer.write("Blue");
+        }
+
+        Robot.writer.close();
+
         Robot.stop();
         requestOpModeStop();
     }
@@ -163,5 +205,16 @@ public abstract class Team9889Linear extends LinearOpMode {
 
         if(opModeIsActive() && !isStopRequested())
             new Thread(runnable).start();
+    }
+
+    public static void writeLastKnownPosition(String values, String fileName) {
+        File file = AppUtil.getInstance().getSettingsFile(fileName + ".txt");
+        ReadWriteFile.writeFile(file, values);
+    }
+
+    public static String readLastKnownPosition(String fileName) {
+        File file = AppUtil.getInstance().getSettingsFile(fileName + ".txt");
+        String contents = ReadWriteFile.readFile(file);
+        return contents;
     }
 }

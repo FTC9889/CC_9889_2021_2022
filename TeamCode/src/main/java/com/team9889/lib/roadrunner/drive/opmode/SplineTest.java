@@ -1,7 +1,5 @@
 package com.team9889.lib.roadrunner.drive.opmode;
 
-import android.util.Log;
-
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
@@ -26,15 +24,16 @@ public class SplineTest extends LinearOpMode {
 
         Trajectory traj = drive.trajectoryBuilder(new Pose2d())
                 .splineTo(new Vector2d(30, 30), 0)
-                .addTemporalMarker(1, () -> {
-                    Log.v("Hello", "");
-                    Robot.getInstance().lift.setPower(0.5);
-                })
-                .splineTo(new Vector2d(60, 0), Math.toRadians(180))
                 .build();
 
         drive.followTrajectory(traj);
 
         sleep(2000);
+
+        drive.followTrajectory(
+                drive.trajectoryBuilder(traj.end(), true)
+                        .splineTo(new Vector2d(0, 0), Math.toRadians(180))
+                        .build()
+        );
     }
 }

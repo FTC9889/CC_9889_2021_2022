@@ -40,6 +40,10 @@ public class DriverStation {
         return gamepad1.y;
     }
 
+    boolean getAutoLineup() {
+        return gamepad1.x;
+    }
+
     private boolean intakeHeightToggle = true;
     public boolean intakeDown = false;
     public  boolean intakeCodePress = false;
@@ -59,6 +63,10 @@ public class DriverStation {
 
     double getLiftDown() {
         return gamepad1.left_trigger + gamepad2.left_trigger;
+    }
+
+    double getLiftRaise(){
+        return -gamepad2.left_stick_y;
     }
 
     boolean getLiftAngleUp() {return gamepad1.dpad_left;}
@@ -105,26 +113,42 @@ public class DriverStation {
     private boolean carouselOn = false;
     public  boolean carouselCodePress = false;
     boolean getCarouselOn() {
-        if ((gamepad1.dpad_down || gamepad2.right_bumper || carouselCodePress) && carouselToggle) {
+        if ((gamepad2.right_bumper || carouselCodePress) && carouselToggle) {
             carouselOn = !carouselOn;
             carouselToggle = false;
-        } else if (!gamepad1.dpad_down && !gamepad2.right_bumper && !carouselCodePress)
+        } else if (!gamepad2.right_bumper && !carouselCodePress)
             carouselToggle = true;
 
         return carouselOn;
     }
 
+    boolean getCarouselDrive() {
+        return gamepad1.dpad_up;
+    }
 
-    private boolean blueToggle = true;
-    private boolean blue = false;
+
+    private boolean slowOn = false;
+    private boolean slowToggle = false;
+    boolean getSlow() {
+        if (gamepad1.dpad_down && !slowToggle) {
+            slowOn = !slowOn;
+            slowToggle = true;
+            return true;
+        } else if (!gamepad1.dpad_down)
+            slowToggle = false;
+
+        return slowOn;
+    }
+
+    private boolean blueToggle = false;
     boolean getBlue() {
-        if (gamepad2.dpad_up && blueToggle) {
-            blue = !blue;
-            blueToggle = false;
-        } else if (gamepad2.dpad_up)
+        if (gamepad2.dpad_up && !blueToggle) {
             blueToggle = true;
+            return true;
+        } else if (!gamepad2.dpad_up)
+            blueToggle = false;
 
-        return blue;
+        return false;
     }
 
 
@@ -134,23 +158,19 @@ public class DriverStation {
 
 
 
-    boolean getChangeLift() {
-        return gamepad2.left_bumper;
+    boolean getDown() {
+        return gamepad2.b;
     }
 
     boolean getShared() {
         return gamepad2.a;
     }
 
-    boolean getFirstLayer() {
-        return gamepad2.b;
-    }
-
     boolean getSecondLayer() {
-        return gamepad2.y;
+        return gamepad2.x;
     }
 
     boolean getThirdLayer() {
-        return gamepad2.x;
+        return gamepad2.y;
     }
 }

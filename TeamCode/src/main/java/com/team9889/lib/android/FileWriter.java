@@ -1,12 +1,10 @@
 package com.team9889.lib.android;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 /**
  * Created by joshua9889 on 4/5/2018.
@@ -15,41 +13,39 @@ import java.nio.charset.Charset;
  */
 
 public class FileWriter {
-    private FileOutputStream writer = null;
-    private Charset charset;
-
-    public static int NORMAL = 0;
-    public static int ERROR = 1;
+    private java.io.FileWriter writer = null;
 
     public FileWriter(String filename){
         this.setup(filename);
     }
 
-    private void setup(String filename){
+    private void setup(String filename) {
         try {
-            try {
-                String root = Environment.getExternalStorageDirectory().toString();
-                File myDir = new File(root + "/saved_data");
-                myDir.mkdirs();
-                File file = new File(myDir, filename);
-                if (file.exists())
-                    file.delete();
+            String root = Environment.getExternalStorageDirectory().toString();
+            File myDir = new File(root + "/FIRST/saved_data");
 
-                writer = new FileOutputStream(file);
-            } catch (RuntimeException e){
-                writer = new FileOutputStream(filename);
+            File file = new File(myDir, filename);
+
+            // creates the file
+            if (file.exists()) {
+                file.delete();
             }
-        } catch (FileNotFoundException e){
+
+            file.createNewFile();
+
+            // creates a FileWriter Object
+            writer = new java.io.FileWriter(file);
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void write(Object object){
-        charset = Charset.forName("US-ASCII");
-        String printString = object + "\n";
+    public void write(String object){
         try {
-            writer.write(printString.getBytes(charset));
+            writer.write(object + "\n");
+            writer.flush();
         } catch (IOException e) {
+            Log.v("Error", e.toString());
             e.printStackTrace();
         }
     }
@@ -61,6 +57,7 @@ public class FileWriter {
 
     public void close(){
         try {
+//            writer.flush();
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();

@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.team9889.ftc2021.auto.AutoModeBase;
+import com.team9889.ftc2021.auto.actions.lift.LiftGoToPos;
 import com.team9889.ftc2021.auto.actions.utl.RobotUpdate;
 import com.team9889.ftc2021.auto.actions.utl.Wait;
 import com.team9889.ftc2021.subsystems.Dumper;
@@ -23,87 +24,208 @@ public class BlueFull extends AutoModeBase {
     @Override
     public void run(StartPosition startPosition, Boxes box) {
         Robot.isRed = false;
+        Robot.rr.getLocalizer().setPoseEstimate(new Pose2d(7, 63, Math.toRadians(90)));
 
-        Robot.rr.getLocalizer().setPoseEstimate(new Pose2d(-33, 65, Math.toRadians(-90)));
+        ThreadAction(new RobotUpdate(Robot));
 
-        ThreadAction(new RobotUpdate());
-
-
-        traj = Robot.rr.trajectoryBuilder(new Pose2d(-33, 65, Math.toRadians(-90)))
-                .splineTo(new Vector2d(-33, 60), Math.toRadians(-90))
-                .build();
-        Robot.rr.followTrajectory(traj);
-
-        Robot.rr.turn(Math.toRadians(180));
-        runAction(new Wait(500));
-        box = Robot.getCamera().getWormPos();
-
+        box = Robot.getCamera().getTSEPos();
         switch (box) {
             case LEFT:
-                Robot.getLift().wantedLiftState = Lift.LiftState.LAYER1;
+                traj = Robot.rr.trajectoryBuilder(new Pose2d(7, 63, Math.toRadians(90)), true)
+                        .splineTo(new Vector2d(-12, 35), Math.toRadians(-90))
+                        .build();
+                Robot.rr.followTrajectory(traj);
+
+                Robot.getDumper().gateState = Dumper.GateState.OPEN;
                 break;
 
             case MIDDLE:
-                Robot.getLift().wantedLiftState = Lift.LiftState.LAYER2;
+                traj = Robot.rr.trajectoryBuilder(new Pose2d(7, 63, Math.toRadians(90)), true)
+                        .splineTo(new Vector2d(0, 50), Math.toRadians(-105))
+                        .build();
+                Robot.rr.followTrajectory(traj);
+
+                runAction(new LiftGoToPos(14, 0, 1500));
+                Robot.getDumper().gateState = Dumper.GateState.OPEN;
                 break;
 
             case RIGHT:
-                Robot.getLift().wantedLiftState = Lift.LiftState.LAYER3;
+                traj = Robot.rr.trajectoryBuilder(new Pose2d(7, 63, Math.toRadians(90)), true)
+                        .splineTo(new Vector2d(7, 55), Math.toRadians(-108))
+                        .build();
+                Robot.rr.followTrajectory(traj);
+
+                runAction(new LiftGoToPos(21, 0, 1500));
+                Robot.getDumper().gateState = Dumper.GateState.OPEN;
                 break;
         }
-        traj = Robot.rr.trajectoryBuilder(traj.end().plus(new Pose2d(0, 0, Math.toRadians(180))), true)
-//                .lineToSplineHeading(new Pose2d(-25, -55, Math.toRadians(90)))
-                .lineTo(new Vector2d(-20, 50))
+
+        runAction(new Wait(300));
+
+        Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
+        Robot.getDumper().gateState = Dumper.GateState.CLOSED;
+
+        traj = Robot.rr.trajectoryBuilder(traj.end())
+                .splineTo(new Vector2d(15, 65), Math.toRadians(15),
+                        SampleMecanumDrive.getVelocityConstraint(35, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+//                .splineTo(new Vector2d(20, -68), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(45, 68), Math.toRadians(-0))
+                .splineToConstantHeading(new Vector2d(55, 68), Math.toRadians(-0),
+                        SampleMecanumDrive.getVelocityConstraint(15, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .addDisplacementMarker(15, () -> {
+//                        ThreadAction(new ResetRR());
+                })
+                .addDisplacementMarker(30, () -> {
+                    Robot.getLift().SetLiftPower(-.1);
+                    Robot.getIntake().SetIntake(1);
+                    Robot.getIntake().SetPassThrough(1);
+                })
+                .addDisplacementMarker(45, () -> {
+                    Robot.getMecanumDrive().resetRR = false;
+                })
                 .build();
         Robot.rr.followTrajectory(traj);
+
+        runAction(new Wait(100));
 
         traj = Robot.rr.trajectoryBuilder(traj.end(), true)
-                .lineTo(new Vector2d(-14, 41),
-                        SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .splineTo(new Vector2d(18, 68), Math.toRadians(-180))
+                .splineTo(new Vector2d(7, 58), Math.toRadians(-110))
+                .addTemporalMarker(.25, () -> {
+                    Robot.getIntake().SetIntake(-.25);
+                    Robot.getIntake().SetPassThrough(-1);
+                })
+                .addTemporalMarker(1.5, () -> {
+                    Robot.getIntake().SetIntake(.1);
+                })
                 .build();
         Robot.rr.followTrajectory(traj);
 
+        Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
+        Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
+        runAction(new LiftGoToPos(21, 0, 1500));
         Robot.getDumper().gateState = Dumper.GateState.OPEN;
+        runAction(new Wait(300));
 
+
+
+
+
+        Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
+        Robot.getDumper().gateState = Dumper.GateState.CLOSED;
+
+        traj = Robot.rr.trajectoryBuilder(traj.end())
+                .splineTo(new Vector2d(20, 68), Math.toRadians(10))
+                .splineToConstantHeading(new Vector2d(45, 68), Math.toRadians(-0))
+                .splineToConstantHeading(new Vector2d(55, 68), Math.toRadians(-0),
+                        SampleMecanumDrive.getVelocityConstraint(15, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .addDisplacementMarker(15, () -> {
+//                        ThreadAction(new ResetRR());
+                })
+                .addDisplacementMarker(30, () -> {
+                    Robot.getLift().SetLiftPower(-.1);
+                    Robot.getIntake().SetIntake(1);
+                    Robot.getIntake().SetPassThrough(1);
+                })
+                .addDisplacementMarker(45, () -> {
+                    Robot.getMecanumDrive().resetRR = false;
+                })
+                .build();
+        Robot.rr.followTrajectory(traj);
+
+        runAction(new Wait(100));
+
+        traj = Robot.rr.trajectoryBuilder(traj.end(), true)
+                .splineTo(new Vector2d(18, 68), Math.toRadians(-180))
+                .splineTo(new Vector2d(7, 60), Math.toRadians(-113))
+                .addTemporalMarker(.25, () -> {
+                    Robot.getIntake().SetIntake(-.25);
+                    Robot.getIntake().SetPassThrough(-1);
+                })
+                .addTemporalMarker(1.5, () -> {
+                    Robot.getIntake().SetIntake(.1);
+                })
+                .build();
+        Robot.rr.followTrajectory(traj);
+
+        Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
+        Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
+        runAction(new LiftGoToPos(21, 0, 1500));
+        Robot.getDumper().gateState = Dumper.GateState.OPEN;
         runAction(new Wait(500));
 
-        Robot.rr.turn(Math.toRadians(15));
 
-        traj = Robot.rr.trajectoryBuilder(traj.end().plus(new Pose2d(0, 0, Math.toRadians(15))))
-                .splineToConstantHeading(new Vector2d(-25, 50), Math.toRadians(90))
-                .addDisplacementMarker(() -> {
-                    Robot.getDumper().gateState = Dumper.GateState.CLOSED;
-                    Robot.getLift().isDown = false;
-                    Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
-                })
-                .splineToConstantHeading(new Vector2d(-68, 57), Math.toRadians(90),
-                        SampleMecanumDrive.getVelocityConstraint(30, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+
+
+
+        Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
+        Robot.getDumper().gateState = Dumper.GateState.CLOSED;
+
+        traj = Robot.rr.trajectoryBuilder(traj.end())
+                .splineTo(new Vector2d(20, 68), Math.toRadians(10))
+                .splineToConstantHeading(new Vector2d(45, 68), Math.toRadians(-0))
+                .splineToConstantHeading(new Vector2d(60, 68), Math.toRadians(-0),
+                        SampleMecanumDrive.getVelocityConstraint(15, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .addDisplacementMarker(15, () -> {
+//                        ThreadAction(new ResetRR());
+                })
+                .addDisplacementMarker(30, () -> {
+                    Robot.getLift().SetLiftPower(-.1);
+                    Robot.getIntake().SetIntake(1);
+                    Robot.getIntake().SetPassThrough(1);
+                })
+                .addDisplacementMarker(45, () -> {
+                    Robot.getMecanumDrive().resetRR = false;
+                })
                 .build();
         Robot.rr.followTrajectory(traj);
 
-        Robot.carousel.setPower(-0.5);
-        runAction(new Wait(3500));
-        Robot.getCarousel().TurnOff();
-
-        runAction(new Wait(timeToWait));
+        runAction(new Wait(100));
 
         traj = Robot.rr.trajectoryBuilder(traj.end(), true)
-                .splineTo(new Vector2d(-60, 45), Math.toRadians(0))
+                .splineTo(new Vector2d(18, 70), Math.toRadians(-180))
+                .splineTo(new Vector2d(7, 60), Math.toRadians(-105))
+                .addTemporalMarker(.25, () -> {
+                    Robot.getIntake().SetIntake(-.25);
+                    Robot.getIntake().SetPassThrough(-1);
+                })
+                .addTemporalMarker(1.5, () -> {
+                    Robot.getIntake().SetIntake(.1);
+                })
                 .build();
         Robot.rr.followTrajectory(traj);
 
-        traj = Robot.rr.trajectoryBuilder(traj.end(), true)
-                .lineTo(new Vector2d(55, 30))
+        Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
+        Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
+        runAction(new LiftGoToPos(21, 0, 1500));
+        Robot.getDumper().gateState = Dumper.GateState.OPEN;
+        runAction(new Wait(300));
+
+
+
+
+
+        Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
+        Robot.getDumper().gateState = Dumper.GateState.CLOSED;
+
+        traj = Robot.rr.trajectoryBuilder(traj.end())
+                .splineTo(new Vector2d(20, 68), Math.toRadians(10))
+                .splineTo(new Vector2d(52, 68), Math.toRadians(-0))
                 .build();
         Robot.rr.followTrajectory(traj);
-
-        Robot.rr.turn(Math.toRadians( 90));
     }
 
     @Override
     public StartPosition side() {
         return null;
+    }
+
+    @Override
+    public void initialize() {
+
     }
 }

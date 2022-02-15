@@ -14,4 +14,9 @@ public class Autonomous extends Team9889Linear {
     public void runOpMode() throws InterruptedException {
 
     }
+
+    @Override
+    public void initialize() {
+
+    }
 }
