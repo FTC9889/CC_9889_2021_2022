@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Carousel extends Subsystem {
-    public static double power = 0.7, wantedPower = 0, addedPower = 0.04, time = 1100;
+    public static double power = 0.6, wantedPower = 0, addedPower = 0.04, time = 1500;
     ElapsedTime timer = new ElapsedTime();
 
     boolean on = false;
@@ -23,6 +23,7 @@ public class Carousel extends Subsystem {
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
         telemetry.addData("Carousel Limit", GetLimit());
+        telemetry.addData("Carousel Power", wantedPower);
     }
 
     @Override

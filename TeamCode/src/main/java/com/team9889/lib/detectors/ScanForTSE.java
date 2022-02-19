@@ -26,7 +26,7 @@ import java.util.List;
 
 @Config
 public class ScanForTSE extends OpenCvPipeline {
-    public static int area = 450;
+    public static int area = 250;
 
     //Outputs
     private Mat cvResizeOutput = new Mat();

@@ -22,6 +22,7 @@ public class RedFull extends AutoModeBase {
 
     @Override
     public void initialize() {
+        Robot.isRed = true;
         Pose2d startPos = new Pose2d(7, -61.5, Math.toRadians(-90));
         Robot.rr.setPoseEstimate(startPos);
 
@@ -46,13 +47,13 @@ public class RedFull extends AutoModeBase {
                 .addDisplacementMarker(40, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.ON));
                 })
-                .addDisplacementMarker(70, () -> {
+                .addDisplacementMarker(60, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OUT));
                 })
-                .addDisplacementMarker(75, () -> {
+                .addDisplacementMarker(65, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OFF));
                 })
-                .addDisplacementMarker(80, () -> {
+                .addDisplacementMarker(70, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OUT));
                 })
                 .addDisplacementMarker(100, () -> {
@@ -79,13 +80,13 @@ public class RedFull extends AutoModeBase {
                 .addDisplacementMarker(40, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.ON));
                 })
-                .addDisplacementMarker(70, () -> {
+                .addDisplacementMarker(60, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OUT));
                 })
-                .addDisplacementMarker(75, () -> {
+                .addDisplacementMarker(65, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OFF));
                 })
-                .addDisplacementMarker(80, () -> {
+                .addDisplacementMarker(70, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OUT));
                 })
                 .addDisplacementMarker(100, () -> {
@@ -108,17 +109,17 @@ public class RedFull extends AutoModeBase {
                 .setReversed(false)
                 .splineTo(new Vector2d(0, -60), Math.toRadians(-0))
                 .splineToConstantHeading(new Vector2d(18, -64), Math.toRadians(-0))
-                .splineToSplineHeading(new Pose2d(60, -64), Math.toRadians(-0))
+                .splineToSplineHeading(new Pose2d(55, -64), Math.toRadians(-0))
                 .addDisplacementMarker(40, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.ON));
                 })
-                .addDisplacementMarker(70, () -> {
+                .addDisplacementMarker(60, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OUT));
                 })
-                .addDisplacementMarker(75, () -> {
+                .addDisplacementMarker(65, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OFF));
                 })
-                .addDisplacementMarker(80, () -> {
+                .addDisplacementMarker(70, () -> {
                     runAction(new IntakeStates(Intake.IntakeState.OUT));
                 })
                 .addDisplacementMarker(100, () -> {
@@ -148,11 +149,23 @@ public class RedFull extends AutoModeBase {
     @Override
     public void run(StartPosition startPosition, Boxes box) {
         ThreadAction(new RobotUpdate(Robot));
+        box = Robot.getCamera().getTSEPos();
 
-        //4.5 56
         Robot.rr.followTrajectorySequence(preloaded);
         Robot.rr.setPoseEstimate(new Pose2d(-4.5, -56, Robot.rr.getPoseEstimate().getHeading()));
-        runAction(new Score(Lift.LiftState.LAYER3));
+
+        switch (box) {
+            case LEFT:
+                runAction(new Score(Lift.LiftState.LAYER1));
+                break;
+            case MIDDLE:
+                runAction(new Score(Lift.LiftState.LAYER2));
+                break;
+            case RIGHT:
+                runAction(new Score(Lift.LiftState.LAYER3));
+                break;
+        }
+
         Robot.rr.followTrajectorySequence(firstCycle);
         Robot.rr.setPoseEstimate(new Pose2d(-8, -58, Robot.rr.getPoseEstimate().getHeading()));
         runAction(new Score(Lift.LiftState.LAYER3));

@@ -133,6 +133,10 @@ public class Teleop extends Team9889Linear {
                 Lift.angle += driverStation.getLiftRaise() / 30;
                 Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
                 Robot.getLift().currentLiftState = Lift.LiftState.NULL;
+            } else if (Math.abs(driverStation.getLiftRaiseSlow()) > 0.1) {
+                Lift.angle += driverStation.getLiftRaiseSlow() / 60;
+                Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
+                Robot.getLift().currentLiftState = Lift.LiftState.NULL;
             }
 
 

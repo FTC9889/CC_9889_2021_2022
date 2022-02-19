@@ -102,7 +102,16 @@ public abstract class Team9889Linear extends LinearOpMode {
             // Autonomous Init Loop code
             while(isInInitLoop()){
                 telemetry.addData("Waiting for Start","");
-                telemetry.addData("", "\uD83D\uDFE5 Red Auto \uD83D\uDFE5");
+
+                if (Robot.getCamera().getPosOfTarget().x == 0.0 && Robot.getCamera().getPosOfTarget().y == 0.0) {
+                    telemetry.addData("⚠️<font size=\"+2\" color=\"red\"> DO NOT RUN: CAMERA NOT INITIALIZED </font>   ⚠️", "");
+                }
+
+                if (Robot.isRed) {
+                    telemetry.addData("", "\uD83D\uDFE5 Red Auto \uD83D\uDFE5");
+                } else {
+                    telemetry.addData("", "\uD83D\uDD35 Blue Auto \uD83D\uDD35");
+                }
                 telemetry.addData("Box", Robot.getCamera().getTSEPos().toString());
 
                 telemetry.addData("Delay at beginning", timeToWait / 1000);

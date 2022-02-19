@@ -1,5 +1,7 @@
 package com.team9889.ftc2021.subsystems;
 
+import android.util.Log;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -43,7 +45,8 @@ public class Lift extends Subsystem {
     @Override
     public void init(boolean auto) {
         if (auto) {
-            wantedLiftState = LiftState.DOWN;
+            wantedLiftState = LiftState.NULL;
+            angle = .58;
         } else {
             wantedLiftState = LiftState.NULL;
             angle = 0;
@@ -74,10 +77,11 @@ public class Lift extends Subsystem {
                 break;
 
             case LAYER1:
+                done = SetLiftPos(25, 9);
                 break;
 
             case LAYER2:
-                done = SetLiftPos(25, 11);
+                done = SetLiftPos(25, 15);
                 break;
 
             case LAYER3:
@@ -160,6 +164,9 @@ public class Lift extends Subsystem {
     }
 
     public void SetLiftPower(double power){
+        Log.i("Power", "" + power);
+//        power = CruiseLib.limitValue(power, 1, 0.2);
+
         if (IsDown()) {
             if (power > 0) {
                 Robot.getInstance().lift.setPower(power);

@@ -69,6 +69,10 @@ public class DriverStation {
         return -gamepad2.left_stick_y;
     }
 
+    double getLiftRaiseSlow(){
+        return -gamepad2.right_stick_y;
+    }
+
     boolean getLiftAngleUp() {return gamepad1.dpad_left;}
 
     boolean getLiftAngleDown() {return gamepad1.dpad_right;}

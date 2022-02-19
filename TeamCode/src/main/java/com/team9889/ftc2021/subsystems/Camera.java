@@ -99,12 +99,12 @@ public class Camera extends Subsystem{
                 box = AutoModeBase.Boxes.MIDDLE;
             }
         } else {
-            if (Math.abs(getPosOfTarget().x) == 40 || Math.abs(getPosOfTarget().x) > 50) {
+            if (Math.abs(getPosOfTarget().x) == 80) {
                 box = AutoModeBase.Boxes.LEFT;
-            } else if (Math.abs(getPosOfTarget().x) < 25) {
-                box = AutoModeBase.Boxes.MIDDLE;
-            } else if (Math.abs(getPosOfTarget().x) >= 20) {
+            } else if (Math.abs(getPosOfTarget().x) >= 75) {
                 box = AutoModeBase.Boxes.RIGHT;
+            } else if (Math.abs(getPosOfTarget().x) < 75) {
+                box = AutoModeBase.Boxes.MIDDLE;
             }
         }
 
