@@ -74,6 +74,8 @@ public class Motor {
             motor.setPower(power);
             currentPower = power;
             numHardwareUsesThisUpdate ++;
+
+            Log.i("Power", "" + power);
         }
     }
 

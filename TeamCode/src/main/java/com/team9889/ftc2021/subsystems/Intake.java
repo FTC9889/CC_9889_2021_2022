@@ -12,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Intake extends Subsystem {
     public static double power = 1;
 
+    int gateCounter = 0;
+
     double heightTimerOffset = 0, timerOffset = 0;
 
     public enum IntakeHeightState {
@@ -22,7 +24,7 @@ public class Intake extends Subsystem {
     IntakeHeightState lastIntakeHeightState = IntakeHeightState.NULL;
 
     public enum IntakeState {
-        ON, OFF, OUT
+        ON, OFF, OUT, FRONT_OUT
     }
     public IntakeState intakeState = IntakeState.OFF;
 
@@ -45,68 +47,28 @@ public class Intake extends Subsystem {
 
         switch (intakeState) {
             case ON:
-//                if (wantedIntakeHeightState != IntakeHeightState.DOWN) {
-//                    currentIntakeHeightState = wantedIntakeHeightState;
-//                }
-//
-//                if (currentIntakeHeightState != IntakeHeightState.DOWN) {
-//                    wantedIntakeHeightState = IntakeHeightState.DOWN;
-//                    if (Robot.getInstance().driverStation != null) {
-//                        Robot.getInstance().driverStation.intakeDown = true;
-//                    }
-//                } else {
-                    SetIntake(power);
-                    SetPassThrough(power);
-//                }
+                SetIntake(power);
+                SetPassThrough(power);
+
+                if (!IntakeGateOpen()) {
+                    intakeState = IntakeState.FRONT_OUT;
+                }
                 break;
 
             case OFF:
-//                if (Robot.getInstance().robotTimer.milliseconds() - timerOffset < 300) {
-                    SetIntake(0);
-                    SetPassThrough(0);
-//                } else {
-//                    wantedIntakeHeightState = IntakeHeightState.UP;
-//                    if (Robot.getInstance().driverStation != null) {
-//                        Robot.getInstance().driverStation.intakeDown = false;
-//                    }
-//                }
+                SetIntake(0);
+                SetPassThrough(0);
                 break;
 
             case OUT:
-//                if (wantedIntakeHeightState != IntakeHeightState.DOWN) {
-//                    currentIntakeHeightState = wantedIntakeHeightState;
-//                }
-//
-//                if (currentIntakeHeightState != IntakeHeightState.DOWN) {
-//                    wantedIntakeHeightState = IntakeHeightState.DOWN;
-//                    if (Robot.getInstance().driverStation != null) {
-//                        Robot.getInstance().driverStation.intakeDown = true;
-//                    }
-//                } else {
-                    SetIntake(-0.5);
-                    SetPassThrough(-0.5);
-//                }
-                break;
-        }
-
-        if (wantedIntakeHeightState != lastIntakeHeightState) {
-            heightTimerOffset = Robot.getInstance().robotTimer.milliseconds();
-        }
-
-        switch (wantedIntakeHeightState) {
-            case UP:
-                IntakeUp();
+                SetIntake(-0.5);
+                SetPassThrough(-0.5);
                 break;
 
-            case DOWN:
-                IntakeDown();
+            case FRONT_OUT:
+                SetIntake(-0.7);
                 break;
         }
-
-        if (Robot.getInstance().robotTimer.milliseconds() - heightTimerOffset > 250) {
-            currentIntakeHeightState = wantedIntakeHeightState;
-        }
-        lastIntakeHeightState = wantedIntakeHeightState;
     }
 
     @Override
@@ -140,5 +102,9 @@ public class Intake extends Subsystem {
 
     public void IntakeDown() {
         Robot.getInstance().intakeLift.setPosition(0.5);
+    }
+
+    public boolean IntakeGateOpen() {
+        return Robot.getInstance().intakeGate.isPressed();
     }
 }

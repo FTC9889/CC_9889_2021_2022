@@ -1,6 +1,5 @@
 package com.team9889.ftc2021.auto.actions.intake;
 
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.subsystems.Intake.IntakeState;
 import com.team9889.ftc2021.subsystems.Robot;
@@ -9,8 +8,6 @@ import com.team9889.ftc2021.subsystems.Robot;
  * Created by Eric on 11/22/2019.
  */
 public class IntakeStates extends Action {
-    private ElapsedTime timer = new ElapsedTime();
-
     IntakeState intake;
 
     public IntakeStates(IntakeState intake) {
@@ -29,9 +26,15 @@ public class IntakeStates extends Action {
 
     @Override
     public boolean isFinished() {
-        return true;
+        return !Robot.getInstance().getIntake().IntakeGateOpen();
     }
 
     @Override
-    public void done() {}
+    public void done() {
+        Robot.getInstance().getIntake().intakeState = IntakeState.FRONT_OUT;
+
+        if (Robot.getInstance().rrCancelable) {
+            Robot.getInstance().rr.breakFollowing();
+        }
+    }
 }

@@ -15,17 +15,17 @@ public class MeepMeepTesting {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setDimensions(13, 15)
                 .setDriveTrainType(DriveTrainType.MECANUM)
-                .setConstraints(48, 33, Math.toRadians(410), Math.toRadians(238), 11.73)
-                .setStartPose(new Pose2d(7, -63, Math.toRadians(-90)))
+                .setConstraints(69.5, 40, Math.toRadians(150), Math.toRadians(150), 11.73)
+                .setStartPose(new Pose2d(5.125, -61.375, Math.toRadians(-90)))
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(7, 63, Math.toRadians(90)))
+                        drive.trajectorySequenceBuilder(new Pose2d(5.125, -61.375, Math.toRadians(-90)))
 
                                 //-----------------
                                 //|   Preloaded   |
                                 //-----------------
                                 // Drive to preloaded
                                 .setReversed(true)
-                                .lineToSplineHeading(new Pose2d(0, 55, Math.toRadians(70)))
+                                .lineToSplineHeading(new Pose2d(4.875, -51.375, Math.toRadians(-58)))
 
                                 // Score preloaded
                                 .waitSeconds(1)
@@ -35,18 +35,16 @@ public class MeepMeepTesting {
                                 //-----------------
                                 // Drive to warehouse and Intake
                                 .setReversed(false)
-                                .splineToSplineHeading(new Pose2d(8, 60), Math.toRadians(0))
-                                .splineToConstantHeading(new Vector2d(15, 64), Math.toRadians(0))
-                                .splineToSplineHeading(new Pose2d(55, 64), Math.toRadians(0))
-                                .addDisplacementMarker(40, () -> {
-                                })
+                                .splineToLinearHeading(new Pose2d(18, -65, Math.toRadians(-0)), Math.toRadians(-0))
 
-                                // Drive to hub
+
+                                .splineToConstantHeading(new Vector2d(55, -65), Math.toRadians(-0))
+
+
                                 .setReversed(true)
-                                .splineTo(new Vector2d(15, 64), Math.toRadians(-180))
-                                .splineTo(new Vector2d(0, 55), Math.toRadians(-110))
-                                .addDisplacementMarker(40, () -> {
-                                })
+                                .splineTo(new Vector2d(35, -65), Math.toRadians(180))
+                                .splineTo(new Vector2d(18, -65), Math.toRadians(180))
+                                .splineTo(new Vector2d(4.875, -51.375), Math.toRadians(122))
 
                                 // Score
                                 .waitSeconds(1)
@@ -56,18 +54,16 @@ public class MeepMeepTesting {
                                 //-----------------
                                 // Drive to warehouse and Intake
                                 .setReversed(false)
-                                .splineToSplineHeading(new Pose2d(8, 61), Math.toRadians(0))
-                                .splineToConstantHeading(new Vector2d(15, 65), Math.toRadians(0))
-                                .splineToSplineHeading(new Pose2d(55, 65), Math.toRadians(0))
-                                .addDisplacementMarker(40, () -> {
-                                })
+                                .splineToLinearHeading(new Pose2d(18, -65, Math.toRadians(-0)), Math.toRadians(-0))
 
-                                // Drive to hub
+
+                                .splineToConstantHeading(new Vector2d(55, -65), Math.toRadians(-0))
+
+
                                 .setReversed(true)
-                                .splineTo(new Vector2d(15, 65), Math.toRadians(-180))
-                                .splineTo(new Vector2d(0, 56), Math.toRadians(-110))
-                                .addDisplacementMarker(40, () -> {
-                                })
+                                .splineTo(new Vector2d(35, -65), Math.toRadians(180))
+                                .splineTo(new Vector2d(18, -65), Math.toRadians(180))
+                                .splineTo(new Vector2d(4.875, -51.375), Math.toRadians(122))
 
                                 // Score
                                 .waitSeconds(1)
@@ -77,18 +73,16 @@ public class MeepMeepTesting {
                                 //-----------------
                                 // Drive to warehouse and Intake
                                 .setReversed(false)
-                                .splineToSplineHeading(new Pose2d(8, 61), Math.toRadians(0))
-                                .splineToConstantHeading(new Vector2d(15, 65), Math.toRadians(0))
-                                .splineToSplineHeading(new Pose2d(55, 65), Math.toRadians(0))
-                                .addDisplacementMarker(40, () -> {
-                                })
+                                .splineToLinearHeading(new Pose2d(18, -65, Math.toRadians(-0)), Math.toRadians(-0))
 
-                                // Drive to hub
+
+                                .splineToConstantHeading(new Vector2d(55, -65), Math.toRadians(-0))
+
+
                                 .setReversed(true)
-                                .splineTo(new Vector2d(15, 65), Math.toRadians(-180))
-                                .splineTo(new Vector2d(0, 56), Math.toRadians(-110))
-                                .addDisplacementMarker(40, () -> {
-                                })
+                                .splineTo(new Vector2d(35, -65), Math.toRadians(180))
+                                .splineTo(new Vector2d(18, -65), Math.toRadians(180))
+                                .splineTo(new Vector2d(4.875, -51.375), Math.toRadians(122))
 
                                 // Score
                                 .waitSeconds(1)
@@ -98,18 +92,16 @@ public class MeepMeepTesting {
                                 //-----------------
                                 // Drive to warehouse and Intake
                                 .setReversed(false)
-                                .splineToSplineHeading(new Pose2d(8, 62), Math.toRadians(0))
-                                .splineToConstantHeading(new Vector2d(15, 66), Math.toRadians(0))
-                                .splineToSplineHeading(new Pose2d(55, 66), Math.toRadians(0))
-                                .addDisplacementMarker(40, () -> {
-                                })
+                                .splineToLinearHeading(new Pose2d(18, -65, Math.toRadians(-0)), Math.toRadians(-0))
 
-                                // Drive to hub
+
+                                .splineToConstantHeading(new Vector2d(55, -65), Math.toRadians(-0))
+
+
                                 .setReversed(true)
-                                .splineTo(new Vector2d(15, 66), Math.toRadians(-180))
-                                .splineTo(new Vector2d(0, 57), Math.toRadians(-110))
-                                .addDisplacementMarker(40, () -> {
-                                })
+                                .splineTo(new Vector2d(35, -65), Math.toRadians(180))
+                                .splineTo(new Vector2d(18, -65), Math.toRadians(180))
+                                .splineTo(new Vector2d(4.875, -51.375), Math.toRadians(122))
 
                                 // Score
                                 .waitSeconds(1)
@@ -119,9 +111,10 @@ public class MeepMeepTesting {
                                 //-----------------
                                 // Drive to warehouse and Intake
                                 .setReversed(false)
-                                .splineToSplineHeading(new Pose2d(8, 62), Math.toRadians(0))
-                                .splineToConstantHeading(new Vector2d(15, 66), Math.toRadians(0))
-                                .splineToSplineHeading(new Pose2d(45, 66), Math.toRadians(0))
+                                .splineToLinearHeading(new Pose2d(18, -65, Math.toRadians(-0)), Math.toRadians(-0))
+
+
+                                .splineToConstantHeading(new Vector2d(55, -65), Math.toRadians(-0))
 
                                 .build()
                 );

@@ -84,15 +84,11 @@ public abstract class Team9889Linear extends LinearOpMode {
                     Robot.rr.setPoseEstimate(new Pose2d(parseDouble(filePoses[0]), parseDouble(filePoses[1]), parseDouble(filePoses[2])));
                 }
 
-                if (Robot.lines[1].contains("Red")) {
-                    Robot.isRed = true;
-                } else {
-                    Robot.isRed = false;
-                }
+                Robot.isRed = Robot.lines[1].contains("Red");
             }
         }
 
-        telemetry.setMsTransmissionInterval(autonomous ? 50:1000);
+        telemetry.setMsTransmissionInterval(autonomous ? 500:1000);
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
 
 //        telemetry = dashboard.getTelemetry();

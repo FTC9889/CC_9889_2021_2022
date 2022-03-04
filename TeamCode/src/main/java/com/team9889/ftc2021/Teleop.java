@@ -2,15 +2,11 @@ package com.team9889.ftc2021;
 
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2021.subsystems.Dumper;
 import com.team9889.ftc2021.subsystems.Intake;
 import com.team9889.ftc2021.subsystems.Lift;
-
-import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * Created by MannoMation on 1/14/2019.
@@ -19,27 +15,16 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 @TeleOp
 public class Teleop extends Team9889Linear {
-    public static double x = 0, y = 15;
-
-    boolean rrFirst = true;
+    ElapsedTime timer = new ElapsedTime();
 
     @Override
     public void runOpMode() {
         DriverStation driverStation = new DriverStation(gamepad1, gamepad2);
         Robot.driverStation = driverStation;
 
-        telemetry.setDisplayFormat(Telemetry.DisplayFormat.HTML);
-
         waitForStart(false);
 
-        Trajectory trajectory = Robot.rr.trajectoryBuilder(new Pose2d(31, -62), true)
-                .splineToConstantHeading(new Vector2d(18, -62), Math.toRadians(180))
-                .splineTo(new Vector2d(7, -53), Math.toRadians(118))
-                .build();
-
         while (opModeIsActive()) {
-
-
             /* Mecanum Drive */
             if (driverStation.resetIMU()) {
                 Robot.getMecanumDrive().writeAngleToFile();
@@ -59,25 +44,6 @@ public class Teleop extends Team9889Linear {
             }
 
 
-            if (driverStation.getAutoLineup()) {
-                if (rrFirst) {
-                    if (Robot.isRed) {
-                        Robot.rr.setPoseEstimate(new Pose2d(31, -62));
-                    } else {
-                        Robot.rr.setPoseEstimate(new Pose2d(31, 62));
-                    }
-                    Robot.rr.followTrajectoryAsync(trajectory);
-                    Robot.getMecanumDrive().rrControl = true;
-                    rrFirst = false;
-                }
-
-                Robot.rr.update();
-            } else {
-                Robot.getMecanumDrive().rrControl = false;
-                rrFirst = true;
-            }
-
-
             /* Intake */
             if (driverStation.getIntake()) {
                 Robot.getIntake().StartIntake();
@@ -86,12 +52,6 @@ public class Teleop extends Team9889Linear {
             } else if (driverStation.getStopIntake()) {
                 Robot.getIntake().StopIntake();
             }
-
-//            if (driverStation.getIntakeHeight()) {
-//                Robot.getIntake().wantedIntakeHeightState = Intake.IntakeHeightState.DOWN;
-//            } else {
-//                Robot.getIntake().wantedIntakeHeightState = Intake.IntakeHeightState.UP;
-//            }
 
 
             /* Lift */
@@ -117,16 +77,6 @@ public class Teleop extends Team9889Linear {
                 Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
             } else if (Robot.getLift().currentLiftState == Lift.LiftState.NULL) {
                 Robot.getLift().SetLiftPower(0);
-            }
-
-            if (driverStation.getLiftAngleUp()) {
-                Lift.angle += 0.005;
-                Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
-                Robot.getLift().currentLiftState = Lift.LiftState.NULL;
-            } else if (driverStation.getLiftAngleDown()) {
-                Lift.angle -= 0.005;
-                Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
-                Robot.getLift().currentLiftState = Lift.LiftState.NULL;
             }
 
             if (Math.abs(driverStation.getLiftRaise()) > 0.1) {
@@ -184,6 +134,9 @@ public class Teleop extends Team9889Linear {
                 telemetry.addData("<font size=\"+2\" color=\"red\">Side</font>", "");
             else
                 telemetry.addData("<font size=\"+2\" color=\"aqua\">Side</font>", "");
+
+            telemetry.addData("Loop Time", timer.milliseconds());
+            timer.reset();
             Robot.outputToTelemetry(telemetry);
             telemetry.update();
 

@@ -45,7 +45,6 @@ public class FileWriter {
             writer.write(object + "\n");
             writer.flush();
         } catch (IOException e) {
-            Log.v("Error", e.toString());
             e.printStackTrace();
         }
     }

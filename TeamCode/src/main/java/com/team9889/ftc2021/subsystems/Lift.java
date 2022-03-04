@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Lift extends Subsystem {
     public static double angle = 0, power = 1, offset1 = -0.02, offset2 = 0, offset3 = 0.01;
 
-    public static double liftTolerance = 1;
+    public static double liftTolerance = 2;
 
     public boolean done = true;
 
@@ -37,7 +37,7 @@ public class Lift extends Subsystem {
 
     public static double layer1 = 3, layer2 = 8, layer3 = 13.5, shared = 11;
 
-    public static PID liftPID = new PID(0.2, 0, 0);
+    public static PID liftPID = new PID(0.09, 0, 0);
     public static double maxCurrent = 6500;
     double current = 0;
     ElapsedTime timer = new ElapsedTime();
@@ -58,8 +58,8 @@ public class Lift extends Subsystem {
         telemetry.addData("Lift Height", GetLiftLength());
         telemetry.addData("Lift Angle", angle);
 
-        telemetry.addData("Is Lift Down", IsDown());
-        telemetry.addData("Lift PID Power", liftPID.getOutput());
+//        telemetry.addData("Is Lift Down", IsDown());
+//        telemetry.addData("Lift PID Power", liftPID.getOutput());
     }
 
     @Override
@@ -81,11 +81,11 @@ public class Lift extends Subsystem {
                 break;
 
             case LAYER2:
-                done = SetLiftPos(25, 15);
+                done = SetLiftPos(23, 13);
                 break;
 
             case LAYER3:
-                done = SetLiftPos(30, 20);
+                done = SetLiftPos(29, 22);
                 break;
 
             case SHARED:
@@ -187,9 +187,9 @@ public class Lift extends Subsystem {
 
 //  Units are Inches
     public double GetLiftLength() {
-        double spoolRadius = 1.1, ticks = 537.6;
+        double spoolRadius = 0.875, ticks = 145.1;
         double spoolCircumference = 2 * Math.PI * spoolRadius;
-        return ((Robot.getInstance().lift.getPosition() / ticks) * spoolCircumference) * 2;
+        return (Robot.getInstance().lift.getPosition() / ticks) * spoolCircumference;
     }
 
     public boolean IsDown() {

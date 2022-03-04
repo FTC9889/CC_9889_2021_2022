@@ -30,7 +30,7 @@ public class Score extends Action {
             case 0:
                 Robot.getInstance().getLift().wantedLiftState = wantedState;
 
-                if ((Robot.getInstance().getLift().done && timer.milliseconds() > 400) || timer.milliseconds() > 1000) {
+                if ((Robot.getInstance().getLift().done && timer.milliseconds() > 100) || timer.milliseconds() > 350) {
                     step = 1;
                     timer.reset();
                 }
@@ -39,27 +39,21 @@ public class Score extends Action {
             case 1:
                 Robot.getInstance().getDumper().gateState = Dumper.GateState.OPEN;
 
-                if (timer.milliseconds() > 400) {
+                if (timer.milliseconds() > 300) {
                     step = 2;
                     timer.reset();
                     Robot.getInstance().getLift().done = false;
+
+                    Robot.getInstance().getLift().wantedLiftState = Lift.LiftState.DOWN;
+                    Robot.getInstance().getDumper().gateState = Dumper.GateState.CLOSED;
                 }
                 break;
-
-            case 2:
-                Robot.getInstance().getLift().wantedLiftState = Lift.LiftState.DOWN;
-
-                if (Robot.getInstance().getLift().done || timer.milliseconds() < 1000) {
-                    Robot.getInstance().getDumper().gateState = Dumper.GateState.CLOSED;
-                    step = 3;
-                    timer.reset();
-                }
         }
     }
 
     @Override
     public boolean isFinished() {
-        return step == 3;
+        return step == 2;
     }
 
     @Override

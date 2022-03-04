@@ -51,6 +51,7 @@ public class Robot {
 
     public Motor intake, passThrough;
     public Servo intakeLift;
+    public RevTouchSensor intakeGate;
 
     public Motor lift;
     public Servo angleAdjust1, angleAdjust2, angleAdjust3;
@@ -96,6 +97,7 @@ public class Robot {
     private Carousel mCarousel = new Carousel();
     private Camera mCamera = new Camera();
 
+    public boolean rrCancelable = false;
     public SampleMecanumDrive rr;
     public StandardTrackingWheelLocalizer localizer;
 
@@ -153,6 +155,8 @@ public class Robot {
 
         intakeLift = hardwareMap.get(Servo.class, Constants.IntakeConstants.kIntakeLift);
 
+        intakeGate = hardwareMap.get(RevTouchSensor.class, Constants.IntakeConstants.kIntakeGate);
+
         //Lift
         lift = new Motor(hardwareMap, Constants.LiftConstants.kLift, 1,
                 DcMotorSimple.Direction.FORWARD, true, true, true);
@@ -193,8 +197,6 @@ public class Robot {
 
     // Update data from Hubs and Apply new data
     public void update() {
-        Log.i("Update", "");
-
         // Update Bulk Data
         try {
             bulkDataMaster = revHubMaster.getBulkInputData();
@@ -214,16 +216,6 @@ public class Robot {
             if (!auto) {
                 rr.getLocalizer().update();
             }
-
-//            result = Double.POSITIVE_INFINITY;
-//            for (VoltageSensor sensor : hardwareMap.voltageSensor) {
-//                double voltage = sensor.getVoltage();
-//                if (voltage > 0){
-//                    result = Math.min(result, voltage);
-//                }
-//            }
-//
-//            Robot.getInstance().getLift().current = lift.motor.getCurrentDraw(ExpansionHubEx.CurrentDrawUnits.MILLIAMPS);
         } catch (Exception e){
             Log.v("Exception@robot.update", "" + e);
         }

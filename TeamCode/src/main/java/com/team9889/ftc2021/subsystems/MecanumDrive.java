@@ -19,7 +19,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 @Config
 public class MecanumDrive extends Subsystem {
     public static double tolerance = 3;
-    public static PID turnPid = new PID(0, 0, 0);
+    public static PID xPID = new PID(0, 0, 0), yPID = new PID(0, 0, 0),
+            thetaPid = new PID(0, 0, 0);
 
     public double xSpeed, ySpeed, turnSpeed;
 
@@ -51,19 +52,22 @@ public class MecanumDrive extends Subsystem {
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
-        telemetry.addData("Robot Position", Robot.getInstance().rr.getPoseEstimate());
+//        telemetry.addData("Robot Position", Robot.getInstance().rr.getPoseEstimate());
+//
+//        telemetry.addData("Left Front", Robot.getInstance().fLDrive.getPosition());
+//        telemetry.addData("Right Front", Robot.getInstance().fRDrive.getPosition());
+//        telemetry.addData("Left Back", Robot.getInstance().bLDrive.getPosition());
+//        telemetry.addData("Right Back", Robot.getInstance().bRDrive.getPosition());
 
-        telemetry.addData("Left Front", Robot.getInstance().fLDrive.getPosition());
-        telemetry.addData("Right Front", Robot.getInstance().fRDrive.getPosition());
-        telemetry.addData("Left Back", Robot.getInstance().bLDrive.getPosition());
-        telemetry.addData("Right Back", Robot.getInstance().bRDrive.getPosition());
+//        telemetry.addData("Gyro", gyroAngle.getTheda(AngleUnit.DEGREES) - angleFromAuton);
 
-        telemetry.addData("Gyro", gyroAngle.getTheda(AngleUnit.DEGREES) - angleFromAuton);
+//        telemetry.addData("Sensor 0", Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 23 / 370);
+//        telemetry.addData("Sensor 1", Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 27.5 / 432);
     }
 
     @Override
     public void update() {
-        getAngle();
+//        getAngle();
 
         if (!auto && !rrControl) {
             setFieldCentricPower(xSpeed, ySpeed, turnSpeed, !Robot.getInstance().isRed);
@@ -150,8 +154,14 @@ public class MecanumDrive extends Subsystem {
         Robot.getInstance().bRDrive.setPower(v4);
     }
 
+    public void driveToPose(Pose2d pose) {
+        xSpeed = xPID.update(Robot.getInstance().rr.getPoseEstimate().getX(), pose.getX());
+        ySpeed = yPID.update(Robot.getInstance().rr.getPoseEstimate().getY(), pose.getY());
+        turnSpeed = thetaPid.update(Robot.getInstance().rr.getPoseEstimate().getHeading(), pose.getHeading());
+    }
+
     public void alignToPoint(double angle) {
-        double speed = turnPid.update(getAngle().getTheda(AngleUnit.DEGREES), angle);
+        double speed = thetaPid.update(getAngle().getTheda(AngleUnit.DEGREES), angle);
 
         if (Math.abs(getAngle().getTheda(AngleUnit.DEGREES) - angle) > tolerance) {
             turnSpeed += speed * CruiseLib.getSign(getAngle().getTheda(AngleUnit.DEGREES) - angle);

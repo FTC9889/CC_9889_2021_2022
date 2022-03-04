@@ -22,8 +22,8 @@ public class Carousel extends Subsystem {
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
-        telemetry.addData("Carousel Limit", GetLimit());
-        telemetry.addData("Carousel Power", wantedPower);
+//        telemetry.addData("Carousel Limit", GetLimit());
+//        telemetry.addData("Carousel Power", wantedPower);
     }
 
     @Override

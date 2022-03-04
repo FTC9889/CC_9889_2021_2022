@@ -72,6 +72,7 @@ public class Constants {
         public final static String kIntake = "intake";
         public final static String kPassThrough = "pass_through";
         public final static String kIntakeLift = "intake_lift";
+        public final static String kIntakeGate = "intake_gate";
     }
 
     /*---------------------

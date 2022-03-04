@@ -68,18 +68,6 @@ public class Camera extends Subsystem{
 
     @Override
     public void update() {
-        if (currentCamState != wantedCamState) {
-            switch (wantedCamState) {
-                case TSE:
-                    setCamPositions(0, 0.9);
-                    break;
-
-                case NULL:
-                    break;
-            }
-
-            currentCamState = wantedCamState;
-        }
     }
 
     @Override
