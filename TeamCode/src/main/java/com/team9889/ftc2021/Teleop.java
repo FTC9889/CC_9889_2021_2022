@@ -4,6 +4,7 @@ package com.team9889.ftc2021;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.team9889.ftc2021.subsystems.Carousel;
 import com.team9889.ftc2021.subsystems.Dumper;
 import com.team9889.ftc2021.subsystems.Intake;
 import com.team9889.ftc2021.subsystems.Lift;
@@ -111,6 +112,14 @@ public class Teleop extends Team9889Linear {
                 Robot.getCarousel().TurnOn();
             } else {
                 Robot.getCarousel().TurnOff();
+            }
+
+            if (driverStation.getCarouselFaster()) {
+                Carousel.power += 0.01;
+                Carousel.time -= 100;
+            } else if (driverStation.getCarouselSlower()) {
+                Carousel.power -= 0.01;
+                Carousel.time += 100;
             }
 
             if (driverStation.getCarouselDrive() && Robot.getCarousel().GetLimit()) {

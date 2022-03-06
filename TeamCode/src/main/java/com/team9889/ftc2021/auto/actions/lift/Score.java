@@ -13,9 +13,15 @@ public class Score extends Action {
     Lift.LiftState wantedState;
     int step = 0;
     ElapsedTime timer = new ElapsedTime();
+    Boolean delay = false;
 
     public Score(Lift.LiftState state) {
         this.wantedState = state;
+    }
+
+    public Score(Lift.LiftState state, Boolean delay) {
+        this.wantedState = state;
+        this.delay = delay;
     }
 
     @Override
@@ -30,17 +36,24 @@ public class Score extends Action {
             case 0:
                 Robot.getInstance().getLift().wantedLiftState = wantedState;
 
-                if ((Robot.getInstance().getLift().done && timer.milliseconds() > 100) || timer.milliseconds() > 350) {
+                if ((Robot.getInstance().getLift().done && timer.milliseconds() > 100) || timer.milliseconds() > 500) {
                     step = 1;
                     timer.reset();
                 }
                 break;
 
             case 1:
+                if (timer.milliseconds() > 250 || !delay) {
+                    step = 2;
+                    timer.reset();
+                }
+                break;
+
+            case 2:
                 Robot.getInstance().getDumper().gateState = Dumper.GateState.OPEN;
 
-                if (timer.milliseconds() > 300) {
-                    step = 2;
+                if (timer.milliseconds() > 450) {
+                    step = 3;
                     timer.reset();
                     Robot.getInstance().getLift().done = false;
 
@@ -53,7 +66,7 @@ public class Score extends Action {
 
     @Override
     public boolean isFinished() {
-        return step == 2;
+        return step == 3;
     }
 
     @Override

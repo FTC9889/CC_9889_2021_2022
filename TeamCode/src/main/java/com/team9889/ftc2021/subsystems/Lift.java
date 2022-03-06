@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 public class Lift extends Subsystem {
     public static double angle = 0, power = 1, offset1 = -0.02, offset2 = 0, offset3 = 0.01;
 
-    public static double liftTolerance = 2;
+    public static double liftTolerance = 1.5;
 
     public boolean done = true;
 
@@ -66,7 +66,7 @@ public class Lift extends Subsystem {
     public void update() {
         switch (wantedLiftState) {
             case DOWN:
-                angle = .58;
+                angle = .7;
 
                 if (!IsDown()) {
                     SetLiftPower(-1);
@@ -81,7 +81,7 @@ public class Lift extends Subsystem {
                 break;
 
             case LAYER2:
-                done = SetLiftPos(23, 13);
+                done = SetLiftPos(24, 14);
                 break;
 
             case LAYER3:
@@ -174,7 +174,15 @@ public class Lift extends Subsystem {
                 Robot.getInstance().lift.setPower(0);
             }
         } else {
-            Robot.getInstance().lift.setPower(power);
+            if (Math.abs(power) > 0.05) {
+                Robot.getInstance().lift.setPower(power);
+            } else {
+                if (angle <= .5) {
+                    Robot.getInstance().lift.setPower(0.07);
+                } else {
+                    Robot.getInstance().lift.setPower(0.1);
+                }
+            }
         }
     }
 

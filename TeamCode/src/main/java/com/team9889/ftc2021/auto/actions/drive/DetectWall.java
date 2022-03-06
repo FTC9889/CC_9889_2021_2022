@@ -20,9 +20,9 @@ public class DetectWall extends Action {
     @Override
     public boolean isFinished() {
         if (Robot.getInstance().isRed) {
-            return Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 27.5 / 432 < 1.8;
+            return Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 27.5 / 432 < 2.5;
         } else {
-            return true;
+            return Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 16.0 / 250 < 2.5;
         }
     }
 

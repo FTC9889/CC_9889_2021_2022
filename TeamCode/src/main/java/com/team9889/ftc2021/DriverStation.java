@@ -103,10 +103,10 @@ public class DriverStation {
     public boolean dumperOpen = false;
     public  boolean dumperCodePress = false;
     boolean getDumperOpen() {
-        if ((gamepad2.dpad_left || dumperCodePress) && dumperToggle) {
+        if ((gamepad2.dpad_down || dumperCodePress) && dumperToggle) {
             dumperOpen = !dumperOpen;
             dumperToggle = false;
-        } else if (!gamepad2.dpad_left && !dumperCodePress)
+        } else if (!gamepad2.dpad_down && !dumperCodePress)
             dumperToggle = true;
 
         return dumperOpen;
@@ -124,6 +124,30 @@ public class DriverStation {
             carouselToggle = true;
 
         return carouselOn;
+    }
+
+    private boolean fasterToggle = true;
+    boolean getCarouselFaster() {
+        if (gamepad2.dpad_right && fasterToggle) {
+            fasterToggle = false;
+            return true;
+        } else if (!gamepad2.dpad_right) {
+            fasterToggle = true;
+        }
+
+        return false;
+    }
+
+    private boolean slowerToggle = true;
+    boolean getCarouselSlower() {
+        if (gamepad2.dpad_left && slowerToggle) {
+            slowerToggle = false;
+            return true;
+        } else if (!gamepad2.dpad_left) {
+            slowerToggle = true;
+        }
+
+        return false;
     }
 
     boolean getCarouselDrive() {

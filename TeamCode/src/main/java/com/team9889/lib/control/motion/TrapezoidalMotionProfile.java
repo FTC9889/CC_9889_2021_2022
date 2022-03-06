@@ -1,7 +1,5 @@
 package com.team9889.lib.control.motion;
 
-import com.team9889.lib.android.FileWriter;
-
 /**
  * Created by joshua9889 on 7/16/2018.
  *
@@ -24,8 +22,8 @@ public class TrapezoidalMotionProfile implements MotionProfile {
     // Demo
     public static void main(String... args){
         TrapezoidalMotionProfile profile =
-                new TrapezoidalMotionProfile(50, new ProfileParameters(((2 * Math.PI * ((5475.764) / 19.2)) / 60.0) * 0.9, 50));
-        FileWriter log = new FileWriter(profile.getClass().getSimpleName() + ".csv");
+                new TrapezoidalMotionProfile(-50, new ProfileParameters(((2 * Math.PI * ((5475.764) / 19.2)) / 60.0) * 0.9, 25));
+//        FileWriter log = new FileWriter("MP" + ".csv");
 
         int step = 1000;
         for (int i = 0; i < step; i++) {
@@ -36,10 +34,10 @@ public class TrapezoidalMotionProfile implements MotionProfile {
                     " | Velocity: " + segment.getVelocity() +
                     " | Acceleration: " + segment.getAcceleration()
             );
-            log.write(segment.getPosition() + "," + segment.getVelocity() + "," + segment.getAcceleration());
+//            log.write(segment.getPosition() + "," + segment.getVelocity() + "," + segment.getAcceleration());
         }
 
-        log.close();
+//        log.close();
     }
 
 

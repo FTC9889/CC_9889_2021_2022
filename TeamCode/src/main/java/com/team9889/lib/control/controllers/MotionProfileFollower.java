@@ -8,6 +8,7 @@ import com.team9889.lib.control.motion.MotionProfileSegment;
  */
 
 public class MotionProfileFollower {
+    public MotionProfileSegment profile;
 
     private double p, d, v, a;
     private MotionProfile profileToFollow;
@@ -31,7 +32,7 @@ public class MotionProfileFollower {
         this.currentPosition = currentPosition;
         this.currentTime = currentTime;
 
-        MotionProfileSegment profile = profileToFollow.getOutput(currentTime);
+        profile = profileToFollow.getOutput(currentTime);
 
         double dt = currentTime - lastTime;
 

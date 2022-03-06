@@ -48,7 +48,7 @@ public class Intake extends Subsystem {
         switch (intakeState) {
             case ON:
                 SetIntake(power);
-                SetPassThrough(power);
+                SetPassThrough(1);
 
                 if (!IntakeGateOpen()) {
                     intakeState = IntakeState.FRONT_OUT;
@@ -68,6 +68,12 @@ public class Intake extends Subsystem {
             case FRONT_OUT:
                 SetIntake(-0.7);
                 break;
+        }
+
+        if (intakeState == IntakeState.FRONT_OUT) {
+            Robot.getInstance().flag.setPosition(0.5);
+        } else {
+            Robot.getInstance().flag.setPosition(0);
         }
     }
 

@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.DriveTrainType;
+import com.noahbres.meepmeep.roadrunner.SampleMecanumDrive;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 public class MeepMeepTesting {
@@ -28,7 +29,7 @@ public class MeepMeepTesting {
                                 .lineToSplineHeading(new Pose2d(4.875, -51.375, Math.toRadians(-58)))
 
                                 // Score preloaded
-                                .waitSeconds(1)
+                                .waitSeconds(.5)
 
                                 //-----------------
                                 //|   1st Cycle   |
@@ -38,7 +39,9 @@ public class MeepMeepTesting {
                                 .splineToLinearHeading(new Pose2d(18, -65, Math.toRadians(-0)), Math.toRadians(-0))
 
 
-                                .splineToConstantHeading(new Vector2d(55, -65), Math.toRadians(-0))
+                                .splineToConstantHeading(new Vector2d(55, -65), Math.toRadians(-0),
+                                        SampleMecanumDrive.getVelocityConstraint(25, Math.toRadians(150), 11.73),
+                                        SampleMecanumDrive.getAccelerationConstraint(50))
 
 
                                 .setReversed(true)
@@ -47,7 +50,7 @@ public class MeepMeepTesting {
                                 .splineTo(new Vector2d(4.875, -51.375), Math.toRadians(122))
 
                                 // Score
-                                .waitSeconds(1)
+                                .waitSeconds(.5)
 
                                 //-----------------
                                 //|   2nd Cycle   |
@@ -66,7 +69,7 @@ public class MeepMeepTesting {
                                 .splineTo(new Vector2d(4.875, -51.375), Math.toRadians(122))
 
                                 // Score
-                                .waitSeconds(1)
+                                .waitSeconds(.5)
 
                                 //-----------------
                                 //|   3rd Cycle   |
@@ -85,7 +88,7 @@ public class MeepMeepTesting {
                                 .splineTo(new Vector2d(4.875, -51.375), Math.toRadians(122))
 
                                 // Score
-                                .waitSeconds(1)
+                                .waitSeconds(.5)
 
                                 //-----------------
                                 //|   4th Cycle   |
@@ -104,7 +107,7 @@ public class MeepMeepTesting {
                                 .splineTo(new Vector2d(4.875, -51.375), Math.toRadians(122))
 
                                 // Score
-                                .waitSeconds(1)
+                                .waitSeconds(.5)
 
                                 //-----------------
                                 //|     Park      |
@@ -114,7 +117,7 @@ public class MeepMeepTesting {
                                 .splineToLinearHeading(new Pose2d(18, -65, Math.toRadians(-0)), Math.toRadians(-0))
 
 
-                                .splineToConstantHeading(new Vector2d(55, -65), Math.toRadians(-0))
+                                .splineToConstantHeading(new Vector2d(30, -65), Math.toRadians(-0))
 
                                 .build()
                 );

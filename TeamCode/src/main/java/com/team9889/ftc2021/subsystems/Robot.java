@@ -64,6 +64,8 @@ public class Robot {
 
     public Servo camYAxis;
 
+    public Servo flag;
+
     public RevBulkData bulkDataMaster, bulkDataSlave;
     public ExpansionHubEx revHubMaster, revHubSlave;
 
@@ -176,6 +178,8 @@ public class Robot {
 
         redLimit = hardwareMap.get(RevTouchSensor.class, Constants.CarouselConstants.kCarouselRedLimit);
         blueLimit = hardwareMap.get(RevTouchSensor.class, Constants.CarouselConstants.kCarouselBlueLimit);
+
+        flag = hardwareMap.get(Servo.class, Constants.IntakeConstants.kIntakeFlag);
 
 
         imu = new RevIMU("imu", hardwareMap);

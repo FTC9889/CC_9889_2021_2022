@@ -31,7 +31,7 @@ public class Dumper extends Subsystem {
                 break;
 
             case PARTIAL:
-                SetGatePosition(0.7);
+                SetGatePosition(0.8);
                 break;
 
             case OPEN:
