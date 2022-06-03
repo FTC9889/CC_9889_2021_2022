@@ -2,9 +2,11 @@ package com.team9889.ftc2021.subsystems;
 
 import android.util.Log;
 
+import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -32,6 +34,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static com.team9889.ftc2021.Team9889Linear.writeLastKnownPosition;
+
 
 /**
  * Created by Eric on 7/26/2019.
@@ -39,8 +43,8 @@ import java.util.List;
 
 public class Robot {
 
-    public WebcamName webcam;
-    public OpenCvCamera camera;
+    public WebcamName webcam, frontCam;
+    public OpenCvCamera camera, frontCVCam;
 
     public Motor fLDrive, fRDrive, bLDrive, bRDrive;
     public RevIMU imu = null;
@@ -51,6 +55,8 @@ public class Robot {
 
     public Motor intake, passThrough;
     public Servo intakeLift;
+    public RevColorSensorV3 inLeft;
+    public DistanceSensor inRight;
     public RevTouchSensor intakeGate;
 
     public Motor lift;
@@ -58,6 +64,9 @@ public class Robot {
     public RevTouchSensor downLimit;
 
     public Servo dumperGate;
+
+    public Servo capRelease;
+    public Servo capArm;
 
     public Motor carousel;
     public RevTouchSensor redLimit, blueLimit;
@@ -75,9 +84,13 @@ public class Robot {
 
     public boolean isRed = true, auto;
 
-    ElapsedTime robotTimer = new ElapsedTime();
+    public ElapsedTime robotTimer = new ElapsedTime(), loopTime = new ElapsedTime();
 
     public double result = Double.POSITIVE_INFINITY;
+
+    public boolean slowdown = false;
+
+    public Telemetry telemetry;
 
     public FileWriter writer;
     public FileReader reader;
@@ -95,6 +108,7 @@ public class Robot {
     private MecanumDrive mMecanumDrive = new MecanumDrive();
     private Intake mIntake = new Intake();
     private Lift mLift = new Lift();
+    private CapArm mCapArm = new CapArm();
     private Dumper mDumper = new Dumper();
     private Carousel mCarousel = new Carousel();
     private Camera mCamera = new Camera();
@@ -106,7 +120,7 @@ public class Robot {
     public DriverStation driverStation;
 
     // List of subsystems
-    private List<Subsystem> subsystems = Arrays.asList(mMecanumDrive, mIntake, mLift, mDumper, mCarousel, mCamera);
+    private List<Subsystem> subsystems = Arrays.asList(mMecanumDrive, mIntake, mLift, mCapArm, mDumper, mCarousel, mCamera);
 
     public void init(HardwareMap hardwareMap, boolean auto){
         this.hardwareMap = hardwareMap;
@@ -127,7 +141,9 @@ public class Robot {
 
         //Camera
         webcam = hardwareMap.get(WebcamName.class, Constants.kWebcam);
+        frontCam = hardwareMap.get(WebcamName.class, Constants.kFrontCam);
         camera = OpenCvCameraFactory.getInstance().createWebcam(webcam);
+        frontCVCam = OpenCvCameraFactory.getInstance().createWebcam(frontCam);
 //        camXAxis = hardwareMap.get(Servo.class, Constants.CameraConstants.kCamX);
         camYAxis = hardwareMap.get(Servo.class, Constants.CameraConstants.kCamY);
 
@@ -157,6 +173,9 @@ public class Robot {
 
         intakeLift = hardwareMap.get(Servo.class, Constants.IntakeConstants.kIntakeLift);
 
+        inLeft = hardwareMap.get(RevColorSensorV3.class, Constants.IntakeConstants.kLeft);
+        inRight = hardwareMap.get(DistanceSensor.class, Constants.IntakeConstants.kRight);
+
         intakeGate = hardwareMap.get(RevTouchSensor.class, Constants.IntakeConstants.kIntakeGate);
 
         //Lift
@@ -171,6 +190,12 @@ public class Robot {
 
         //Dumper
         dumperGate = hardwareMap.get(Servo.class, Constants.DumperConstants.kGate);
+//        dumperGate = new CCServo(hardwareMap, Constants.DumperConstants.kGate, 90, 400, Servo.Direction.FORWARD);
+
+        //Cap
+        capArm = hardwareMap.get(Servo.class, Constants.CapConstants.kArm);
+        capRelease = hardwareMap.get(Servo.class, Constants.CapConstants.kRelease);
+//        capArm = new CCServo(hardwareMap, Constants.CapConstants.kArm, 180, 240, Servo.Direction.FORWARD);
 
         //Carousel
         carousel = new Motor(hardwareMap, Constants.CarouselConstants.kCarousel, 1,
@@ -197,6 +222,7 @@ public class Robot {
 //        this.driverStation = driverStation;
 
         robotTimer.reset();
+        loopTime.reset();
     }
 
     // Update data from Hubs and Apply new data
@@ -213,23 +239,48 @@ public class Robot {
             bLDrive.update(bulkDataMaster);
             lift.update(bulkDataSlave);
 
+//            capArm.update(loopTime.milliseconds());
+
             // Update Subsystems
             for (Subsystem subsystem : subsystems)
                 subsystem.update();
 
-            if (!auto) {
+//            if (!auto) {
                 rr.getLocalizer().update();
-            }
+//            }
         } catch (Exception e){
             Log.v("Exception@robot.update", "" + e);
         }
 
+        if (isRed) {
+            writeLastKnownPosition("Red", "Side");
+        } else {
+            writeLastKnownPosition("Blue", "Side");
+        }
+
+        Log.v("Loop Time", "" + loopTime.milliseconds());
+
+        loopTime.reset();
     }
 
     // Output Telemetry for all subsystems
     public void outputToTelemetry(Telemetry telemetry) {
+        telemetry.addData("Loop Time", loopTime.milliseconds());
+
+        if (isRed)
+            telemetry.addData("<font size=\"+2\" color=\"red\">Side</font>", "");
+        else
+            telemetry.addData("<font size=\"+2\" color=\"aqua\">Side</font>", "");
+
         for (Subsystem subsystem : subsystems)
             subsystem.outputToTelemetry(telemetry);
+
+
+//        TelemetryPacket packet = new TelemetryPacket();
+//        packet.fieldOverlay()
+//                .setFill("green")
+//                .fillRect(rr.getPoseEstimate().getX() - 6.5, rr.getPoseEstimate().getY() - 6.5, 13, 13);
+//        FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
     // Stop all subsystems
@@ -250,6 +301,10 @@ public class Robot {
 
     public Lift getLift(){
         return mLift;
+    }
+
+    public CapArm getCapArm(){
+        return mCapArm;
     }
 
     public Dumper getDumper(){

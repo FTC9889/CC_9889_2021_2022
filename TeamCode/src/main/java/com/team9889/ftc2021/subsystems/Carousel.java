@@ -14,37 +14,43 @@ public class Carousel extends Subsystem {
     public static double power = 0.6, wantedPower = 0, addedPower = 0.04, time = 1500;
     ElapsedTime timer = new ElapsedTime();
 
-    boolean on = false;
+    public boolean on = false, override = false;
 
     @Override
     public void init(boolean auto) {
+        power = 0.6;
     }
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
         telemetry.addData("Carousel Power", power);
+
+        telemetry.addData("Carousel Limits", "  Red:" + Robot.getInstance().redLimit.isPressed() +
+                ", Blue:" + Robot.getInstance().blueLimit.isPressed());
     }
 
     @Override
     public void update() {
-        if (on) {
-            if (timer.milliseconds() > time) {
-                wantedPower = 1;
-            }
+        if (!override) {
+            if (on) {
+                if (timer.milliseconds() > time) {
+                    wantedPower = 1;
+                }
 
-            if (wantedPower < power) {
-                wantedPower += addedPower;
-            }
+                if (wantedPower < power) {
+                    wantedPower += addedPower;
+                }
 
-            if (Robot.getInstance().isRed) {
-                SetWheelsPower(wantedPower);
+                if (Robot.getInstance().isRed) {
+                    SetWheelsPower(wantedPower);
+                } else {
+                    SetWheelsPower(-wantedPower);
+                }
             } else {
-                SetWheelsPower(-wantedPower);
+                timer.reset();
+                SetWheelsPower(0);
+                wantedPower = 0;
             }
-        } else {
-            timer.reset();
-            SetWheelsPower(0);
-            wantedPower = 0;
         }
     }
 

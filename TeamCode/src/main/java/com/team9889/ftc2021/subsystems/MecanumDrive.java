@@ -1,5 +1,7 @@
 package com.team9889.ftc2021.subsystems;
 
+import android.util.Log;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -11,6 +13,8 @@ import com.team9889.lib.control.math.cartesian.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
+import static java.lang.Math.PI;
 
 /**
  * Created by Eric on 9/7/2019.
@@ -35,6 +39,15 @@ public class MecanumDrive extends Subsystem {
 
     boolean auto;
 
+    public enum Corner {
+        TOP_RIGHT, BOTTOM_RIGHT, TOP_LEFT, BOTTOM_LEFT
+    }
+    public static Corner corner = Corner.TOP_RIGHT;
+    public enum Sensor {
+        FRONT, LEFT, BACK, RIGHT
+    }
+    public static Sensor xSensor = Sensor.FRONT, ySensor = Sensor.RIGHT;
+
     @Override
     public void init(boolean auto) {
         if(auto) {
@@ -52,7 +65,7 @@ public class MecanumDrive extends Subsystem {
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
-//        telemetry.addData("Robot Position", Robot.getInstance().rr.getPoseEstimate());
+        telemetry.addData("Robot Position", Robot.getInstance().rr.getPoseEstimate());
 //
 //        telemetry.addData("Left Front", Robot.getInstance().fLDrive.getPosition());
 //        telemetry.addData("Right Front", Robot.getInstance().fRDrive.getPosition());
@@ -61,8 +74,10 @@ public class MecanumDrive extends Subsystem {
 
 //        telemetry.addData("Gyro", gyroAngle.getTheda(AngleUnit.DEGREES) - angleFromAuton);
 
-//        telemetry.addData("Sensor 0", Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 23 / 370);
-//        telemetry.addData("Sensor 1", Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 27.5 / 432);
+        telemetry.addData("Sensor 0", (Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 24 / 380) + 7);
+        telemetry.addData("Sensor 1", (Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 24 / 380) + 7);
+        telemetry.addData("Sensor 3", (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24 / 380) + 7);
+        telemetry.addData("Sensor 4", (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24 / 380) + 7);
     }
 
     @Override
@@ -75,6 +90,12 @@ public class MecanumDrive extends Subsystem {
             ySpeed = 0;
             turnSpeed = 0;
         }
+
+//        double xDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24.0 / 380.0) + 7,
+//                yDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24.0 / 380.0) + 7;
+//        Vector2d pose = getPosition(xSensor, ySensor, corner);
+//        Robot.getInstance().rr.setPoseEstimate(new Pose2d(pose.getX(), pose.getY(),
+//                Robot.getInstance().rr.getPoseEstimate().getHeading()));
     }
 
     @Override
@@ -139,9 +160,29 @@ public class MecanumDrive extends Subsystem {
         );
     }
 
+    public void setFieldCentricPowerAuto(double x, double y, double rotation) {
+        // Read pose
+        Pose2d poseEstimate = Robot.getInstance().rr.getPoseEstimate();
+
+        // Create a vector from the gamepad x/y inputs
+        // Then, rotate that vector by the inverse of that heading
+        com.acmerobotics.roadrunner.geometry.Vector2d input;
+        input = new com.acmerobotics.roadrunner.geometry.Vector2d(x, y).rotated(-poseEstimate.getHeading());
+
+        // Pass in the rotated input + right stick value for rotation
+        // Rotation is not part of the rotated input thus must be passed in separately
+        Robot.getInstance().rr.setWeightedDrivePower(
+                new Pose2d(
+                        input.getX(),
+                        input.getY(),
+                        -rotation
+                )
+        );
+    }
+
     public void setPower(double leftStickX, double leftStickY, double rightStickX){
         double r = Math.hypot(leftStickX, leftStickY);
-        double robotAngle = Math.atan2(leftStickY, leftStickX) - Math.PI / 4;
+        double robotAngle = Math.atan2(leftStickY, leftStickX) - PI / 4;
         double rightX = rightStickX;
         final double v1 = r * Math.cos(robotAngle) + rightX;
         final double v2 = r * Math.sin(robotAngle) - rightX;
@@ -173,23 +214,119 @@ public class MecanumDrive extends Subsystem {
 //      Robot must be parallel to the field walls
 //      Assume Robot is always facing back wall
 
-    public Vector2d getPositionRed () {
-        double dist0 = (double) Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 29.75 / 459;
-        double dist1 = (double) Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 27.5 / 432;
-        double angle = getAngle().getTheda(AngleUnit.RADIANS);
-        Vector2d frontDistToRobot = new Vector2d(5.75, 7), sideDistToRobot = new Vector2d(7, 0);
-        Vector2d robotPos = new Vector2d(), globalPos = new Vector2d(72,-72);
+    //bulkDataMaster 0: Left (5.5 inches from robot center)
+    //bulkDataMaster 1 Back (5.75 inches from robot center)
+    //bulkDataSlave 0: Front (7 inches from robot center)
+    //bulkDataSlave 1: Right (5.5 inches from robot center)
+    public Vector2d getPosition (Sensor xSensor, Sensor ySensor, Corner corner) {
+        double angle = Robot.getInstance().rr.getPoseEstimate().getHeading(), xDist = 0, yDist = 0;
 
-        angle = angle - Math.PI/2;
+        switch (xSensor) {
+            case FRONT:
+                xDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24.0 / 380.0) + 7;
+                break;
 
-        robotPos.setX((dist0 + (frontDistToRobot.getX() * Math.sin(angle)) + frontDistToRobot.getY())
-                * Math.cos(angle));
-        robotPos.setY(-((dist1 + (sideDistToRobot.getY() * Math.sin(angle)) + sideDistToRobot.getX())
-                * Math.cos(angle)));
+            case LEFT:
+                xDist = (Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 24.0 / 380.0) + 5.5;
+                break;
+
+            case BACK:
+                xDist = (Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 24.0 / 380.0) + 5.75;
+                break;
+
+            case RIGHT:
+                xDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24.0 / 380.0) + 5.5;
+                break;
+        }
+
+        switch (ySensor) {
+            case FRONT:
+                yDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24.0 / 380.0) + 7;
+                break;
+
+            case LEFT:
+                yDist = (Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 24.0 / 380.0) + 5.5;
+                break;
+
+            case BACK:
+                yDist = (Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 24.0 / 380.0) + 5.75;
+                break;
+
+            case RIGHT:
+                yDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24.0 / 380.0) + 5.5;
+                break;
+        }
+
+        Vector2d robotPos = new Vector2d(), globalPos = new Vector2d();
+
+        double adjustedAngle = angle;
+
+        if (angle > PI / 4.0){
+            adjustedAngle -= PI / 2.0;
+        }else if (angle < -PI / 4.0){
+            adjustedAngle += PI / 2.0;
+        }
+
+        if (angle > PI / 4.0){
+            adjustedAngle -= PI / 2.0;
+        }else if (angle < -PI / 4.0){
+            adjustedAngle += PI / 2.0;
+        }
+
+        Log.v("Adjusted Angle", angle + ", " + adjustedAngle);
+
+        robotPos.setX((xDist * Math.cos(0)) + (yDist * Math.sin(0)));
+        robotPos.setY((yDist * Math.cos(0)) + (xDist * Math.sin(0)));
+
+        switch (corner) {
+            case TOP_RIGHT:
+                globalPos = new Vector2d(72,-72);
+                robotPos.setX(-robotPos.getX());
+                break;
+
+            case BOTTOM_RIGHT:
+                globalPos = new Vector2d(-72,-72);
+                break;
+
+            case TOP_LEFT:
+                globalPos = new Vector2d(72,72);
+                robotPos.setX(-robotPos.getX());
+                robotPos.setY(-robotPos.getY());
+                break;
+
+            case BOTTOM_LEFT:
+                globalPos = new Vector2d(-72,72);
+                robotPos.setY(-robotPos.getY());
+                break;
+        }
 
         globalPos = globalPos.add(robotPos);
 
-        Robot.getInstance().rr.setPoseEstimate(new Pose2d(globalPos.getX(), globalPos.getY(), getAngle().getTheda(AngleUnit.RADIANS)));
+        Robot.getInstance().rr.setPoseEstimate(new Pose2d(globalPos.getX(), globalPos.getY(), angle));
+
+        Log.v("New Position", globalPos.getX() + ", " + globalPos.getY());
+
+        return globalPos;
+    }
+
+    public Vector2d getPositionRed () {
+        double dist0 = (double) Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24 / 380;
+        double dist1 = (double) Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24 / 380;
+        double angle = Robot.getInstance().rr.getPoseEstimate().getHeading();
+        Vector2d frontDistToRobot = new Vector2d(5.75, 7), sideDistToRobot = new Vector2d(7, 0);
+        Vector2d robotPos = new Vector2d(), globalPos = new Vector2d(72,-72);
+
+//        angle = angle - Math.PI/2;
+
+        double xDistance = dist0 + (frontDistToRobot.getX() * Math.sin(angle)) + frontDistToRobot.getY(),
+            yDistance = dist1 + (sideDistToRobot.getY() * Math.sin(angle)) + sideDistToRobot.getX();
+
+        robotPos.setX((xDistance * Math.cos(angle)) + (yDistance * Math.sin(angle)));
+        robotPos.setY((yDistance * Math.cos(angle)) + (xDistance * Math.sin(angle)));
+
+        globalPos = globalPos.add(robotPos);
+
+        Robot.getInstance().rr.setPoseEstimate(new Pose2d(globalPos.getX(), globalPos.getY(), angle));
 
         return globalPos;
     }
@@ -201,7 +338,7 @@ public class MecanumDrive extends Subsystem {
         Vector2d frontDistToRobot = new Vector2d(-4, 7), sideDistToRobot = new Vector2d(-5, 8);
         Vector2d robotPos = new Vector2d(), globalPos = new Vector2d(72,72);
 
-        angle = angle + Math.PI/2;
+        angle = angle + PI/2;
 
         robotPos.setX((dist0 + (sideDistToRobot.getX() * Math.sin(angle)) + sideDistToRobot.getY())
                 * Math.cos(angle));

@@ -4,7 +4,6 @@ package com.team9889.ftc2021;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.team9889.ftc2021.subsystems.Carousel;
 import com.team9889.ftc2021.subsystems.Dumper;
 import com.team9889.ftc2021.subsystems.Intake;
 import com.team9889.ftc2021.subsystems.Lift;
@@ -13,9 +12,10 @@ import com.team9889.ftc2021.subsystems.Lift;
  * Created by MannoMation on 1/14/2019.
  */
 
-@Config
 @TeleOp
+@Config
 public class Teleop extends Team9889Linear {
+    public static double capArm = 0.15;
     ElapsedTime timer = new ElapsedTime();
 
     @Override
@@ -33,61 +33,91 @@ public class Teleop extends Team9889Linear {
                 if (!driverStation.getSlow()) {
                     Robot.getMecanumDrive().xSpeed += driverStation.getX();
                     Robot.getMecanumDrive().ySpeed += driverStation.getY();
-                    if (Robot.getLift().wantedLiftState != Lift.LiftState.LAYER3)
+                    if (Robot.getLift().wantedLiftState == Lift.LiftState.DOWN ||
+                            Robot.getLift().wantedLiftState == Lift.LiftState.NULL)
                         Robot.getMecanumDrive().turnSpeed += driverStation.getSteer();
                     else
                         Robot.getMecanumDrive().turnSpeed += driverStation.getSteer() / 3;
+
+                    Robot.slowdown = false;
                 } else {
                     Robot.getMecanumDrive().xSpeed += driverStation.getX() / 3;
                     Robot.getMecanumDrive().ySpeed += driverStation.getY() / 3;
                     Robot.getMecanumDrive().turnSpeed += driverStation.getSteer() / 5;
+
+                    Robot.slowdown = true;
                 }
             }
 
 
             /* Intake */
             if (driverStation.getIntake()) {
-                Robot.getIntake().StartIntake();
-            } else if (driverStation.getOuttake()) {
-                Robot.getIntake().StartOuttake();
+                Robot.getIntake().loadState = Intake.LoadState.INTAKE;
             } else if (driverStation.getStopIntake()) {
-                Robot.getIntake().StopIntake();
+                Robot.getIntake().loadState = Intake.LoadState.OFF;
+            } else if (driverStation.getOuttake()) {
+                Robot.getIntake().loadState = Intake.LoadState.OUTTAKE;
+            } else if (gamepad1.x) {
+                Robot.getIntake().loadState = Intake.LoadState.TRANSFER;
             }
+
+//            if (gamepad1.dpad_up) {
+//                Robot.getIntake().IntakeUp();
+//            } else if (gamepad1.dpad_down) {
+//                Robot.getIntake().IntakeDown();
+//            }
 
 
             /* Lift */
-            if (driverStation.getLiftUp() > 0.1) {
-                Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
-                Robot.getLift().currentLiftState = Lift.LiftState.NULL;
-                driverStation.gamepad2Lift = false;
+            if (driverStation.getSetDefault()) {
+                if (driverStation.getFirstLayer()) {
+                    Robot.getLift().defaultLiftState = Lift.LiftState.SMART;
+                } else if (driverStation.getSecondLayer()) {
+                    Robot.getLift().defaultLiftState = Lift.LiftState.LAYER2;
+                } else if (driverStation.getThirdLayer()) {
+                    Robot.getLift().defaultLiftState = Lift.LiftState.LAYER3;
+                } else if (driverStation.getDown()) {
+                    Robot.getLift().defaultLiftState = Lift.LiftState.DOWN;
+                } else if (driverStation.getSharedClose()) {
+                    Robot.getLift().defaultLiftState = Lift.LiftState.SHARED_CLOSE;
+                } else if (driverStation.getSharedFar()) {
+                    Robot.getLift().defaultLiftState = Lift.LiftState.SHARED_FAR;
+                }
+            } else {
+                if (Math.abs(driverStation.getLiftExtend()) > 0.1) {
+                    Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
+                    Robot.getLift().currentLiftState = Lift.LiftState.NULL;
 
-                Robot.getLift().SetLiftPower(driverStation.getLiftUp());
-            } else if (driverStation.getLiftDown() > 0.1) {
-                Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
-                Robot.getLift().currentLiftState = Lift.LiftState.NULL;
-                driverStation.gamepad2Lift = false;
-
-                Robot.getLift().SetLiftPower(-driverStation.getLiftDown());
-            } else if (driverStation.getSecondLayer()) {
-                Robot.getLift().wantedLiftState = Lift.LiftState.LAYER2;
-            } else if (driverStation.getThirdLayer()) {
-                Robot.getLift().wantedLiftState = Lift.LiftState.LAYER3;
-            } else if (driverStation.getShared()) {
-                Robot.getLift().wantedLiftState = Lift.LiftState.SHARED;
-            } else if (driverStation.getDown()) {
-                Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
-            } else if (Robot.getLift().currentLiftState == Lift.LiftState.NULL) {
-                Robot.getLift().SetLiftPower(0);
+                    Robot.getLift().SetLiftPower(driverStation.getLiftExtend());
+                } else if (driverStation.getFirstLayer()) {
+                    Robot.getLift().wantedLiftState = Lift.LiftState.SMART;
+                } else if (driverStation.getSecondLayer()) {
+                    Robot.getLift().wantedLiftState = Lift.LiftState.LAYER2;
+                } else if (driverStation.getThirdLayer()) {
+                    Robot.getLift().wantedLiftState = Lift.LiftState.LAYER3;
+                } else if (driverStation.getDown()) {
+                    Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
+                } else if (driverStation.getSharedClose()) {
+                    Robot.getLift().wantedLiftState = Lift.LiftState.SHARED_CLOSE;
+                } else if (driverStation.getSharedFar()) {
+                    Robot.getLift().wantedLiftState = Lift.LiftState.SHARED_FAR;
+                } else if (driverStation.getDefault()) {
+                    Robot.getLift().wantedLiftState = Robot.getLift().defaultLiftState;
+                } else if (Robot.getLift().currentLiftState == Lift.LiftState.NULL) {
+                    Robot.getLift().SetLiftPower(0);
+                }
             }
 
             if (Math.abs(driverStation.getLiftRaise()) > 0.1) {
-                Lift.angle += driverStation.getLiftRaise() / 30;
-                Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
-                Robot.getLift().currentLiftState = Lift.LiftState.NULL;
-            } else if (Math.abs(driverStation.getLiftRaiseSlow()) > 0.1) {
-                Lift.angle += driverStation.getLiftRaiseSlow() / 60;
-                Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
-                Robot.getLift().currentLiftState = Lift.LiftState.NULL;
+                if (Robot.getCapArm().step == 0 || Robot.getCapArm().step == 4) {
+                    Lift.angle += driverStation.getLiftRaise() / 30;
+                    Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
+                    Robot.getLift().currentLiftState = Lift.LiftState.NULL;
+                } else {
+                    Robot.getCapArm().manualControl = true;
+                    Robot.getCapArm().position -= driverStation.getLiftRaise() / 80;
+                    Robot.getCapArm().setCapArm(Robot.getCapArm().position);
+                }
             }
 
 
@@ -95,16 +125,30 @@ public class Teleop extends Team9889Linear {
             if (driverStation.getDumperOpen()) {
                 Robot.getDumper().gateState = Dumper.GateState.OPEN;
             } else {
-                if (Robot.getIntake().intakeState == Intake.IntakeState.OFF) {
-                    Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
-                } else {
-                    Robot.getDumper().gateState = Dumper.GateState.CLOSED;
-                }
+                Robot.getDumper().gateState = Dumper.GateState.CLOSED;
             }
 
             if (driverStation.getScore()) {
                 Robot.getLift().scoreState = Lift.ScoreState.RELEASE;
             }
+
+
+            /* Cap */
+            if (driverStation.getCapForward()) {
+                Robot.getCapArm().step += 1;
+                Robot.getCapArm().manualControl = false;
+            } else if (driverStation.getCapBack()) {
+                Robot.getCapArm().step -= 1;
+                Robot.getCapArm().manualControl = false;
+            } else if (driverStation.resetCap()) {
+                Robot.getCapArm().step = 0;
+                Robot.getCapArm().manualControl = false;
+            }
+
+//            if (gamepad1.back) {
+//                Robot.capArm.setPosition(capArm);
+//                Robot.getCapArm().manualControl = true;
+//            }
 
             
             /* Carousel */
@@ -114,38 +158,14 @@ public class Teleop extends Team9889Linear {
                 Robot.getCarousel().TurnOff();
             }
 
-            if (driverStation.getCarouselFaster()) {
-                Carousel.power += 0.01;
-                Carousel.time -= 100;
-            } else if (driverStation.getCarouselSlower()) {
-                Carousel.power -= 0.01;
-                Carousel.time += 100;
-            }
 
-            if (driverStation.getCarouselDrive() && Robot.getCarousel().GetLimit()) {
-                Robot.getMecanumDrive().xSpeed -= .7;
-            }
-
-
+            /* Side */
             if (driverStation.getBlue()) {
                 Robot.isRed = !Robot.isRed;
             }
 
-            /* Camera */
-            if (Robot.isRed) {
-                writeLastKnownPosition("Red", "Side");
-            } else {
-                writeLastKnownPosition("Blue", "Side");
-            }
 
             /* Telemetry */
-            if (Robot.isRed)
-                telemetry.addData("<font size=\"+2\" color=\"red\">Side</font>", "");
-            else
-                telemetry.addData("<font size=\"+2\" color=\"aqua\">Side</font>", "");
-
-            telemetry.addData("Loop Time", timer.milliseconds());
-            timer.reset();
             Robot.outputToTelemetry(telemetry);
             telemetry.update();
 

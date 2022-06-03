@@ -62,6 +62,15 @@ public class CruiseLib {
             return val;
     }
 
+    public static double angleWrap(double angle) {
+        if (angle > 180){
+            return angle - 360;
+        }else if (angle < -180){
+            return angle + 360;
+        }
+        return angle;
+    }
+
     public static int getSign(double input) {
         return (int)(input / Math.abs(input));
     }

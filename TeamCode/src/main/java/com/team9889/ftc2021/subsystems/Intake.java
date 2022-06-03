@@ -1,8 +1,12 @@
 package com.team9889.ftc2021.subsystems;
 
+import android.graphics.Color;
+
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /**
  * Created by Eric on 8/19/2019.
@@ -10,23 +14,26 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Intake extends Subsystem {
-    public static double power = 1;
+    public static double power = 1, up = 0.4, down = 1;
 
-    int gateCounter = 0;
-
-    double heightTimerOffset = 0, timerOffset = 0;
+    public boolean overridePower = false;
 
     public enum IntakeHeightState {
         UP, DOWN, NULL
     }
-    public IntakeHeightState wantedIntakeHeightState = IntakeHeightState.NULL,
-            currentIntakeHeightState = IntakeHeightState.NULL;
-    IntakeHeightState lastIntakeHeightState = IntakeHeightState.NULL;
+    public IntakeHeightState wantedIntakeHeightState = IntakeHeightState.NULL;
 
     public enum IntakeState {
-        ON, OFF, OUT, FRONT_OUT
+        ON, OFF, OUT, PARTIAL_OUT
     }
-    public IntakeState intakeState = IntakeState.OFF;
+    public IntakeState intakeState = IntakeState.OFF, passThroughState = IntakeState.OFF;
+
+    public enum LoadState {
+        INTAKE, TRANSFER, OUTTAKE, OFF
+    }
+    public LoadState loadState = LoadState.OFF;
+
+    public boolean block = true;
 
     @Override
     public void init(boolean auto) {
@@ -34,46 +41,94 @@ public class Intake extends Subsystem {
             intakeState = IntakeState.OFF;
             wantedIntakeHeightState = IntakeHeightState.UP;
         }
+
+        Robot.getInstance().inLeft.setGain(2);
     }
 
     @Override
-    public void outputToTelemetry(Telemetry telemetry) { }
+    public void outputToTelemetry(Telemetry telemetry) {
+        telemetry.addData("Intake Left", Robot.getInstance().inLeft.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Intake Right", Robot.getInstance().inRight.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Freight in Intake", GetFreightInIntake());
+        telemetry.addData("Is Block", block);
+    }
 
     @Override
     public void update() {
-        if (intakeState != IntakeState.OFF) {
-            timerOffset = Robot.getInstance().robotTimer.milliseconds();
+        switch (loadState) {
+            case INTAKE:
+                if (!overridePower)
+                    power = .7;
+                IntakeOn();
+                IntakeDown();
+                passThroughState = IntakeState.PARTIAL_OUT;
+
+                if (GetFreightInIntake()) {
+                    loadState = LoadState.TRANSFER;
+
+                    block = GetHue() <= 120;
+                }
+                break;
+
+            case TRANSFER:
+                power = -0.2;
+                IntakeUp();
+                PassThroughOn();
+                break;
+
+            case OUTTAKE:
+                IntakeOut();
+                IntakeDown();
+                PassThroughOut();
+                break;
+
+            case OFF:
+                IntakeOff();
+                IntakeUp();
+                PassThroughOff();
+                break;
         }
 
         switch (intakeState) {
             case ON:
                 SetIntake(power);
-                SetPassThrough(1);
-
-                if (!IntakeGateOpen()) {
-                    intakeState = IntakeState.FRONT_OUT;
-                }
                 break;
 
             case OFF:
                 SetIntake(0);
-                SetPassThrough(0);
                 break;
 
             case OUT:
                 SetIntake(-0.5);
-                SetPassThrough(-0.5);
-                break;
-
-            case FRONT_OUT:
-                SetIntake(-0.7);
                 break;
         }
 
-        if (intakeState == IntakeState.FRONT_OUT) {
+        switch (passThroughState) {
+            case ON:
+                SetPassThrough(1);
+                break;
+
+            case OFF:
+                SetPassThrough(0);
+                break;
+
+            case OUT:
+                SetPassThrough(-0.5);
+                break;
+
+            case PARTIAL_OUT:
+                SetPassThrough(-0.6);
+                break;
+        }
+
+        if (false) {
             Robot.getInstance().flag.setPosition(0.5);
         } else {
-            Robot.getInstance().flag.setPosition(0);
+            if (Robot.getInstance().slowdown) {
+                Robot.getInstance().flag.setPosition(1);
+            } else {
+                Robot.getInstance().flag.setPosition(0);
+            }
         }
     }
 
@@ -90,27 +145,50 @@ public class Intake extends Subsystem {
         Robot.getInstance().passThrough.setPower(power);
     }
 
-    public void StartIntake() {
+    public void IntakeOn() {
         intakeState = IntakeState.ON;
     }
 
-    public void StartOuttake() {
+    public void IntakeOut() {
         intakeState = IntakeState.OUT;
     }
 
-    public void StopIntake() {
+    public void IntakeOff() {
         intakeState = IntakeState.OFF;
     }
 
+    public void PassThroughOn() {
+        passThroughState = IntakeState.ON;
+    }
+
+    public void PassThroughOut() {
+        passThroughState = IntakeState.OUT;
+    }
+
+    public void PassThroughOff() {
+        passThroughState = IntakeState.OFF;
+    }
+
     public void IntakeUp() {
-        Robot.getInstance().intakeLift.setPosition(0.1);
+        Robot.getInstance().intakeLift.setPosition(up);
     }
 
     public void IntakeDown() {
-        Robot.getInstance().intakeLift.setPosition(0.5);
+        Robot.getInstance().intakeLift.setPosition(down);
     }
 
     public boolean IntakeGateOpen() {
         return Robot.getInstance().intakeGate.isPressed();
+    }
+
+    public boolean GetFreightInIntake() {
+        return Robot.getInstance().inLeft.getDistance(DistanceUnit.INCH) < 1.5 || Robot.getInstance().inRight.getDistance(DistanceUnit.INCH) < 3.4;
+    }
+
+    public double GetHue() {
+        final float[] hsvValues = new float[3];
+        NormalizedRGBA colors = Robot.getInstance().inLeft.getNormalizedColors();
+        Color.colorToHSV(colors.toColor(), hsvValues);
+        return hsvValues[0];
     }
 }

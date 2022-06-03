@@ -33,7 +33,7 @@ public class DriverStation {
     }
 
     boolean getStopIntake() {
-        return gamepad1.b || gamepad2.left_trigger > .3;
+        return gamepad1.b || gamepad2.back;
     }
 
     boolean getOuttake() {
@@ -57,25 +57,13 @@ public class DriverStation {
         return intakeDown;
     }
 
-    double getLiftUp() {
-        return gamepad1.right_trigger + gamepad2.right_trigger;
-    }
-
-    double getLiftDown() {
-        return gamepad1.left_trigger + gamepad2.left_trigger;
+    double getLiftExtend() {
+        return (gamepad1.right_trigger - gamepad1.left_trigger) - gamepad2.right_stick_y;
     }
 
     double getLiftRaise(){
         return -gamepad2.left_stick_y;
     }
-
-    double getLiftRaiseSlow(){
-        return -gamepad2.right_stick_y;
-    }
-
-    boolean getLiftAngleUp() {return gamepad1.dpad_left;}
-
-    boolean getLiftAngleDown() {return gamepad1.dpad_right;}
 
     boolean getSetLift() {
         return gamepad1.left_bumper;
@@ -103,10 +91,10 @@ public class DriverStation {
     public boolean dumperOpen = false;
     public  boolean dumperCodePress = false;
     boolean getDumperOpen() {
-        if ((gamepad2.dpad_down || dumperCodePress) && dumperToggle) {
+        if ((gamepad2.left_bumper || dumperCodePress) && dumperToggle) {
             dumperOpen = !dumperOpen;
             dumperToggle = false;
-        } else if (!gamepad2.dpad_down && !dumperCodePress)
+        } else if (!gamepad2.left_bumper && !dumperCodePress)
             dumperToggle = true;
 
         return dumperOpen;
@@ -126,34 +114,6 @@ public class DriverStation {
         return carouselOn;
     }
 
-    private boolean fasterToggle = true;
-    boolean getCarouselFaster() {
-        if (gamepad2.dpad_right && fasterToggle) {
-            fasterToggle = false;
-            return true;
-        } else if (!gamepad2.dpad_right) {
-            fasterToggle = true;
-        }
-
-        return false;
-    }
-
-    private boolean slowerToggle = true;
-    boolean getCarouselSlower() {
-        if (gamepad2.dpad_left && slowerToggle) {
-            slowerToggle = false;
-            return true;
-        } else if (!gamepad2.dpad_left) {
-            slowerToggle = true;
-        }
-
-        return false;
-    }
-
-    boolean getCarouselDrive() {
-        return gamepad1.dpad_up;
-    }
-
 
     private boolean slowOn = false;
     private boolean slowToggle = false;
@@ -170,13 +130,40 @@ public class DriverStation {
 
     private boolean blueToggle = false;
     boolean getBlue() {
-        if (gamepad2.dpad_up && !blueToggle) {
+        if ((gamepad2.left_stick_button && gamepad2.right_stick_button) && !blueToggle) {
             blueToggle = true;
             return true;
-        } else if (!gamepad2.dpad_up)
+        } else if (!gamepad2.left_stick_button && !gamepad2.right_stick_button)
             blueToggle = false;
 
         return false;
+    }
+
+
+    private boolean capForwardLastValue = false;
+    boolean getCapForward() {
+        if (gamepad2.dpad_right && !capForwardLastValue) {
+            capForwardLastValue = true;
+            return true;
+        }
+
+        capForwardLastValue = gamepad2.dpad_right;
+        return false;
+    }
+
+    private boolean capBackLastValue = false;
+    boolean getCapBack() {
+        if (gamepad2.dpad_left && !capBackLastValue) {
+            capBackLastValue = true;
+            return true;
+        }
+
+        capBackLastValue = gamepad2.dpad_left;
+        return false;
+    }
+
+    boolean resetCap() {
+        return gamepad1.left_trigger >= 0.2;
     }
 
 
@@ -190,7 +177,7 @@ public class DriverStation {
         return gamepad2.b;
     }
 
-    boolean getShared() {
+    boolean getFirstLayer() {
         return gamepad2.a;
     }
 
@@ -200,5 +187,21 @@ public class DriverStation {
 
     boolean getThirdLayer() {
         return gamepad2.y;
+    }
+
+    boolean getSharedClose() {
+        return gamepad2.dpad_down;
+    }
+
+    boolean getSharedFar() {
+        return gamepad2.dpad_up;
+    }
+
+    boolean getDefault() {
+        return gamepad1.left_bumper;
+    }
+
+    boolean getSetDefault() {
+        return gamepad2.right_trigger >= 0.2;
     }
 }

@@ -23,7 +23,7 @@ public class Lift extends Subsystem {
     public boolean done = true;
 
     public enum LiftState {
-        DOWN, LAYER1, LAYER2, LAYER3, SHARED, NULL
+        DOWN, LAYER1, LAYER2, LAYER3, LAYER3_CLOSE, SHARED_CLOSE, SHARED_FAR, SMART, NULL
     }
     public LiftState wantedLiftState = LiftState.NULL, currentLiftState = LiftState.NULL,
             defaultLiftState = LiftState.LAYER3;
@@ -46,9 +46,9 @@ public class Lift extends Subsystem {
     public void init(boolean auto) {
         if (auto) {
             wantedLiftState = LiftState.NULL;
-            angle = .58;
+            angle = .66;
         } else {
-            wantedLiftState = LiftState.NULL;
+            wantedLiftState = LiftState.DOWN;
             angle = 0;
         }
     }
@@ -66,7 +66,7 @@ public class Lift extends Subsystem {
     public void update() {
         switch (wantedLiftState) {
             case DOWN:
-                angle = .7;
+                angle = .66;
 
                 if (!IsDown()) {
                     SetLiftPower(-1);
@@ -77,19 +77,36 @@ public class Lift extends Subsystem {
                 break;
 
             case LAYER1:
-                done = SetLiftPos(25, 9);
+                done = SetLiftPos(25, 3);
                 break;
 
             case LAYER2:
-                done = SetLiftPos(24, 14);
+                done = SetLiftPos(24, 12);
                 break;
 
             case LAYER3:
-                done = SetLiftPos(29, 22);
+                done = SetLiftPos(31, 25);
                 break;
 
-            case SHARED:
-                done = SetLiftPos(11, 6);
+            case LAYER3_CLOSE:
+                done = SetLiftPos(22, 18);
+                angle = 1;
+                break;
+
+            case SHARED_CLOSE:
+                done = SetLiftPos(11, 8);
+                break;
+
+            case SHARED_FAR:
+                done = SetLiftPos(20, 8);
+                break;
+
+            case SMART:
+                if (Robot.getInstance().getIntake().block) {
+                    done = SetLiftPos(29, 23);
+                } else {
+                    done = SetLiftPos(24, 14);
+                }
                 break;
 
             case NULL:
@@ -114,8 +131,8 @@ public class Lift extends Subsystem {
                 break;
 
             case DOWN:
-                if (Math.abs(Robot.getInstance().fLDrive.getPosition() - scorePose.getX()) > 100 &&
-                        Math.abs(Robot.getInstance().fRDrive.getPosition() - scorePose.getY()) > 100) {
+                if (Math.abs(Robot.getInstance().fLDrive.getPosition() - scorePose.getX()) > 50 &&
+                        Math.abs(Robot.getInstance().fRDrive.getPosition() - scorePose.getY()) > 50) {
                     if (Robot.getInstance().driverStation != null) {
                         Robot.getInstance().driverStation.dumperOpen = false;
                     }
@@ -177,11 +194,14 @@ public class Lift extends Subsystem {
             if (Math.abs(power) > 0.05) {
                 Robot.getInstance().lift.setPower(power);
             } else {
-                if (angle <= .5) {
-                    Robot.getInstance().lift.setPower(0.07);
-                } else {
-                    Robot.getInstance().lift.setPower(0.1);
-                }
+                Robot.getInstance().lift.setPower(0.07);
+//                if (angle <= .5) {
+//                    Robot.getInstance().lift.setPower(0.15);
+//                } else if (angle >= 0.85) {
+//                    Robot.getInstance().lift.setPower(0.3);
+//                } else {
+//                    Robot.getInstance().lift.setPower(0.2);
+//                }
             }
         }
     }

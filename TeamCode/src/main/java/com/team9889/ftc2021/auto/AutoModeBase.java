@@ -72,6 +72,11 @@ public abstract class AutoModeBase extends Team9889Linear {
 
             while (!action.isFinished() && opModeIsActive() && !isStopRequested()) {
                 action.update();
+
+                Robot.outputToTelemetry(telemetry);
+                telemetry.update();
+
+                Robot.update();
             }
 
             if (opModeIsActive() && !isStopRequested()) {

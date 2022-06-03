@@ -57,7 +57,7 @@ public class RedFull extends AutoModeBase {
                 })
 //                .splineToConstantHeading(new Vector2d(24, -67), Math.toRadians(-0))
                 .splineToConstantHeading(new Vector2d(57, -67), Math.toRadians(-0),
-                        SampleMecanumDrive.getVelocityConstraint(22, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getVelocityConstraint(17, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .addTemporalMarker(100, () -> {
                     Robot.rrCancelable = false;
@@ -70,8 +70,8 @@ public class RedFull extends AutoModeBase {
                     Robot.rrCancelable = true;
                 })
 //                .splineToConstantHeading(new Vector2d(24, -67), Math.toRadians(-0))
-                .splineToConstantHeading(new Vector2d(56, -67), Math.toRadians(-0),
-                        SampleMecanumDrive.getVelocityConstraint(22, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                .splineToConstantHeading(new Vector2d(55, -67), Math.toRadians(-0),
+                        SampleMecanumDrive.getVelocityConstraint(15, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
                         SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .addTemporalMarker(100, () -> {
                     Robot.rrCancelable = false;
@@ -84,7 +84,12 @@ public class RedFull extends AutoModeBase {
                     ThreadAction(new IntakeStates(Intake.IntakeState.ON));
                     Robot.rrCancelable = true;
                 })
-                .splineToConstantHeading(new Vector2d(46, -56), Math.toRadians(-0))
+                .splineToConstantHeading(new Vector2d(25, -67), Math.toRadians(-0),
+                        SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .splineToConstantHeading(new Vector2d(43, -56), Math.toRadians(-0),
+                        SampleMecanumDrive.getVelocityConstraint(20, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .addTemporalMarker(100, () -> {
                     Robot.rrCancelable = false;
                 })
@@ -96,7 +101,7 @@ public class RedFull extends AutoModeBase {
                     ThreadAction(new IntakeStates(Intake.IntakeState.ON));
                     Robot.rrCancelable = true;
                 })
-                .splineToConstantHeading(new Vector2d(48, -56), Math.toRadians(-0))
+                .splineToConstantHeading(new Vector2d(45, -56), Math.toRadians(-0))
                 .addTemporalMarker(100, () -> {
                     Robot.rrCancelable = false;
                 })
@@ -107,7 +112,7 @@ public class RedFull extends AutoModeBase {
                 .setReversed(true)
 //                .splineTo(new Vector2d(35, -67), Math.toRadians(180))
                 .splineTo(new Vector2d(18, -67), Math.toRadians(180))
-                .splineTo(new Vector2d(7, -58), Math.toRadians(126))
+                .splineTo(new Vector2d(2, -60), Math.toRadians(126))
                 .addDisplacementMarker(30, () -> {
                     Robot.getIntake().intakeState = Intake.IntakeState.OFF;
                     Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
@@ -117,9 +122,11 @@ public class RedFull extends AutoModeBase {
         score2 = Robot.rr.trajectorySequenceBuilder(intake.end())
                 // Drive to hub
                 .setReversed(true)
-                .splineToConstantHeading(new Vector2d(35, -71), Math.toRadians(180))
-                .splineToConstantHeading(new Vector2d(18, -71), Math.toRadians(180))
-                .splineTo(new Vector2d(5, -60), Math.toRadians(126))
+                .splineToConstantHeading(new Vector2d(35, -71), Math.toRadians(180),
+                        SampleMecanumDrive.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .splineToConstantHeading(new Vector2d(12, -71), Math.toRadians(180))
+                .splineTo(new Vector2d(8, -62), Math.toRadians(126))
                 .addDisplacementMarker(30, () -> {
                     Robot.getIntake().intakeState = Intake.IntakeState.OFF;
                     Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
@@ -127,7 +134,7 @@ public class RedFull extends AutoModeBase {
                 .build();
 
         park = Robot.rr.trajectorySequenceBuilder(wall.end())
-                .splineToConstantHeading(new Vector2d(40, -66), Math.toRadians(-0))
+                .splineToConstantHeading(new Vector2d(50, -66), Math.toRadians(-0))
                 .build();
     }
 
@@ -157,7 +164,7 @@ public class RedFull extends AutoModeBase {
                 // Drive to hub
                 .setReversed(true)
                 .splineTo(new Vector2d(18, -67), Math.toRadians(180))
-                .splineTo(new Vector2d(7, -58), Math.toRadians(122))
+                .splineTo(new Vector2d(3, -56), Math.toRadians(122))
                 .addDisplacementMarker(30, () -> {
                     Robot.getIntake().intakeState = Intake.IntakeState.OFF;
                     Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
@@ -165,7 +172,7 @@ public class RedFull extends AutoModeBase {
                 .build();
 
         Robot.rr.followTrajectorySequence(score);
-        Robot.rr.setPoseEstimate(new Pose2d(3.5, -51, Robot.rr.getPoseEstimate().getHeading()));
+        Robot.rr.setPoseEstimate(new Pose2d(0, -49, Robot.rr.getPoseEstimate().getHeading()));
         runAction(new Score(Lift.LiftState.LAYER3));
 
         Robot.rr.followTrajectorySequence(wall);
@@ -176,7 +183,7 @@ public class RedFull extends AutoModeBase {
                 // Drive to hub
                 .setReversed(true)
                 .splineTo(new Vector2d(18, -67), Math.toRadians(180))
-                .splineTo(new Vector2d(7, -58), Math.toRadians(122))
+                .splineTo(new Vector2d(3, -56), Math.toRadians(122))
                 .addDisplacementMarker(30, () -> {
                     Robot.getIntake().intakeState = Intake.IntakeState.OFF;
                     Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
@@ -184,7 +191,7 @@ public class RedFull extends AutoModeBase {
                 .build();
 
         Robot.rr.followTrajectorySequence(score);
-        Robot.rr.setPoseEstimate(new Pose2d(3.5, -51, Robot.rr.getPoseEstimate().getHeading()));
+        Robot.rr.setPoseEstimate(new Pose2d(0, -49, Robot.rr.getPoseEstimate().getHeading()));
         runAction(new Score(Lift.LiftState.LAYER3));
 
         Robot.rr.followTrajectorySequence(wall);
@@ -205,23 +212,23 @@ public class RedFull extends AutoModeBase {
         Robot.rr.setPoseEstimate(new Pose2d(3.5, -51, Robot.rr.getPoseEstimate().getHeading()));
         runAction(new Score(Lift.LiftState.LAYER3));
 
-        Robot.rr.followTrajectorySequence(wall);
-        Robot.rr.followTrajectorySequence(intake4);
+//        Robot.rr.followTrajectorySequence(wall);
+//        Robot.rr.followTrajectorySequence(intake4);
 
-        score = Robot.rr.trajectorySequenceBuilder(Robot.rr.getPoseEstimate())
-                // Drive to hub
-                .setReversed(true)
-                .splineTo(new Vector2d(18, -67), Math.toRadians(180))
-                .splineTo(new Vector2d(7, -58), Math.toRadians(122))
-                .addDisplacementMarker(30, () -> {
-                    Robot.getIntake().intakeState = Intake.IntakeState.OFF;
-                    Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
-                })
-                .build();
+//        score = Robot.rr.trajectorySequenceBuilder(Robot.rr.getPoseEstimate())
+//                 Drive to hub
+//                .setReversed(true)
+//                .splineTo(new Vector2d(18, -67), Math.toRadians(180))
+//                .splineTo(new Vector2d(7, -58), Math.toRadians(122))
+//                .addDisplacementMarker(30, () -> {
+//                    Robot.getIntake().intakeState = Intake.IntakeState.OFF;
+//                    Robot.getDumper().gateState = Dumper.GateState.PARTIAL;
+//                })
+//                .build();
 
-        Robot.rr.followTrajectorySequence(score2);
-        Robot.rr.setPoseEstimate(new Pose2d(3.5, -51, Robot.rr.getPoseEstimate().getHeading()));
-        runAction(new Score(Lift.LiftState.LAYER3));
+//        Robot.rr.followTrajectorySequence(score2);
+//        Robot.rr.setPoseEstimate(new Pose2d(3.5, -51, Robot.rr.getPoseEstimate().getHeading()));
+//        runAction(new Score(Lift.LiftState.LAYER3));
 
         Robot.rr.followTrajectorySequence(wall);
         Robot.rr.followTrajectorySequence(park);

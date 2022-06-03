@@ -20,6 +20,7 @@ public class Constants {
     public final static String kRevHubSlave = "E";
 
     public final static String kWebcam = "Webcam";
+    public final static String kFrontCam = "front_cam";
 
     public static Pose2d pose;
 
@@ -73,6 +74,8 @@ public class Constants {
         public final static String kPassThrough = "pass_through";
         public final static String kIntakeLift = "intake_lift";
         public final static String kIntakeGate = "intake_gate";
+        public final static String kLeft = "intake_left";
+        public final static String kRight = "intake_right";
         public final static String kIntakeFlag = "flag";
     }
 
@@ -100,6 +103,18 @@ public class Constants {
     //Settings for Lift
     public static class DumperConstants {
         public final static String kGate = "gate";
+    }
+
+    /*---------------------
+    |                     |
+    |        Cap!         |
+    |                     |
+    ---------------------*/
+
+    //Settings for Lift
+    public static class CapConstants {
+        public final static String kArm = "arm";
+        public final static String kRelease = "release";
     }
 
     /*---------------------

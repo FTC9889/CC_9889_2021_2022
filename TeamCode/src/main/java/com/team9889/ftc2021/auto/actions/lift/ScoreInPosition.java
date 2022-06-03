@@ -2,34 +2,31 @@ package com.team9889.ftc2021.auto.actions.lift;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2021.auto.actions.Action;
-import com.team9889.ftc2021.auto.actions.ActionVariables;
 import com.team9889.ftc2021.subsystems.Dumper;
 import com.team9889.ftc2021.subsystems.Lift;
 import com.team9889.ftc2021.subsystems.Robot;
+import com.team9889.lib.Pose;
+
+import static java.lang.Math.abs;
 
 /**
  * Created by Eric on 2/8/2022.
  */
-public class Score extends Action {
+public class ScoreInPosition extends Action {
     Lift.LiftState wantedState;
+    Pose pose;
     int step = 0;
     ElapsedTime timer = new ElapsedTime();
-    Boolean delay = false;
 
-    public Score(Lift.LiftState state) {
+    public ScoreInPosition(Lift.LiftState state, Pose pose) {
         this.wantedState = state;
-    }
-
-    public Score(Lift.LiftState state, Boolean delay) {
-        this.wantedState = state;
-        this.delay = delay;
+        this.pose = pose;
     }
 
     @Override
     public void start() {
         timer.reset();
         Robot.getInstance().getLift().done = false;
-        ActionVariables.readyToScore = true;
     }
 
     @Override
@@ -45,7 +42,8 @@ public class Score extends Action {
                 break;
 
             case 1:
-                if (timer.milliseconds() > 250 || !delay) {
+                Pose error = Pose.getError(Pose.Pose2dToPose(Robot.getInstance().rr.getLocalizer().getPoseEstimate()), pose);
+                if (abs(error.x) < 2 && abs(error.y) < 2 && abs(error.theta) < 3) {
                     step = 2;
                     timer.reset();
                 }

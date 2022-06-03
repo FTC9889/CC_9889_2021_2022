@@ -31,8 +31,6 @@ public class IntakeStates extends Action {
 
     @Override
     public void done() {
-        Robot.getInstance().getIntake().intakeState = IntakeState.FRONT_OUT;
-
         if (Robot.getInstance().rrCancelable) {
             Robot.getInstance().rr.breakFollowing();
         }

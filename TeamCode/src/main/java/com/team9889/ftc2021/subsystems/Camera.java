@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.team9889.ftc2021.auto.AutoModeBase;
+import com.team9889.lib.detectors.ScanForDuck;
+import com.team9889.lib.detectors.ScanForHub;
 import com.team9889.lib.detectors.ScanForTSE;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -18,6 +20,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 @Config
 public class Camera extends Subsystem{
     ScanForTSE scanForTSE = new ScanForTSE();
+    public ScanForDuck scanForDuck = new ScanForDuck();
+    public ScanForHub scanForHub = new ScanForHub();
 
     public enum CameraStates {
         TSE, NULL
@@ -44,8 +48,9 @@ public class Camera extends Subsystem{
                 Robot.getInstance().camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
                 if (auto) {
                     setScanForTSE();
+//                    Robot.getInstance().camera.setPipeline(blank);
                 } else {
-
+                    Robot.getInstance().camera.setPipeline(scanForHub);
                 }
             }
 
@@ -54,6 +59,28 @@ public class Camera extends Subsystem{
 
             }
         });
+
+        Robot.getInstance().frontCVCam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                Robot.getInstance().frontCVCam.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT);
+                if (auto) {
+//                    setScanForTSE();
+                    Robot.getInstance().frontCVCam.setPipeline(scanForDuck);
+                } else {
+                    Robot.getInstance().frontCVCam.setPipeline(scanForDuck);
+                }
+            }
+
+            @Override
+            public void onError(int errorCode) {
+
+            }
+        });
+
+        Robot.getInstance().camYAxis.setPosition(0.68);
     }
 
     @Override
@@ -62,8 +89,12 @@ public class Camera extends Subsystem{
             telemetry.addData("Pos", getPosOfTarget());
             telemetry.addData("Box", getTSEPos());
 
+            telemetry.addData("Duck Point", scanForDuck.getPoint());
+
             Log.i("Box", "" + getTSEPos() + ", Pos: " + getPosOfTarget());
         }
+
+        telemetry.addData("Hub Pose", scanForHub.getPoint());
     }
 
     @Override
