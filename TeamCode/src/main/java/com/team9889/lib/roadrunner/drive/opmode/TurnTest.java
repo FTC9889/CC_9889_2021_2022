@@ -2,6 +2,7 @@ package com.team9889.lib.roadrunner.drive.opmode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.team9889.ftc2021.subsystems.Robot;
@@ -11,6 +12,7 @@ import com.team9889.lib.roadrunner.drive.SampleMecanumDrive;
  * This is a simple routine to test turning capabilities.
  */
 @Config
+@Disabled
 @Autonomous(group = "drive")
 public class TurnTest extends LinearOpMode {
     public static double ANGLE = 90; // deg

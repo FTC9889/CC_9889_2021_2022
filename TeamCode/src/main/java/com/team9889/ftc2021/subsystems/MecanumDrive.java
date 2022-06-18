@@ -82,8 +82,6 @@ public class MecanumDrive extends Subsystem {
 
     @Override
     public void update() {
-//        getAngle();
-
         if (!auto && !rrControl) {
             setFieldCentricPower(xSpeed, ySpeed, turnSpeed, !Robot.getInstance().isRed);
             xSpeed = 0;
@@ -91,11 +89,7 @@ public class MecanumDrive extends Subsystem {
             turnSpeed = 0;
         }
 
-//        double xDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24.0 / 380.0) + 7,
-//                yDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24.0 / 380.0) + 7;
-//        Vector2d pose = getPosition(xSensor, ySensor, corner);
-//        Robot.getInstance().rr.setPoseEstimate(new Pose2d(pose.getX(), pose.getY(),
-//                Robot.getInstance().rr.getPoseEstimate().getHeading()));
+        Log.v("Loop Time M", "" + Robot.getInstance().loopTime.milliseconds());
     }
 
     @Override

@@ -7,4 +7,6 @@ public class ActionVariables {
     public static boolean grabbedDuck = false;
 
     public static boolean readyToScore = true;
+
+    public static boolean stopDriving = false;
 }

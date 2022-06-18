@@ -1,6 +1,7 @@
 package com.team9889.ftc2021.subsystems;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -61,7 +62,7 @@ public class Intake extends Subsystem {
                     power = .7;
                 IntakeOn();
                 IntakeDown();
-                passThroughState = IntakeState.PARTIAL_OUT;
+                passThroughState = IntakeState.OFF;
 
                 if (GetFreightInIntake()) {
                     loadState = LoadState.TRANSFER;
@@ -130,6 +131,8 @@ public class Intake extends Subsystem {
                 Robot.getInstance().flag.setPosition(0);
             }
         }
+
+        Log.v("Loop Time I", "" + Robot.getInstance().loopTime.milliseconds());
     }
 
     @Override
@@ -182,7 +185,13 @@ public class Intake extends Subsystem {
     }
 
     public boolean GetFreightInIntake() {
-        return Robot.getInstance().inLeft.getDistance(DistanceUnit.INCH) < 1.5 || Robot.getInstance().inRight.getDistance(DistanceUnit.INCH) < 3.4;
+        try {
+            return Robot.getInstance().inLeft.getDistance(DistanceUnit.INCH) < 1.5 || Robot.getInstance().inRight.getDistance(DistanceUnit.INCH) < 3.4;
+        }
+        catch (Exception exception) {
+            Log.e("Intake failed TryCatch", "" + exception);
+            return false;
+        }
     }
 
     public double GetHue() {

@@ -1,4 +1,4 @@
-package com.team9889.ftc2021.auto.actions.drive;
+package com.team9889.ftc2021.auto.actions.drive.duck;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2021.auto.actions.Action;
@@ -16,6 +16,8 @@ public class DriveToDuck extends Action {
 
     Point lastPoint = new Point(0, 0);
 
+    int counter = 0;
+
     @Override
     public void start() {
         timer.reset();
@@ -31,24 +33,31 @@ public class DriveToDuck extends Action {
             lastPoint = point;
         }
 
-        double xSpeed = 0, turnSpeed = (0.0014 * (point.x - 160)) + 0.0221;
+        double xSpeed = 0, turnSpeed = (0.0007 * (point.x - 160)) + 0.0221;
 
         if (Robot.getInstance().isRed) {
-            if (Robot.getInstance().rr.getPoseEstimate().getY() > -58 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
+            if (Robot.getInstance().rr.getPoseEstimate().getY() > -56 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
                 xSpeed = 0.5;
             }
         } else {
-            if (Robot.getInstance().rr.getPoseEstimate().getY() < 58 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
+            if (Robot.getInstance().rr.getPoseEstimate().getY() < 56 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
                 xSpeed = 0.5;
             }
         }
 
         Robot.getInstance().getMecanumDrive().setPower(0, xSpeed, turnSpeed);
+
+        if (Robot.getInstance().getIntake().loadState != Intake.LoadState.INTAKE) {
+            counter++;
+            Robot.getInstance().getIntake().loadState = Intake.LoadState.INTAKE;
+        } else {
+            counter = 0;
+        }
     }
 
     @Override
     public boolean isFinished() {
-        return Robot.getInstance().getIntake().loadState != Intake.LoadState.INTAKE || timer.milliseconds() > 2000;
+        return counter > 5 || timer.milliseconds() > 2000;
     }
 
     @Override

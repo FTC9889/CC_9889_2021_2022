@@ -227,10 +227,13 @@ public class Robot {
 
     // Update data from Hubs and Apply new data
     public void update() {
+        Log.v("Loop Time 1", "" + loopTime.milliseconds());
         // Update Bulk Data
         try {
             bulkDataMaster = revHubMaster.getBulkInputData();
             bulkDataSlave = revHubSlave.getBulkInputData();
+
+            Log.v("Loop Time 2", "" + loopTime.milliseconds());
 
             // Update Motors
             fRDrive.update(bulkDataMaster);
@@ -239,26 +242,24 @@ public class Robot {
             bLDrive.update(bulkDataMaster);
             lift.update(bulkDataSlave);
 
+            Log.v("Loop Time 3", "" + loopTime.milliseconds());
+
 //            capArm.update(loopTime.milliseconds());
 
             // Update Subsystems
             for (Subsystem subsystem : subsystems)
                 subsystem.update();
 
-//            if (!auto) {
+            Log.v("Loop Time 4", "" + loopTime.milliseconds());
+
+            if (auto) {
                 rr.getLocalizer().update();
-//            }
+            }
         } catch (Exception e){
             Log.v("Exception@robot.update", "" + e);
         }
 
-        if (isRed) {
-            writeLastKnownPosition("Red", "Side");
-        } else {
-            writeLastKnownPosition("Blue", "Side");
-        }
-
-        Log.v("Loop Time", "" + loopTime.milliseconds());
+        Log.v("Loop Time 5", "" + loopTime.milliseconds());
 
         loopTime.reset();
     }
@@ -287,6 +288,12 @@ public class Robot {
     public void stop(){
         for (Subsystem subsystem : subsystems)
             subsystem.stop();
+
+        if (isRed) {
+            writeLastKnownPosition("Red", "Side");
+        } else {
+            writeLastKnownPosition("Blue", "Side");
+        }
 //        revHubMaster.close();
 //        revHubSlave.close();
     }

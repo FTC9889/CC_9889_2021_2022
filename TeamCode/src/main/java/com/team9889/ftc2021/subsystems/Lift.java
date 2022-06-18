@@ -10,6 +10,8 @@ import com.team9889.lib.control.controllers.PID;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import java.util.Hashtable;
+
 /**
  * Created by Eric on 8/19/2019.
  */
@@ -20,13 +22,14 @@ public class Lift extends Subsystem {
 
     public static double liftTolerance = 1.5;
 
-    public boolean done = true;
+    public boolean done = true, needsReset = false;
 
     public enum LiftState {
         DOWN, LAYER1, LAYER2, LAYER3, LAYER3_CLOSE, SHARED_CLOSE, SHARED_FAR, SMART, NULL
     }
     public LiftState wantedLiftState = LiftState.NULL, currentLiftState = LiftState.NULL,
             defaultLiftState = LiftState.LAYER3;
+    Hashtable<LiftState, double[]> liftNumbers = new Hashtable<>();
 
     public enum ScoreState {
         RELEASE, DOWN, NULL
@@ -39,8 +42,8 @@ public class Lift extends Subsystem {
 
     public static PID liftPID = new PID(0.09, 0, 0);
     public static double maxCurrent = 6500;
-    double current = 0;
-    ElapsedTime timer = new ElapsedTime();
+    double lastPower = 0, lastLength = 0;
+    ElapsedTime timer = new ElapsedTime(), liftStallTimer = new ElapsedTime();
 
     @Override
     public void init(boolean auto) {
@@ -51,6 +54,12 @@ public class Lift extends Subsystem {
             wantedLiftState = LiftState.DOWN;
             angle = 0;
         }
+
+
+//        for(LiftState state : LiftState.values()) {
+//            liftNumbers.put(state, )
+//        }
+
     }
 
     @Override
@@ -77,11 +86,11 @@ public class Lift extends Subsystem {
                 break;
 
             case LAYER1:
-                done = SetLiftPos(25, 3);
+                done = SetLiftPos(27, 10);
                 break;
 
             case LAYER2:
-                done = SetLiftPos(24, 12);
+                done = SetLiftPos(27, 18);
                 break;
 
             case LAYER3:
@@ -94,11 +103,11 @@ public class Lift extends Subsystem {
                 break;
 
             case SHARED_CLOSE:
-                done = SetLiftPos(11, 8);
+                done = SetLiftPos(11, 10);
                 break;
 
             case SHARED_FAR:
-                done = SetLiftPos(20, 8);
+                done = SetLiftPos(20, 10);
                 break;
 
             case SMART:
@@ -112,7 +121,14 @@ public class Lift extends Subsystem {
             case NULL:
                 break;
         }
-        currentLiftState = wantedLiftState;
+        Log.v("Loop Time L1", "" + Robot.getInstance().loopTime.milliseconds());
+
+        if (currentLiftState != wantedLiftState) {
+            liftStallTimer.reset();
+            currentLiftState = wantedLiftState;
+        }
+        Log.v("Loop Time L2", "" + Robot.getInstance().loopTime.milliseconds());
+
 
         switch (scoreState) {
             case RELEASE:
@@ -153,15 +169,20 @@ public class Lift extends Subsystem {
                 scoreStateTime = Robot.getInstance().robotTimer.milliseconds();
                 break;
         }
+        Log.v("Loop Time L3", "" + Robot.getInstance().loopTime.milliseconds());
 
-
-        if (IsDown()) {
-            Robot.getInstance().lift.resetEncoder();
-        }
-
+//        if (IsDown() && needsReset) {
+//            Robot.getInstance().lift.resetEncoder();
+//            needsReset = false;
+//        } else if (IsDown()){
+//            needsReset = true;
+//        }
+//        Log.v("Loop Time L4", "" + Robot.getInstance().loopTime.milliseconds());
 
         angle = CruiseLib.limitValue(angle, 1, .21);
         SetAngleAdjust(angle);
+
+        Log.v("Loop Time L", "" + Robot.getInstance().loopTime.milliseconds());
     }
 
     @Override
@@ -171,7 +192,20 @@ public class Lift extends Subsystem {
 
     public boolean SetLiftLength(double length) {
         if (Math.abs(GetLiftLength() - length) > liftTolerance) {
-            SetLiftPower(liftPID.update(GetLiftLength(), length));
+            double power = CruiseLib.limitValue(liftPID.update(GetLiftLength(), length), -0.05, -1, 0.05, 1);
+
+            if ((Math.abs(power - lastPower) > 0.1 && Math.abs(GetLiftLength() - lastLength) > 2) || Math.abs(power) > 0.9) {
+                liftStallTimer.reset();
+            }
+
+            if (liftStallTimer.milliseconds() < 500) {
+                SetLiftPower(power);
+            } else {
+                SetLiftPower(0);
+            }
+
+            lastPower = power;
+            lastLength = GetLiftLength();
         } else {
             SetLiftPower(0);
             return true;
@@ -181,9 +215,6 @@ public class Lift extends Subsystem {
     }
 
     public void SetLiftPower(double power){
-        Log.i("Power", "" + power);
-//        power = CruiseLib.limitValue(power, 1, 0.2);
-
         if (IsDown()) {
             if (power > 0) {
                 Robot.getInstance().lift.setPower(power);

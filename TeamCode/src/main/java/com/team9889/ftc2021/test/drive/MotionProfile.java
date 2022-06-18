@@ -2,6 +2,7 @@ package com.team9889.ftc2021.test.drive;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2021.Team9889Linear;
 import com.team9889.lib.control.controllers.MotionProfileFollower;
@@ -13,6 +14,7 @@ import com.team9889.lib.control.motion.TrapezoidalMotionProfile;
  */
 
 @Config
+@Disabled
 @Autonomous
 public class MotionProfile extends Team9889Linear {
     @Override

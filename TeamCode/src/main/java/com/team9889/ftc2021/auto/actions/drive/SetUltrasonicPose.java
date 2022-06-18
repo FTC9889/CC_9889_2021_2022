@@ -11,7 +11,7 @@ import com.team9889.lib.control.math.cartesian.Vector2d;
  */
 public class SetUltrasonicPose extends Action {
     public enum Position {
-        CAROUSEL, WH_AFTER_BARRIER, WH_INTAKE_SHARED_SIDE, DUCK_AUTO_SCORE
+        CAROUSEL, WH_AFTER_BARRIER, WH_INTAKE_SHARED_SIDE, DUCK_AUTO_SCORE, WH_CYCLE
     }
     Position position;
 
@@ -53,6 +53,11 @@ public class SetUltrasonicPose extends Action {
                 case DUCK_AUTO_SCORE:
                     tempPose = Robot.getInstance().getMecanumDrive().getPosition
                             (MecanumDrive.Sensor.BACK, MecanumDrive.Sensor.RIGHT, MecanumDrive.Corner.BOTTOM_RIGHT);
+                    break;
+
+                case WH_CYCLE:
+                    tempPose = Robot.getInstance().getMecanumDrive().getPosition
+                            (MecanumDrive.Sensor.FRONT, MecanumDrive.Sensor.RIGHT, MecanumDrive.Corner.TOP_RIGHT);
                     break;
             }
         } else {

@@ -45,7 +45,7 @@ public abstract class Team9889Linear extends LinearOpMode {
     public abstract void initialize();
 
     public void waitForStart(boolean autonomous) {
-        this.waitForStart(autonomous, AutoModeBase.StartPosition.REDRIGHT);
+        this.waitForStart(autonomous, AutoModeBase.StartPosition.RED_DUCK);
     }
 
     public void waitForStart(boolean autonomous, AutoModeBase.StartPosition startPosition) {
@@ -65,11 +65,11 @@ public abstract class Team9889Linear extends LinearOpMode {
         if (autonomous) {
             Robot.getCamera().setTSECamPos();
 
-            if (startPosition == AutoModeBase.StartPosition.REDLEFT ||
-                startPosition == AutoModeBase.StartPosition.REDRIGHT) {
+            if (startPosition == AutoModeBase.StartPosition.RED_CYCLE ||
+                startPosition == AutoModeBase.StartPosition.RED_DUCK) {
                 Robot.isRed = true;
-            } else if (startPosition == AutoModeBase.StartPosition.BLUELEFT ||
-                    startPosition == AutoModeBase.StartPosition.BLUERIGHT) {
+            } else if (startPosition == AutoModeBase.StartPosition.BLUE_CYCLE ||
+                    startPosition == AutoModeBase.StartPosition.BLUE_DUCK) {
                 Robot.isRed = false;
             }
 
@@ -111,25 +111,25 @@ public abstract class Team9889Linear extends LinearOpMode {
                 }
                 telemetry.addData("Box", Robot.getCamera().getTSEPos().toString());
 
-                telemetry.addData("Delay at beginning", timeToWait / 1000);
+                telemetry.addData("Delay at beginning", timeToWait / 1000.0);
 
                 Robot.outputToTelemetry(telemetry);
                 telemetry.update();
 
-                FtcDashboard.getInstance().startCameraStream(Robot.frontCVCam, 0);
+                FtcDashboard.getInstance().startCameraStream(Robot.camera, 0);
 
                 if (gamepad1.dpad_up && buttonReleased) {
-                    timeToWait += 1000;
+                    timeToWait += 500;
                     buttonReleased = false;
                 } else if (gamepad1.dpad_down && buttonReleased) {
-                    timeToWait -= 1000;
+                    timeToWait -= 500;
                     buttonReleased = false;
                 } else if (!gamepad1.dpad_up && !gamepad1.dpad_down) {
                     buttonReleased = true;
                 }
             }
         } else {
-            FtcDashboard.getInstance().startCameraStream(Robot.frontCVCam, 0);
+            FtcDashboard.getInstance().startCameraStream(Robot.camera, 0);
 
             // Teleop Init Loop code
             while(isInInitLoop()){

@@ -6,10 +6,10 @@ import com.team9889.ftc2021.auto.AutoModeBase;
 import com.team9889.ftc2021.auto.actions.ActionVariables;
 import com.team9889.ftc2021.auto.actions.carousel.SpinDuck;
 import com.team9889.ftc2021.auto.actions.drive.DriveTillCarousel;
-import com.team9889.ftc2021.auto.actions.drive.DriveToDuck;
+import com.team9889.ftc2021.auto.actions.drive.duck.DriveToDuck;
 import com.team9889.ftc2021.auto.actions.drive.PurePursuit;
 import com.team9889.ftc2021.auto.actions.drive.SetUltrasonicPose;
-import com.team9889.ftc2021.auto.actions.drive.TurnUntilDuck;
+import com.team9889.ftc2021.auto.actions.drive.duck.TurnUntilDuck;
 import com.team9889.ftc2021.auto.actions.intake.DriveAndIntake;
 import com.team9889.ftc2021.auto.actions.lift.Score;
 import com.team9889.ftc2021.auto.actions.lift.ScoreNextToHub;
@@ -24,13 +24,11 @@ import java.util.ArrayList;
  * Created by Eric on 5/27/2022.
  */
 
-@Autonomous
+@Autonomous(name = "\uD83D\uDFE5 \uD83E\uDD86 ♻ Red Duck & Cycle ♻ \uD83E\uDD86 \uD83D\uDFE5", preselectTeleOp = "Teleop")
 public class RedDuckCycle extends AutoModeBase {
     @Override
     public void run(StartPosition startPosition, Boxes box) {
         ArrayList<Pose> path = new ArrayList<>();
-
-//        ThreadAction(new ScoreInPosition(Lift.LiftState.LAYER3, new Pose(-32, -47, -127)));
 
         path.add(new Pose(-38, -55, -90, 1, 0, 6));
         path.add(new Pose(-32, -49, -127, 1, 0, 12));
@@ -51,12 +49,12 @@ public class RedDuckCycle extends AutoModeBase {
         runAction(new SpinDuck());
 
         path.add(new Pose(-65, -40, 90, 1, 0, 6));
-        path.add(new Pose(-60, -40, -40, 1, 0, 12));
+        path.add(new Pose(-60, -40, -60, 1, 0, 12));
         runAction(new PurePursuit(path));
         path.clear();
 
         Robot.getIntake().overridePower = true;
-        Intake.power = .75;
+        Intake.power = 0.5;
         Robot.getIntake().loadState = Intake.LoadState.INTAKE;
         runAction(new TurnUntilDuck());
 
@@ -68,12 +66,9 @@ public class RedDuckCycle extends AutoModeBase {
             path.clear();
 
             runAction(new Score(Lift.LiftState.LAYER3, false));
-            Robot.getIntake().loadState = Intake.LoadState.OFF;
-            Robot.getIntake().overridePower = false;
-        } else {
-            Robot.getIntake().loadState = Intake.LoadState.OFF;
-            Robot.getIntake().overridePower = false;
         }
+        Robot.getIntake().loadState = Intake.LoadState.OFF;
+        Robot.getIntake().overridePower = false;
 
         path.add(new Pose(-40, -24, -90, 1, -1, 6));
         path.add(new Pose(-24, -5, -180, 1, -1, 6));

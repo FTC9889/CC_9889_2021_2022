@@ -25,6 +25,8 @@ public class Teleop extends Team9889Linear {
 
         waitForStart(false);
 
+        timer.reset();
+
         while (opModeIsActive()) {
             /* Mecanum Drive */
             if (driverStation.resetIMU()) {
@@ -88,7 +90,7 @@ public class Teleop extends Team9889Linear {
                     Robot.getLift().wantedLiftState = Lift.LiftState.NULL;
                     Robot.getLift().currentLiftState = Lift.LiftState.NULL;
 
-                    Robot.getLift().SetLiftPower(driverStation.getLiftExtend());
+                    Robot.getLift().SetLiftPower(driverStation.getLiftExtend() / (Robot.getLift().defaultLiftState == Lift.LiftState.SHARED_CLOSE ? 2 : 1));
                 } else if (driverStation.getFirstLayer()) {
                     Robot.getLift().wantedLiftState = Lift.LiftState.SMART;
                 } else if (driverStation.getSecondLayer()) {
@@ -134,15 +136,17 @@ public class Teleop extends Team9889Linear {
 
 
             /* Cap */
-            if (driverStation.getCapForward()) {
-                Robot.getCapArm().step += 1;
-                Robot.getCapArm().manualControl = false;
-            } else if (driverStation.getCapBack()) {
-                Robot.getCapArm().step -= 1;
-                Robot.getCapArm().manualControl = false;
-            } else if (driverStation.resetCap()) {
-                Robot.getCapArm().step = 0;
-                Robot.getCapArm().manualControl = false;
+            if (timer.milliseconds() > 85000) {
+                if (driverStation.getCapForward()) {
+                    Robot.getCapArm().step += 1;
+                    Robot.getCapArm().manualControl = false;
+                } else if (driverStation.getCapBack()) {
+                    Robot.getCapArm().step -= 1;
+                    Robot.getCapArm().manualControl = false;
+                } else if (driverStation.resetCap()) {
+                    Robot.getCapArm().step = 0;
+                    Robot.getCapArm().manualControl = false;
+                }
             }
 
 //            if (gamepad1.back) {

@@ -3,6 +3,7 @@ package com.team9889.lib.roadrunner.drive.opmode;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.team9889.ftc2021.subsystems.Robot;
@@ -38,7 +39,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  *
  * Uncomment the @Disabled tag below to use this opmode.
  */
-//@Disabled
+@Disabled
 @Config
 @TeleOp(group = "drive")
 public class MotorDirectionDebugger extends LinearOpMode {

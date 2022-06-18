@@ -11,14 +11,14 @@ import com.team9889.ftc2021.auto.actions.Action;
 public abstract class AutoModeBase extends Team9889Linear {
 
     // Autonomous Settings
-    private StartPosition currentAutoRunning = StartPosition.REDRIGHT;
+    private StartPosition currentAutoRunning = StartPosition.RED_DUCK;
 
     // Timer for autonomous
     protected ElapsedTime autoTimer = new ElapsedTime();
     double lastLoop = 0;
 
     public enum StartPosition {
-        REDRIGHT, REDLEFT, BLUERIGHT, BLUELEFT, PARK;
+        RED_DUCK, RED_CYCLE, BLUE_DUCK, BLUE_CYCLE;
 
         private static String redString = "Red";
         private static String blueString = "Blue";
