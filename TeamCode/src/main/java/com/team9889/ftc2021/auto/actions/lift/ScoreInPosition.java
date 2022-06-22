@@ -42,7 +42,7 @@ public class ScoreInPosition extends Action {
                 break;
 
             case 1:
-                Pose error = Pose.getError(Pose.Pose2dToPose(Robot.getInstance().rr.getLocalizer().getPoseEstimate()), pose);
+                Pose error = Pose.getDifference(Pose.Pose2dToPose(Robot.getInstance().rr.getLocalizer().getPoseEstimate()), pose);
                 if (abs(error.x) < 2 && abs(error.y) < 2 && abs(error.theta) < 3) {
                     step = 2;
                     timer.reset();

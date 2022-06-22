@@ -49,7 +49,7 @@ public class Pose {
         return new Pose(pose2d.getX(), pose2d.getY(), Math.toDegrees(pose2d.getHeading()));
     }
 
-    public static Pose getError(Pose pose1, Pose pose2) {
+    public static Pose getDifference(Pose pose1, Pose pose2) {
         return new Pose(pose2.x - pose1.x, pose2.y - pose1.y, pose2.theta - pose1.theta);
     }
 
