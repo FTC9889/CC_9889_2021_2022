@@ -5,6 +5,7 @@ import android.util.Log;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.team9889.ftc2021.Constants;
 import com.team9889.lib.CruiseLib;
 import com.team9889.lib.control.controllers.PID;
@@ -35,18 +36,15 @@ public class MecanumDrive extends Subsystem {
 
     public boolean resetRR = false, rrControl = false;
 
-    private String filename = "gyro.txt";
-
     boolean auto;
 
     public enum Corner {
         TOP_RIGHT, BOTTOM_RIGHT, TOP_LEFT, BOTTOM_LEFT
     }
-    public static Corner corner = Corner.TOP_RIGHT;
+
     public enum Sensor {
         FRONT, LEFT, BACK, RIGHT
     }
-    public static Sensor xSensor = Sensor.FRONT, ySensor = Sensor.RIGHT;
 
     @Override
     public void init(boolean auto) {
@@ -203,53 +201,51 @@ public class MecanumDrive extends Subsystem {
         }
     }
 
-
-//  Constraints:
-//      Robot must be parallel to the field walls
-//      Assume Robot is always facing back wall
+    //bulkDataSlave 0: Front (7 inches from robot center)
+    private double frontUltrasonicDistance() {
+        return (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24.0 / 380.0) + 7;
+    }
 
     //bulkDataMaster 0: Left (5.5 inches from robot center)
+    private double leftUltrasonicDistance() {
+        return (Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 24.0 / 380.0) + 5.5;
+    }
+
     //bulkDataMaster 1 Back (5.75 inches from robot center)
-    //bulkDataSlave 0: Front (7 inches from robot center)
+    private double backUltrasonicDistance() {
+        return (Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 24.0 / 380.0) + 5.75;
+    }
+
     //bulkDataSlave 1: Right (5.5 inches from robot center)
-    public Vector2d getPosition (Sensor xSensor, Sensor ySensor, Corner corner) {
-        double angle = Robot.getInstance().rr.getPoseEstimate().getHeading(), xDist = 0, yDist = 0;
+    private double rightUltrasonicDistance() {
+        return (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24.0 / 380.0) + 5.5;
+    }
 
-        switch (xSensor) {
+    private double getUltrasonicDistance(Sensor sensor) {
+        switch (sensor) {
             case FRONT:
-                xDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24.0 / 380.0) + 7;
-                break;
-
+                return frontUltrasonicDistance();
             case LEFT:
-                xDist = (Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 24.0 / 380.0) + 5.5;
-                break;
-
+                return leftUltrasonicDistance();
             case BACK:
-                xDist = (Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 24.0 / 380.0) + 5.75;
-                break;
-
-            case RIGHT:
-                xDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24.0 / 380.0) + 5.5;
-                break;
+                return backUltrasonicDistance();
+            default: // case RIGHT:
+                return rightUltrasonicDistance();
         }
+    }
 
-        switch (ySensor) {
-            case FRONT:
-                yDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24.0 / 380.0) + 7;
-                break;
 
-            case LEFT:
-                yDist = (Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 24.0 / 380.0) + 5.5;
-                break;
+    //  Constraints:
+    //      Robot must be parallel to the field walls
+    //      Assume Robot is always facing back wall
+    public Vector2d getPosition(Sensor xSensor, Sensor ySensor, Corner corner) {
+        if (xSensor == ySensor)
+            RobotLog.e("Watch out.. Two Ultrasonic Sensors measuring the same thing");
 
-            case BACK:
-                yDist = (Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 24.0 / 380.0) + 5.75;
-                break;
-
-            case RIGHT:
-                yDist = (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24.0 / 380.0) + 5.5;
-                break;
-        }
+        // Sensor Readings
+        double angle = Robot.getInstance().rr.getPoseEstimate().getHeading();
+        double xDist = getUltrasonicDistance(xSensor);
+        double yDist = getUltrasonicDistance(ySensor);
 
         Vector2d robotPos = new Vector2d(), globalPos = new Vector2d();
 
@@ -269,8 +265,8 @@ public class MecanumDrive extends Subsystem {
 
         Log.v("Adjusted Angle", angle + ", " + adjustedAngle);
 
-        robotPos.setX((xDist * Math.cos(0)) + (yDist * Math.sin(0)));
-        robotPos.setY((yDist * Math.cos(0)) + (xDist * Math.sin(0)));
+        robotPos.setX(xDist * Math.cos(0));
+        robotPos.setY(yDist * Math.cos(0));
 
         switch (corner) {
             case TOP_RIGHT:
@@ -303,6 +299,7 @@ public class MecanumDrive extends Subsystem {
         return globalPos;
     }
 
+    @Deprecated
     public Vector2d getPositionRed () {
         double dist0 = (double) Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24 / 380;
         double dist1 = (double) Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24 / 380;
@@ -325,6 +322,7 @@ public class MecanumDrive extends Subsystem {
         return globalPos;
     }
 
+    @Deprecated
     public Vector2d getPositionBlue () {
         double dist0 = (double) Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 23 / 370;
         double dist1 = (double) Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 16 / 250;

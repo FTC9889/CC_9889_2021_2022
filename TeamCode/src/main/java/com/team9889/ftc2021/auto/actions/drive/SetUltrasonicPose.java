@@ -59,6 +59,8 @@ public class SetUltrasonicPose extends Action {
                     tempPose = Robot.getInstance().getMecanumDrive().getPosition
                             (MecanumDrive.Sensor.FRONT, MecanumDrive.Sensor.RIGHT, MecanumDrive.Corner.TOP_RIGHT);
                     break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + position);
             }
         } else {
 
