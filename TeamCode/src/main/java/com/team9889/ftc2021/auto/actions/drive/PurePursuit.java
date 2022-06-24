@@ -2,6 +2,7 @@ package com.team9889.ftc2021.auto.actions.drive;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.auto.actions.ActionVariables;
@@ -25,7 +26,8 @@ import static java.lang.Math.toDegrees;
 public class PurePursuit extends Action {
     public static double speedToAdd = 0.02;
 
-    double maxSpeed = 0;
+    double maxSpeed = 0, timeout = -1;
+    ElapsedTime timer = new ElapsedTime();
 
     ArrayList<Pose> path;
     Pose tolerance = new Pose(2, 2, 3);
@@ -35,8 +37,19 @@ public class PurePursuit extends Action {
         this.path = path;
     }
 
+    public PurePursuit(ArrayList<Pose> path, double timeout) {
+        this.path = path;
+        this.timeout = timeout;
+    }
+
     public PurePursuit(ArrayList<Pose> path, Pose tolerance) {
         this.path = path;
+        this.tolerance = tolerance;
+    }
+
+    public PurePursuit(ArrayList<Pose> path, Pose tolerance, double timeout) {
+        this.path = path;
+        this.timeout = timeout;
         this.tolerance = tolerance;
     }
 
@@ -53,6 +66,8 @@ public class PurePursuit extends Action {
 
         Pose2d pose = Robot.getInstance().rr.getLocalizer().getPoseEstimate();
         path.add(0, new Pose(pose.getX(), pose.getY(), toDegrees(pose.getHeading())));
+
+        timer.reset();
     }
 
     @Override
@@ -102,12 +117,12 @@ public class PurePursuit extends Action {
 //                + sqrt(pow(point.y-pose.getY(), 2) + pow(point.x-pose.getX(), 2)));
 
         double turnSpeed;
-        if (sqrt(pow(point.y-pose.getY(), 2) + pow(point.x-pose.getX(), 2)) < 10 || path.get(step).thetaFollowPoint == 0) {
+        if ((sqrt(pow(point.y-pose.getY(), 2) + pow(point.x-pose.getX(), 2)) < 10 && step == path.size() - 1) || path.get(step).thetaFollowPoint == 0) {
 //            Log.v("Angle", path.get(step).theta + ", " + toDegrees(pose.getHeading()) + ", " +
 //                    -CruiseLib.angleWrap(path.get(step).theta - toDegrees(pose.getHeading())) / 180.0);
 
-            turnSpeed = CruiseLib.limitValue(-CruiseLib.angleWrap(path.get(step).theta - toDegrees(pose.getHeading())) / 180.0,
-                    0, -0.3, 0, 0.3);
+            turnSpeed = CruiseLib.limitValue(-CruiseLib.angleWrap(path.get(step).theta - toDegrees(pose.getHeading())) / 90.0,
+                    0, -1, 0, 1) * path.get(step).turnSpeed;
         } else {
 //            Log.v("Angle", angleToPoint + ", " + toDegrees(pose.getHeading()));
 
@@ -162,7 +177,7 @@ public class PurePursuit extends Action {
         Pose error = Pose.getError(Pose.Pose2dToPose(Robot.getInstance().rr.getLocalizer().getPoseEstimate()),
                 path.get(path.size() - 1));
         return ((abs(error.x) < tolerance.x && abs(error.y) < tolerance.y && abs(CruiseLib.angleWrap(error.theta)) < tolerance.theta)
-                && step == path.size() - 1) || ActionVariables.stopDriving;
+                && step == path.size() - 1) || ActionVariables.stopDriving || (timeout != -1 && timer.milliseconds() > timeout);
     }
 
     @Override

@@ -30,7 +30,7 @@ public class Timeout {
      * @return If the proper amount of time has elapsed.
      */
     public boolean is_timed_out() {
-        return currentTime.now() - (startTime + millisecondTimeout) >= 0;
+        return currentTime.now() - startTime >= millisecondTimeout;
     }
 
     /**

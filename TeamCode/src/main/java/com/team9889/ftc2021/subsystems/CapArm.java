@@ -13,6 +13,8 @@ public class CapArm extends Subsystem{
     public boolean manualControl = false;
     ElapsedTime timer = new ElapsedTime();
 
+    public boolean intake = false;
+
     @Override
     public void init(boolean auto) {
 
@@ -29,13 +31,13 @@ public class CapArm extends Subsystem{
             switch (step) {
                 case 0:
                     // Arm Down
-                    setCapArm(0.13);
+                    setCapArm(intake ? 0.28 : 0.13);
                     capClose();
                     break;
 
                 case 1:
                     // Grab Cap
-                    setCapArm(0.885);
+                    setCapArm(0.87);
                     capClose();
                     break;
 
@@ -88,10 +90,10 @@ public class CapArm extends Subsystem{
 //    }
 
     public void capClose() {
-        Robot.getInstance().capRelease.setPosition(0);
+        Robot.getInstance().capRelease.setPosition(1);
     }
 
     public void capOpen() {
-        Robot.getInstance().capRelease.setPosition(1);
+        Robot.getInstance().capRelease.setPosition(0);
     }
 }

@@ -43,15 +43,19 @@ public class Intake extends Subsystem {
             wantedIntakeHeightState = IntakeHeightState.UP;
         }
 
+        overridePower = false;
+
         Robot.getInstance().inLeft.setGain(2);
     }
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
-        telemetry.addData("Intake Left", Robot.getInstance().inLeft.getDistance(DistanceUnit.INCH));
-        telemetry.addData("Intake Right", Robot.getInstance().inRight.getDistance(DistanceUnit.INCH));
+//        telemetry.addData("Intake Left", Robot.getInstance().inLeft.getDistance(DistanceUnit.INCH));
+//        telemetry.addData("Intake Right", Robot.getInstance().inRight.getDistance(DistanceUnit.INCH));
         telemetry.addData("Freight in Intake", GetFreightInIntake());
         telemetry.addData("Is Block", block);
+
+        telemetry.addData("Power", power);
     }
 
     @Override
@@ -88,6 +92,12 @@ public class Intake extends Subsystem {
                 IntakeUp();
                 PassThroughOff();
                 break;
+        }
+
+        if (loadState == LoadState.TRANSFER) {
+            Robot.getInstance().getCapArm().intake = true;
+        } else {
+            Robot.getInstance().getCapArm().intake = false;
         }
 
         switch (intakeState) {

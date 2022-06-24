@@ -101,6 +101,6 @@ public class Motor {
     }
 
     public void setRPM(double rpm) {
-        motor.setVelocity(rpm * 360, AngleUnit.DEGREES);
+        motor.setVelocity(rpm * 2, AngleUnit.DEGREES);
     }
 }

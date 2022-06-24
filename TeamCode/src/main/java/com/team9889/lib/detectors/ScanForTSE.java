@@ -1,6 +1,7 @@
 package com.team9889.lib.detectors;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.team9889.ftc2021.subsystems.Robot;
 import com.team9889.lib.detectors.util.HSV;
 
 import org.opencv.core.Core;
@@ -37,7 +38,10 @@ public class ScanForTSE extends OpenCvPipeline {
 
     public static double x1, x2, y1, y2;
 
-    public static HSV hsv = new HSV(110, 140,
+    public static HSV blueHSV = new HSV(0, 30,
+            50, 255, 1, 255);
+
+    public static HSV redHSV = new HSV(110, 140,
             50, 255, 1, 255);
 
     private List<Point> points = new ArrayList<>();
@@ -67,11 +71,17 @@ public class ScanForTSE extends OpenCvPipeline {
         blur(blurInput, blurType, blurRadius, blurOutput);
 
         Imgproc.rectangle(blurOutput, new Point(0, 0), new Point(160, 85), new Scalar(0, 0, 0), -1);
-        Imgproc.rectangle(blurOutput, new Point(0, 0), new Point(45, 120), new Scalar(0, 0, 0), -1);
+        if (Robot.getInstance().isRed)
+            Imgproc.rectangle(blurOutput, new Point(0, 0), new Point(45, 120), new Scalar(0, 0, 0), -1);
+        else
+            Imgproc.rectangle(blurOutput, new Point(180, 0), new Point(115, 120), new Scalar(0, 0, 0), -1);
 
         // Step HSV_Threshold0:
         Mat hsvThresholdInput = blurOutput;
-        hsvThreshold(hsvThresholdInput, hsv.getH(), hsv.getS(), hsv.getV(), hsvThresholdOutput);
+        if (Robot.getInstance().isRed)
+            hsvThreshold(hsvThresholdInput, redHSV.getH(), redHSV.getS(), redHSV.getV(), hsvThresholdOutput);
+        else
+            hsvThreshold(hsvThresholdInput, blueHSV.getH(), blueHSV.getS(), blueHSV.getV(), hsvThresholdOutput);
 
         // Step Find_Contours0:
         Mat findContoursInput = hsvThresholdOutput;

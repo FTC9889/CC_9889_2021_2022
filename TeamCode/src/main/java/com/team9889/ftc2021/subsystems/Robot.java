@@ -241,6 +241,9 @@ public class Robot {
             bRDrive.update(bulkDataMaster);
             bLDrive.update(bulkDataMaster);
             lift.update(bulkDataSlave);
+            carousel.update(bulkDataSlave);
+
+            getLift().liftDown = !bulkDataSlave.getDigitalInputState(0);
 
             Log.v("Loop Time 3", "" + loopTime.milliseconds());
 
@@ -252,9 +255,9 @@ public class Robot {
 
             Log.v("Loop Time 4", "" + loopTime.milliseconds());
 
-            if (auto) {
+//            if (auto) {
                 rr.getLocalizer().update();
-            }
+//            }
         } catch (Exception e){
             Log.v("Exception@robot.update", "" + e);
         }

@@ -14,7 +14,7 @@ public class DriveTillCarousel extends Action {
 
     @Override
     public void update() {
-        Robot.getInstance().getMecanumDrive().setPower(0, -0.3, 0);
+        Robot.getInstance().getMecanumDrive().setPower(0, -0.3 * (Robot.getInstance().isRed ? 1 : -1), 0);
     }
 
     @Override

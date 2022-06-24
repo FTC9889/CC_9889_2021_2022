@@ -22,7 +22,7 @@ public class Lift extends Subsystem {
 
     public static double liftTolerance = 1.5;
 
-    public boolean done = true, needsReset = false;
+    public boolean done = true, liftDown = true;
 
     public enum LiftState {
         DOWN, LAYER1, LAYER2, LAYER3, LAYER3_CLOSE, SHARED_CLOSE, SHARED_FAR, SMART, NULL
@@ -67,7 +67,7 @@ public class Lift extends Subsystem {
         telemetry.addData("Lift Height", GetLiftLength());
         telemetry.addData("Lift Angle", angle);
 
-//        telemetry.addData("Is Lift Down", IsDown());
+        telemetry.addData("Is Lift Down", IsDown());
 //        telemetry.addData("Lift PID Power", liftPID.getOutput());
     }
 
@@ -86,11 +86,11 @@ public class Lift extends Subsystem {
                 break;
 
             case LAYER1:
-                done = SetLiftPos(27, 10);
+                done = SetLiftPos(18, 10);
                 break;
 
             case LAYER2:
-                done = SetLiftPos(27, 18);
+                done = SetLiftPos(26, 18);
                 break;
 
             case LAYER3:
@@ -171,12 +171,9 @@ public class Lift extends Subsystem {
         }
         Log.v("Loop Time L3", "" + Robot.getInstance().loopTime.milliseconds());
 
-//        if (IsDown() && needsReset) {
-//            Robot.getInstance().lift.resetEncoder();
-//            needsReset = false;
-//        } else if (IsDown()){
-//            needsReset = true;
-//        }
+        if (IsDown()) {
+            Robot.getInstance().lift.resetEncoder();
+        }
 //        Log.v("Loop Time L4", "" + Robot.getInstance().loopTime.milliseconds());
 
         angle = CruiseLib.limitValue(angle, 1, .21);
@@ -192,7 +189,11 @@ public class Lift extends Subsystem {
 
     public boolean SetLiftLength(double length) {
         if (Math.abs(GetLiftLength() - length) > liftTolerance) {
-            double power = CruiseLib.limitValue(liftPID.update(GetLiftLength(), length), -0.05, -1, 0.05, 1);
+            double power;
+            if (Robot.getInstance().auto)
+                power = CruiseLib.limitValue(liftPID.update(GetLiftLength(), length), -0.05, -1, 0.05, 1);
+            else
+                power = CruiseLib.limitValue(liftPID.update(GetLiftLength(), length), -0.05, -1, 0.05, 1);
 
             if ((Math.abs(power - lastPower) > 0.1 && Math.abs(GetLiftLength() - lastLength) > 2) || Math.abs(power) > 0.9) {
                 liftStallTimer.reset();
@@ -244,7 +245,7 @@ public class Lift extends Subsystem {
         Robot.getInstance().angleAdjust3.setPosition(pos + offset3);
     }
 
-//  Units are Inches
+    //  Units are Inches
     public double GetLiftLength() {
         double spoolRadius = 0.875, ticks = 145.1;
         double spoolCircumference = 2 * Math.PI * spoolRadius;
@@ -252,11 +253,11 @@ public class Lift extends Subsystem {
     }
 
     public boolean IsDown() {
-        return Robot.getInstance().downLimit.isPressed();
+        return liftDown;
     }
 
 
-//  Units are Inches and Degrees
+    //  Units are Inches and Degrees
     public Boolean SetLiftPos(double length, double height) {
         double midToEnd = 5.625, lengthToEnd = 10, liftArm = 11.75, dumperHeight = 4.25;
         double hypot = Math.sqrt(Math.pow(height - 6 + (6 - dumperHeight), 2) + Math.pow(length - midToEnd, 2));

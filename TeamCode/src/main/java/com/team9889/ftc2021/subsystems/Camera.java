@@ -82,19 +82,17 @@ public class Camera extends Subsystem{
             }
         });
 
-        Robot.getInstance().camYAxis.setPosition(0.68);
+        Robot.getInstance().camYAxis.setPosition(0.35);
     }
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
-        if (auto) {
+//        if (auto) {
             telemetry.addData("Pos", getPosOfTarget());
             telemetry.addData("Box", getTSEPos());
 
             telemetry.addData("Duck Point", scanForDuck.getPoint());
-
-            Log.i("Box", "" + getTSEPos() + ", Pos: " + getPosOfTarget());
-        }
+//        }
     }
 
     @Override
@@ -120,12 +118,12 @@ public class Camera extends Subsystem{
                     box = AutoModeBase.Boxes.LEFT;
                 }
             } else {
-                if (Math.abs(getPosOfTarget().x) == 80) {
+                if (scanForTSE.getPoint().size() >= 2) {
                     box = AutoModeBase.Boxes.LEFT;
                 } else if (Math.abs(getPosOfTarget().x) >= 75) {
-                    box = AutoModeBase.Boxes.RIGHT;
-                } else if (Math.abs(getPosOfTarget().x) < 75) {
                     box = AutoModeBase.Boxes.MIDDLE;
+                } else if (Math.abs(getPosOfTarget().x) < 75) {
+                    box = AutoModeBase.Boxes.RIGHT;
                 }
             }
         }

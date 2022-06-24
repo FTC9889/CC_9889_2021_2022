@@ -1,31 +1,36 @@
 package com.team9889.ftc2021.auto.actions.drive.duck;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.auto.actions.ActionVariables;
 import com.team9889.ftc2021.subsystems.Robot;
+import com.team9889.lib.CruiseLib;
 
 /**
  * Created by Eric on 5/27/2022.
  */
+
 public class TurnUntilDuck extends Action {
     @Override
     public void start() {
-        Robot.getInstance().getMecanumDrive().setPower(0, 0, 0.1);
+        Robot.getInstance().getMecanumDrive().setPower(0, 0, 0.1 * (Robot.getInstance().isRed ? 1 : -1));
     }
 
     @Override
     public void update() {
         if (Robot.getInstance().getCamera().scanForDuck.getPoint().x != 160) {
             Robot.getInstance().getMecanumDrive().setPower(0, 0,
-                    (0.0018 * (Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160)) + 0.05);
+                    CruiseLib.limitValue(0.003 * (Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160), -0.1, -0.1, 0.1, 0.1));
+        } else {
+            Robot.getInstance().getMecanumDrive().setPower(0, 0, 0.1 * (Robot.getInstance().isRed ? 1 : -1));
         }
     }
 
     @Override
     public boolean isFinished() {
         return (Robot.getInstance().getCamera().scanForDuck.getPoint().x != 160 &&
-                Math.abs(Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160) < 10) ||
-                Math.toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading()) < -45;
+                Math.abs(Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160) < 8) ||
+                Math.toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading()) > 120;
     }
 
     @Override
@@ -33,7 +38,7 @@ public class TurnUntilDuck extends Action {
         Robot.getInstance().getMecanumDrive().setPower(0, 0, 0);
 
         if (Robot.getInstance().getCamera().scanForDuck.getPoint().x != 160 &&
-                Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160 < 10) {
+                Math.abs(Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160) < 8) {
             ActionVariables.grabbedDuck = true;
         } else {
             ActionVariables.grabbedDuck = false;

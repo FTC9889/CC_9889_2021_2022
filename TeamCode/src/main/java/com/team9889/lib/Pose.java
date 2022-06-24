@@ -6,8 +6,18 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
  * Created by Eric on 5/24/2022.
  */
 public class Pose {
-    public double x, y, theta, maxSpeed, radius;
+    public double x, y, theta, maxSpeed, radius, turnSpeed;
     public int thetaFollowPoint;
+
+    public Pose (double x, double y, double theta, double maxSpeed, int thetaFollowPoint, double radius, double turnSpeed) {
+        this.x = x;
+        this.y = y;
+        this.theta = theta;
+        this.maxSpeed = maxSpeed;
+        this.thetaFollowPoint = thetaFollowPoint;
+        this.radius = radius;
+        this.turnSpeed = turnSpeed;
+    }
 
     public Pose (double x, double y, double theta, double maxSpeed, int thetaFollowPoint, double radius) {
         this.x = x;
@@ -16,6 +26,7 @@ public class Pose {
         this.maxSpeed = maxSpeed;
         this.thetaFollowPoint = thetaFollowPoint;
         this.radius = radius;
+        this.turnSpeed = 1;
     }
 
     public Pose (double x, double y, double theta, double maxSpeed, int thetaFollowPoint) {
@@ -25,6 +36,7 @@ public class Pose {
         this.maxSpeed = maxSpeed;
         this.thetaFollowPoint = thetaFollowPoint;
         this.radius = 20;
+        this.turnSpeed = 1;
     }
 
     public Pose (double x, double y, double theta, double maxSpeed) {
@@ -34,6 +46,7 @@ public class Pose {
         this.maxSpeed = maxSpeed;
         this.thetaFollowPoint = 0;
         this.radius = 20;
+        this.turnSpeed = 1;
     }
 
     public Pose (double x, double y, double theta) {
@@ -43,6 +56,7 @@ public class Pose {
         this.maxSpeed = 1;
         this.thetaFollowPoint = 0;
         this.radius = 20;
+        this.turnSpeed = 1;
     }
 
     public static Pose Pose2dToPose(Pose2d pose2d) {

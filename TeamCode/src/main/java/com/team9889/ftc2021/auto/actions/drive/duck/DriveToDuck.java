@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.subsystems.Intake;
 import com.team9889.ftc2021.subsystems.Robot;
+import com.team9889.lib.CruiseLib;
 
 import org.opencv.core.Point;
 
@@ -27,21 +28,23 @@ public class DriveToDuck extends Action {
     public void update() {
         Point point = Robot.getInstance().getCamera().scanForDuck.getPoint();
 
+        double xSpeed = 0, turnSpeed;
+
         if (point.x == 160) {
             point = lastPoint;
+            turnSpeed = 0;
         } else {
             lastPoint = point;
+            turnSpeed = (0.0007 * (point.x - 160)) + 0.0221;
         }
 
-        double xSpeed = 0, turnSpeed = (0.0007 * (point.x - 160)) + 0.0221;
-
         if (Robot.getInstance().isRed) {
-            if (Robot.getInstance().rr.getPoseEstimate().getY() > -56 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
+            if (Robot.getInstance().rr.getPoseEstimate().getY() > -58 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
                 xSpeed = 0.5;
             }
         } else {
-            if (Robot.getInstance().rr.getPoseEstimate().getY() < 56 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
-                xSpeed = 0.5;
+            if (Robot.getInstance().rr.getPoseEstimate().getY() < 56 && Robot.getInstance().rr.getPoseEstimate().getX() > -63) {
+                xSpeed = 0.5 * CruiseLib.limitValue(-0.0556 * Robot.getInstance().rr.getPoseEstimate().getY() + 3.2222, 1, 0.4);
             }
         }
 

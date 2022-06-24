@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Carousel extends Subsystem {
-    public static double power = 0.6, wantedPower = 0, addedPower = 0.04, time = 1500;
+    public static double power = 0.6, wantedPower = 0, addedPower = 0.04, time = 1350;
     ElapsedTime timer = new ElapsedTime();
 
     public boolean on = false, override = false;
@@ -23,10 +23,13 @@ public class Carousel extends Subsystem {
 
     @Override
     public void outputToTelemetry(Telemetry telemetry) {
-        telemetry.addData("Carousel Power", power);
+//        telemetry.addData("Carousel Power", power);
 
-        telemetry.addData("Carousel Limits", "  Red:" + Robot.getInstance().redLimit.isPressed() +
-                ", Blue:" + Robot.getInstance().blueLimit.isPressed());
+        telemetry.addData("Carousel Velocity", Robot.getInstance().carousel.getVelocity());
+        telemetry.addData("Carousel Encoder", Robot.getInstance().carousel.getPosition());
+
+//        telemetry.addData("Carousel Limits", "  Red:" + Robot.getInstance().redLimit.isPressed() +
+//                ", Blue:" + Robot.getInstance().blueLimit.isPressed());
     }
 
     @Override
@@ -38,7 +41,8 @@ public class Carousel extends Subsystem {
                 }
 
                 if (wantedPower < power) {
-                    wantedPower += addedPower;
+//                    wantedPower += addedPower;
+                    Robot.getInstance().carousel.setRPM(180 * (Robot.getInstance().isRed ? 1 : -1));
                 }
 
                 if (Robot.getInstance().isRed) {

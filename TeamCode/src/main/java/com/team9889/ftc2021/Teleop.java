@@ -16,6 +16,7 @@ import com.team9889.ftc2021.subsystems.Lift;
 @Config
 public class Teleop extends Team9889Linear {
     public static double capArm = 0.15;
+    boolean overrideTimer = false;
     ElapsedTime timer = new ElapsedTime();
 
     @Override
@@ -33,13 +34,13 @@ public class Teleop extends Team9889Linear {
                 Robot.getMecanumDrive().writeAngleToFile();
             } else {
                 if (!driverStation.getSlow()) {
-                    Robot.getMecanumDrive().xSpeed += driverStation.getX();
-                    Robot.getMecanumDrive().ySpeed += driverStation.getY();
+                    Robot.getMecanumDrive().xSpeed += driverStation.getX() * 0.8;
+                    Robot.getMecanumDrive().ySpeed += driverStation.getY() * 0.8;
                     if (Robot.getLift().wantedLiftState == Lift.LiftState.DOWN ||
                             Robot.getLift().wantedLiftState == Lift.LiftState.NULL)
-                        Robot.getMecanumDrive().turnSpeed += driverStation.getSteer();
+                        Robot.getMecanumDrive().turnSpeed += driverStation.getSteer() * 0.8;
                     else
-                        Robot.getMecanumDrive().turnSpeed += driverStation.getSteer() / 3;
+                        Robot.getMecanumDrive().turnSpeed += driverStation.getSteer() / 3 * 0.8;
 
                     Robot.slowdown = false;
                 } else {
@@ -99,9 +100,9 @@ public class Teleop extends Team9889Linear {
                     Robot.getLift().wantedLiftState = Lift.LiftState.LAYER3;
                 } else if (driverStation.getDown()) {
                     Robot.getLift().wantedLiftState = Lift.LiftState.DOWN;
-                } else if (driverStation.getSharedClose()) {
+                } else if (driverStation.getSharedClose() && (Robot.getCapArm().step == 0 || Robot.getCapArm().step == 4)) {
                     Robot.getLift().wantedLiftState = Lift.LiftState.SHARED_CLOSE;
-                } else if (driverStation.getSharedFar()) {
+                } else if (driverStation.getSharedFar() && (Robot.getCapArm().step == 0 || Robot.getCapArm().step == 4)) {
                     Robot.getLift().wantedLiftState = Lift.LiftState.SHARED_FAR;
                 } else if (driverStation.getDefault()) {
                     Robot.getLift().wantedLiftState = Robot.getLift().defaultLiftState;
@@ -136,7 +137,7 @@ public class Teleop extends Team9889Linear {
 
 
             /* Cap */
-            if (timer.milliseconds() > 85000) {
+            if (timer.milliseconds() > 85000 || overrideTimer) {
                 if (driverStation.getCapForward()) {
                     Robot.getCapArm().step += 1;
                     Robot.getCapArm().manualControl = false;
@@ -147,6 +148,10 @@ public class Teleop extends Team9889Linear {
                     Robot.getCapArm().step = 0;
                     Robot.getCapArm().manualControl = false;
                 }
+            }
+
+            if (driverStation.getOverrideTimer()) {
+                overrideTimer = true;
             }
 
 //            if (gamepad1.back) {

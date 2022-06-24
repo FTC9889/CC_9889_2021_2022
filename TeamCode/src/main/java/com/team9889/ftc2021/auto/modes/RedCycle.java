@@ -28,8 +28,8 @@ public class RedCycle extends AutoModeBase {
         runAction(new Wait(timeToWait));
 
         // Drive to Hub
-        path.add(new Pose(5, -55, -90, 1, 0, 6));
-        path.add(new Pose(6, -55, -60, 1, 0, 6));
+        path.add(new Pose(5, -52, -90, 1, 0, 6));
+        path.add(new Pose(6, -52, -60, 1, 0, 6));
         runAction(new PurePursuit(path));
         path.clear();
 
@@ -51,8 +51,15 @@ public class RedCycle extends AutoModeBase {
         // Drive into Warehouse and intake
         Robot.getIntake().loadState = Intake.LoadState.OUTTAKE;
 
-        runAction(new DriveIntoWall());
-        Robot.rr.setPoseEstimate(new Pose2d(8, -66, Robot.rr.getPoseEstimate().getHeading()));
+        path.add(new Pose(8, -57, 0, .4, 0, 6));
+        path.add(new Pose(10, -60, 0, .4, 0, 6));
+        path.add(new Pose(12, -63, 0, .4, 0, 6));
+        path.add(new Pose(14, -66, 0, .4, 0, 6));
+        runAction(new PurePursuit(path));
+        path.clear();
+
+//        runAction(new DriveIntoWall());
+//        Robot.rr.setPoseEstimate(new Pose2d(8, -66, Robot.rr.getPoseEstimate().getHeading()));
 
         Robot.getIntake().loadState = Intake.LoadState.INTAKE;
 

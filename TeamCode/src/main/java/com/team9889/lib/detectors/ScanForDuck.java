@@ -1,6 +1,7 @@
 package com.team9889.lib.detectors;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.team9889.ftc2021.subsystems.Robot;
 import com.team9889.lib.detectors.util.HSV;
 
 import org.opencv.core.Core;
@@ -26,7 +27,7 @@ import java.util.List;
 
 @Config
 public class ScanForDuck extends OpenCvPipeline {
-    public static int area = 300, maxArea = 3000;
+    public static int area = 300, maxArea = 5000;
 
     //Outputs
     private Mat cvResizeOutput = new Mat();
@@ -35,8 +36,8 @@ public class ScanForDuck extends OpenCvPipeline {
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
-    public static HSV duckHSV = new HSV(80, 110,
-            90, 200, 0, 255);
+    public static HSV duckHSV = new HSV(90, 100,
+            60, 255, 0, 255);
 
     private Point point = new Point(1e10, 1e10);
 
@@ -122,6 +123,7 @@ public class ScanForDuck extends OpenCvPipeline {
             if(dist < minDistance) {
                 minDistance = dist;
                 minPoint = mc.get(i);
+//                minPoint.x += Robot.getInstance().isRed ? -25 : 15;
             }
         }
 

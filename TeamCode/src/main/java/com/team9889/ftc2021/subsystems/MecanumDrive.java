@@ -74,10 +74,10 @@ public class MecanumDrive extends Subsystem {
 
 //        telemetry.addData("Gyro", gyroAngle.getTheda(AngleUnit.DEGREES) - angleFromAuton);
 
-        telemetry.addData("Sensor 0", (Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 24 / 380) + 7);
-        telemetry.addData("Sensor 1", (Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 24 / 380) + 7);
-        telemetry.addData("Sensor 3", (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24 / 380) + 7);
-        telemetry.addData("Sensor 4", (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24 / 380) + 7);
+//        telemetry.addData("Sensor 0", (Robot.getInstance().bulkDataMaster.getAnalogInputValue(0) * 24 / 380) + 7);
+//        telemetry.addData("Sensor 1", (Robot.getInstance().bulkDataMaster.getAnalogInputValue(1) * 24 / 380) + 7);
+//        telemetry.addData("Sensor 3", (Robot.getInstance().bulkDataSlave.getAnalogInputValue(0) * 24 / 380) + 7);
+//        telemetry.addData("Sensor 4", (Robot.getInstance().bulkDataSlave.getAnalogInputValue(1) * 24 / 380) + 7);
     }
 
     @Override

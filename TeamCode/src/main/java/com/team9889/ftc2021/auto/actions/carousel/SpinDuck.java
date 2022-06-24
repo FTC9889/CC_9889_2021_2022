@@ -12,25 +12,26 @@ public class SpinDuck extends Action {
 
     @Override
     public void start() {
-        Robot.getInstance().getCarousel().override = true;
-        Robot.getInstance().getCarousel().SetWheelsPower(.5);
+//        Robot.getInstance().getCarousel().override = true;
+//        Robot.getInstance().getCarousel().SetWheelsPower(.5);
     }
 
     @Override
     public void update() {
-        if (timer.milliseconds() > 1700) {
-            Robot.getInstance().getCarousel().SetWheelsPower(0.5);
-        }
+//        if (timer.milliseconds() > 1700) {
+//            Robot.getInstance().getCarousel().SetWheelsPower(0.5);
+            Robot.getInstance().getCarousel().on = true;
+//        }
     }
 
     @Override
     public boolean isFinished() {
-        return timer.milliseconds() > 3000;
+        return timer.milliseconds() > 2250;
     }
 
     @Override
     public void done() {
-        Robot.getInstance().getCarousel().override = false;
-        Robot.getInstance().carousel.setPower(0);
+//        Robot.getInstance().getCarousel().override = false;
+        Robot.getInstance().getCarousel().on = false;
     }
 }

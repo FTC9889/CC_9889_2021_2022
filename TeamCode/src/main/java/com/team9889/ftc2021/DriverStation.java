@@ -103,12 +103,11 @@ public class DriverStation {
 
     private boolean carouselToggle = true;
     private boolean carouselOn = false;
-    public  boolean carouselCodePress = false;
     boolean getCarouselOn() {
-        if ((gamepad2.right_bumper || carouselCodePress) && carouselToggle) {
+        if (gamepad2.right_bumper && carouselToggle) {
             carouselOn = !carouselOn;
             carouselToggle = false;
-        } else if (!gamepad2.right_bumper && !carouselCodePress)
+        } else if (!gamepad2.right_bumper)
             carouselToggle = true;
 
         return carouselOn;
@@ -203,5 +202,9 @@ public class DriverStation {
 
     boolean getSetDefault() {
         return gamepad2.right_trigger >= 0.2;
+    }
+
+    boolean getOverrideTimer() {
+        return gamepad2.left_trigger >= 0.5;
     }
 }
