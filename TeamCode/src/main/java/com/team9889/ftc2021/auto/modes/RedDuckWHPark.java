@@ -6,8 +6,10 @@ import com.team9889.ftc2021.auto.AutoModeBase;
 import com.team9889.ftc2021.auto.actions.carousel.SpinDuck;
 import com.team9889.ftc2021.auto.actions.drive.DriveTillCarousel;
 import com.team9889.ftc2021.auto.actions.drive.PurePursuit;
+import com.team9889.ftc2021.auto.actions.drive.PurePursuitRobotCentric;
 import com.team9889.ftc2021.auto.actions.drive.duck.DriveToDuck;
 import com.team9889.ftc2021.auto.actions.drive.duck.TurnUntilDuck;
+import com.team9889.ftc2021.auto.actions.intake.Outtake;
 import com.team9889.ftc2021.auto.actions.lift.Score;
 import com.team9889.ftc2021.auto.actions.utl.Wait;
 import com.team9889.ftc2021.subsystems.Intake;
@@ -20,15 +22,15 @@ import java.util.ArrayList;
  * Created by Eric on 5/27/2022.
  */
 
-@Autonomous(name = "\uD83D\uDD35 \uD83E\uDD86 Blue Duck \uD83E\uDD86 \uD83D\uDD35", preselectTeleOp = "Teleop")
-public class BlueDuck extends AutoModeBase {
+@Autonomous(name = "\uD83D\uDFE5 \uD83E\uDD86 Red Duck WH Park \uD83E\uDD86 \uD83D\uDFE5", preselectTeleOp = "Teleop")
+public class RedDuckWHPark extends AutoModeBase {
     @Override
     public void run(StartPosition startPosition, Boxes box) {
         ArrayList<Pose> path = new ArrayList<>();
 
-        Intake.down = 0.7;
-
         runAction(new Wait(timeToWait));
+
+        Intake.down = 0.7;
 
         path.add(new Pose(-38, -55, -90, 1, 0, 6));
         path.add(new Pose(-32, -47, -127, 1, 0, 12));
@@ -38,7 +40,7 @@ public class BlueDuck extends AutoModeBase {
         runAction(new PurePursuit(path));
         path.clear();
 
-        Robot.getIntake().loadState = Intake.LoadState.OUTTAKE;
+        runAction(new Outtake(0, -1));
         switch (box) {
             case RIGHT:
                 runAction(new Score(Lift.LiftState.LAYER3, false));
@@ -54,9 +56,9 @@ public class BlueDuck extends AutoModeBase {
         }
         Robot.getIntake().loadState = Intake.LoadState.OFF;
 
-        path.add(new Pose(-34, -53, -90, 1, 0, 6));
-        path.add(new Pose(-55, -48, -90, 1, 0, 12));
-        path.add(new Pose(-69, -48, -90, 1, 0, 12));
+        path.add(new Pose(-34, -53, -127, 1, 0, 6));
+        path.add(new Pose(-55, -53, -127, 1, 0, 12));
+        path.add(new Pose(-69, -53, 90, 1, 0, 12));
         runAction(new PurePursuit(path, new Pose(5, 5, 3)));
         path.clear();
 
@@ -66,7 +68,7 @@ public class BlueDuck extends AutoModeBase {
         runAction(new Wait(250));
         runAction(new SpinDuck());
 
-        path.add(new Pose(-65, -40, -90, 1, 0, 6));
+        path.add(new Pose(-65, -40, 90, 1, 0, 6));
         path.add(new Pose(-60, -33, -50, 1, 0, 12));
         runAction(new PurePursuit(path));
         path.clear();
@@ -79,7 +81,7 @@ public class BlueDuck extends AutoModeBase {
         runAction(new DriveToDuck());
         runAction(new Wait(250));
 
-        path.add(new Pose(-35, -47, -127, 1, 0, 12));
+        path.add(new Pose(-36, -52, -127, 1, 0, 12));
         runAction(new PurePursuit(path, new Pose(1, 1, 2)));
         path.clear();
 
@@ -91,11 +93,17 @@ public class BlueDuck extends AutoModeBase {
 
         Robot.getIntake().loadState = Intake.LoadState.OFF;
 
-        path.add(new Pose(-55, -47, -127, 1, 0, 12));
-        path.add(new Pose(-59, -47, 0, 1, 0, 6));
-        path.add(new Pose(-60, -28, 0, 1, 0, 12));
-        path.add(new Pose(-66, -28, 0, 1, 0, 12));
-        runAction(new PurePursuit(path, new Pose(0.5, 0.5, 2), 5000));
+        path.add(new Pose(-55, -47, -127, 1, 0, 6));
+        path.add(new Pose(-59, -47, -180, 1, 0, 6));
+        path.add(new Pose(-59.5, -25, 90, 1, 0, 6));
+        path.add(new Pose(-24, 0, 0, 1, 0, 6));
+        path.add(new Pose(9, 0, 0, 1, 0, 6));
+        path.add(new Pose(9.5, -44, 0, 1, 0, 6));
+        runAction(new PurePursuit(path));
+        path.clear();
+
+        path.add(new Pose(60, -44, 0, 1, 0, 6));
+        runAction(new PurePursuit(path));
         path.clear();
 
         Intake.down = 0.58;
@@ -103,12 +111,12 @@ public class BlueDuck extends AutoModeBase {
 
     @Override
     public StartPosition side() {
-        return StartPosition.BLUE_DUCK;
+        return StartPosition.RED_DUCK;
     }
 
     @Override
     public void initialize() {
-        Pose2d startPos = new Pose2d(-42, 61.375, Math.toRadians(90));
+        Pose2d startPos = new Pose2d(-42, -61.375, Math.toRadians(-90));
         Robot.rr.setPoseEstimate(startPos);
     }
 }

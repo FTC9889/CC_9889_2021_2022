@@ -35,16 +35,16 @@ public class DriveToDuck extends Action {
             turnSpeed = 0;
         } else {
             lastPoint = point;
-            turnSpeed = (0.0007 * (point.x - 160)) + 0.0221;
+            turnSpeed = (0.0015 * (point.x - 160)) + 0.0221;
         }
 
         if (Robot.getInstance().isRed) {
-            if (Robot.getInstance().rr.getPoseEstimate().getY() > -58 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
-                xSpeed = 0.5;
+            if (Robot.getInstance().rr.getPoseEstimate().getY() > - 59 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
+                xSpeed = 0.5 * CruiseLib.limitValue(-0.0556 * Robot.getInstance().rr.getPoseEstimate().getY() + 3.2222, 1, 0.3);
             }
         } else {
-            if (Robot.getInstance().rr.getPoseEstimate().getY() < 56 && Robot.getInstance().rr.getPoseEstimate().getX() > -63) {
-                xSpeed = 0.5 * CruiseLib.limitValue(-0.0556 * Robot.getInstance().rr.getPoseEstimate().getY() + 3.2222, 1, 0.4);
+            if (Robot.getInstance().rr.getPoseEstimate().getY() < 59 && Robot.getInstance().rr.getPoseEstimate().getX() > -63) {
+                xSpeed = 0.5 * CruiseLib.limitValue(-0.0556 * Robot.getInstance().rr.getPoseEstimate().getY() + 3.2222, 1, 0.3);
             }
         }
 
@@ -60,7 +60,7 @@ public class DriveToDuck extends Action {
 
     @Override
     public boolean isFinished() {
-        return counter > 5 || timer.milliseconds() > 2000;
+        return counter > 5 || timer.milliseconds() > 3000;
     }
 
     @Override

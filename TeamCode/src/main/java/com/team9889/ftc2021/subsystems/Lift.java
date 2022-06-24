@@ -22,7 +22,7 @@ public class Lift extends Subsystem {
 
     public static double liftTolerance = 1.5;
 
-    public boolean done = true, liftDown = true;
+    public boolean done = true, liftDown = true, cycleAuto = false;
 
     public enum LiftState {
         DOWN, LAYER1, LAYER2, LAYER3, LAYER3_CLOSE, SHARED_CLOSE, SHARED_FAR, SMART, NULL
@@ -86,11 +86,23 @@ public class Lift extends Subsystem {
                 break;
 
             case LAYER1:
-                done = SetLiftPos(18, 10);
+                if (Robot.getInstance().isRed)
+                    if (cycleAuto)
+                        done = SetLiftPos(23, 10);
+                    else
+                        done = SetLiftPos(18, 10);
+                else
+                    if (cycleAuto)
+                        done = SetLiftPos(22, 9);
+                    else
+                        done = SetLiftPos(17, 10);
                 break;
 
             case LAYER2:
-                done = SetLiftPos(26, 18);
+                if (Robot.getInstance().isRed)
+                    done = SetLiftPos(27, 18);
+                else
+                    done = SetLiftPos(23, 18);
                 break;
 
             case LAYER3:
@@ -103,7 +115,7 @@ public class Lift extends Subsystem {
                 break;
 
             case SHARED_CLOSE:
-                done = SetLiftPos(11, 10);
+                done = SetLiftPos(8, 10);
                 break;
 
             case SHARED_FAR:

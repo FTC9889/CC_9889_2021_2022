@@ -61,7 +61,12 @@ public class SetUltrasonicPose extends Action {
                     break;
             }
         } else {
-
+            switch (position) {
+                case WH_CYCLE:
+                    tempPose = Robot.getInstance().getMecanumDrive().getPosition
+                            (MecanumDrive.Sensor.FRONT, MecanumDrive.Sensor.LEFT, MecanumDrive.Corner.TOP_LEFT);
+                    break;
+            }
         }
 
         pose.setX(((pose.getX() * step) + tempPose.getX()) / (step + 1));

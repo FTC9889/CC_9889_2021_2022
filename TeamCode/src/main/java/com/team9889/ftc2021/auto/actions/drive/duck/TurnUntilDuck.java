@@ -20,7 +20,7 @@ public class TurnUntilDuck extends Action {
     public void update() {
         if (Robot.getInstance().getCamera().scanForDuck.getPoint().x != 160) {
             Robot.getInstance().getMecanumDrive().setPower(0, 0,
-                    CruiseLib.limitValue(0.003 * (Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160), -0.1, -0.1, 0.1, 0.1));
+                    CruiseLib.limitValue(0.003 * (Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160), -0.07, -0.07, 0.07, 0.07));
         } else {
             Robot.getInstance().getMecanumDrive().setPower(0, 0, 0.1 * (Robot.getInstance().isRed ? 1 : -1));
         }
@@ -28,9 +28,15 @@ public class TurnUntilDuck extends Action {
 
     @Override
     public boolean isFinished() {
+        boolean turnToFar;
+        if (Robot.getInstance().isRed)
+            turnToFar = CruiseLib.angleWrap(Math.toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading())) < -120;
+        else
+            turnToFar = Math.toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading()) > 120;
+
         return (Robot.getInstance().getCamera().scanForDuck.getPoint().x != 160 &&
-                Math.abs(Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160) < 8) ||
-                Math.toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading()) > 120;
+                Math.abs(Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160) < 4) ||
+                turnToFar;
     }
 
     @Override

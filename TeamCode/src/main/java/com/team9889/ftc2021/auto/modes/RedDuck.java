@@ -31,6 +31,8 @@ public class RedDuck extends AutoModeBase {
 
         runAction(new Wait(timeToWait));
 
+        Intake.down = 0.7;
+
         path.add(new Pose(-38, -55, -90, 1, 0, 6));
         path.add(new Pose(-32, -47, -127, 1, 0, 12));
         if (box == Boxes.LEFT) {
@@ -84,6 +86,8 @@ public class RedDuck extends AutoModeBase {
         runAction(new PurePursuit(path, new Pose(1, 1, 2)));
         path.clear();
 
+        runAction(new Wait(timeToWaitDuck));
+
         runAction(new Score(Lift.LiftState.LAYER3, false));
         Robot.getIntake().loadState = Intake.LoadState.OFF;
         Robot.getIntake().overridePower = false;
@@ -95,6 +99,8 @@ public class RedDuck extends AutoModeBase {
         path.add(new Pose(-66, -32, 0, 1, 0, 12));
         runAction(new PurePursuit(path, new Pose(0.5, 0.5, 2), 5000));
         path.clear();
+
+        Intake.down = 0.58;
     }
 
     @Override

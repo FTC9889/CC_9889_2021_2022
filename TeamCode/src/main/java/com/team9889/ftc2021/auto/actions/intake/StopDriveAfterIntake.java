@@ -9,7 +9,6 @@ import com.team9889.ftc2021.subsystems.Robot;
  * Created by Eric on 6/16/2022.
  */
 public class StopDriveAfterIntake extends Action {
-    int counter = 0;
 
     @Override
     public void start() {
@@ -18,17 +17,11 @@ public class StopDriveAfterIntake extends Action {
 
     @Override
     public void update() {
-        if (Robot.getInstance().getIntake().loadState != Intake.LoadState.INTAKE) {
-            counter++;
-            Robot.getInstance().getIntake().loadState = Intake.LoadState.INTAKE;
-        } else {
-            counter = 0;
-        }
     }
 
     @Override
     public boolean isFinished() {
-        return counter > 3;
+        return Robot.getInstance().getIntake().loadState != Intake.LoadState.INTAKE;
     }
 
     @Override

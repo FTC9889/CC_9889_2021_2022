@@ -82,7 +82,7 @@ public class Camera extends Subsystem{
             }
         });
 
-        Robot.getInstance().camYAxis.setPosition(0.35);
+        Robot.getInstance().camYAxis.setPosition(0.37);
     }
 
     @Override

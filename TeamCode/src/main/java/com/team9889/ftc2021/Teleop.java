@@ -137,7 +137,7 @@ public class Teleop extends Team9889Linear {
 
 
             /* Cap */
-            if (timer.milliseconds() > 85000 || overrideTimer) {
+            if (timer.milliseconds() > 77000 || overrideTimer) {
                 if (driverStation.getCapForward()) {
                     Robot.getCapArm().step += 1;
                     Robot.getCapArm().manualControl = false;

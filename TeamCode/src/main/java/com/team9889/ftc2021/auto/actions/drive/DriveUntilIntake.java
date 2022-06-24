@@ -23,9 +23,9 @@ public class DriveUntilIntake extends Action {
         double turnSpeed = CruiseLib.limitValue(-CruiseLib.angleWrap(
                 0 - toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading())) / 90.0,
                 0, -0.7, 0, 0.7);
-        double xSpeed = (-0.0133 * Robot.getInstance().rr.getPoseEstimate().getX()) + 0.9333;
-        CruiseLib.limitValue(xSpeed, speed);
-        Robot.getInstance().getMecanumDrive().setFieldCentricPowerAuto(xSpeed, 0, turnSpeed);
+        double xSpeed = (-0.0133 * Robot.getInstance().rr.getPoseEstimate().getX()) + 0.75;
+        xSpeed = CruiseLib.limitValue(xSpeed, speed, 0.25);
+        Robot.getInstance().getMecanumDrive().setPower(0, xSpeed,turnSpeed);
 
         speed += 0.02;
 
@@ -39,7 +39,7 @@ public class DriveUntilIntake extends Action {
 
     @Override
     public boolean isFinished() {
-        return counter > 3;
+        return counter > 1;
     }
 
     @Override

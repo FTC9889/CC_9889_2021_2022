@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
 public class Carousel extends Subsystem {
-    public static double power = 0.6, wantedPower = 0, addedPower = 0.04, time = 1350;
+    public static double power = 0.6, wantedPower = 0, addedPower = 0.04, time = 1450;
     ElapsedTime timer = new ElapsedTime();
 
     public boolean on = false, override = false;
@@ -19,6 +19,9 @@ public class Carousel extends Subsystem {
     @Override
     public void init(boolean auto) {
         power = 0.6;
+        on = false;
+        Robot.getInstance().carousel.setRPM(0);
+        Robot.getInstance().carousel.setPower(0);
     }
 
     @Override
@@ -42,7 +45,7 @@ public class Carousel extends Subsystem {
 
                 if (wantedPower < power) {
 //                    wantedPower += addedPower;
-                    Robot.getInstance().carousel.setRPM(180 * (Robot.getInstance().isRed ? 1 : -1));
+                    Robot.getInstance().carousel.setRPM(170 * (Robot.getInstance().isRed ? 1 : -1));
                 }
 
                 if (Robot.getInstance().isRed) {
@@ -53,6 +56,7 @@ public class Carousel extends Subsystem {
             } else {
                 timer.reset();
                 SetWheelsPower(0);
+                Robot.getInstance().carousel.setRPM(0);
                 wantedPower = 0;
             }
         }

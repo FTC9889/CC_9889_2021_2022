@@ -37,7 +37,7 @@ public abstract class Team9889Linear extends LinearOpMode {
     // Dashboard
     public FtcDashboard dashboard = FtcDashboard.getInstance();
 
-    public int timeToWait = 0;
+    public int timeToWait = 0, timeToWaitDuck = 0;
     boolean buttonReleased = true;
 
     public String angleRead = "";
@@ -112,11 +112,20 @@ public abstract class Team9889Linear extends LinearOpMode {
                 telemetry.addData("Box", Robot.getCamera().getTSEPos().toString());
 
                 telemetry.addData("Delay at beginning", timeToWait / 1000.0);
+                telemetry.addData("Delay at duck placement", timeToWaitDuck / 1000.0);
 
                 Robot.outputToTelemetry(telemetry);
                 telemetry.update();
 
                 FtcDashboard.getInstance().startCameraStream(Robot.frontCVCam, 0);
+
+                if (gamepad1.y && buttonReleased) {
+                    timeToWaitDuck += 500;
+                    buttonReleased = false;
+                } else if (gamepad1.a && buttonReleased) {
+                    timeToWaitDuck -= 500;
+                    buttonReleased = false;
+                }
 
                 if (gamepad1.dpad_up && buttonReleased) {
                     timeToWait += 500;
@@ -124,7 +133,7 @@ public abstract class Team9889Linear extends LinearOpMode {
                 } else if (gamepad1.dpad_down && buttonReleased) {
                     timeToWait -= 500;
                     buttonReleased = false;
-                } else if (!gamepad1.dpad_up && !gamepad1.dpad_down) {
+                } else if (!gamepad1.dpad_up && !gamepad1.dpad_down && !gamepad1.y && !gamepad1.a) {
                     buttonReleased = true;
                 }
             }

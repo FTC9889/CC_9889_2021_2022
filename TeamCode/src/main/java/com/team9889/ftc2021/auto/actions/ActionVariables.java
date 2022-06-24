@@ -6,7 +6,7 @@ package com.team9889.ftc2021.auto.actions;
 public class ActionVariables {
     public static boolean grabbedDuck = false;
 
-    public static boolean readyToScore = true;
+    public static boolean readyToScore = false;
 
     public static boolean stopDriving = false;
 }

@@ -5,9 +5,11 @@ import android.util.Log;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.openftc.revextensions2.ExpansionHubEx;
 
 /**
  * Created by Eric on 8/19/2019.
@@ -15,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 @Config
 public class Intake extends Subsystem {
-    public static double power = 1, up = 0.4, down = 1;
+    public static double power = 1, up = 0.4, down = 0.58;
 
     public boolean overridePower = false;
 
@@ -34,14 +36,16 @@ public class Intake extends Subsystem {
     }
     public LoadState loadState = LoadState.OFF;
 
+    ElapsedTime hopperTimer = new ElapsedTime();
+
     public boolean block = true;
 
     @Override
     public void init(boolean auto) {
-        if (auto) {
-            intakeState = IntakeState.OFF;
-            wantedIntakeHeightState = IntakeHeightState.UP;
-        }
+//        if (auto) {
+        intakeState = IntakeState.OFF;
+        wantedIntakeHeightState = IntakeHeightState.UP;
+//        }
 
         overridePower = false;
 
@@ -55,6 +59,8 @@ public class Intake extends Subsystem {
         telemetry.addData("Freight in Intake", GetFreightInIntake());
         telemetry.addData("Is Block", block);
 
+        telemetry.addData("Intake Current", Robot.getInstance().intake.motor.getCurrentDraw(ExpansionHubEx.CurrentDrawUnits.MILLIAMPS));
+
         telemetry.addData("Power", power);
     }
 
@@ -63,12 +69,12 @@ public class Intake extends Subsystem {
         switch (loadState) {
             case INTAKE:
                 if (!overridePower)
-                    power = .7;
+                    power = 0.75;
                 IntakeOn();
                 IntakeDown();
                 passThroughState = IntakeState.OFF;
 
-                if (GetFreightInIntake()) {
+                if (GetFreightInIntake() && hopperTimer.milliseconds() > 500) {
                     loadState = LoadState.TRANSFER;
 
                     block = GetHue() <= 120;
@@ -76,7 +82,7 @@ public class Intake extends Subsystem {
                 break;
 
             case TRANSFER:
-                power = -0.2;
+                power = -0.4;
                 IntakeUp();
                 PassThroughOn();
                 break;
@@ -98,6 +104,10 @@ public class Intake extends Subsystem {
             Robot.getInstance().getCapArm().intake = true;
         } else {
             Robot.getInstance().getCapArm().intake = false;
+        }
+
+        if (loadState != LoadState.INTAKE) {
+            hopperTimer.reset();
         }
 
         switch (intakeState) {

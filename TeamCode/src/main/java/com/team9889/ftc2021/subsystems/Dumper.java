@@ -29,15 +29,15 @@ public class Dumper extends Subsystem {
     public void update() {
         switch (gateState) {
             case CLOSED:
-                SetGatePosition(0.8);
+                SetGatePosition(0);
                 break;
 
             case PARTIAL:
-                SetGatePosition(0.8);
+                SetGatePosition(0);
                 break;
 
             case OPEN:
-                SetGatePosition(0);
+                SetGatePosition(0.6);
                 break;
         }
     }

@@ -41,8 +41,8 @@ public class ScanForTSE extends OpenCvPipeline {
     public static HSV blueHSV = new HSV(0, 30,
             50, 255, 1, 255);
 
-    public static HSV redHSV = new HSV(110, 140,
-            50, 255, 1, 255);
+    public static HSV redHSV = new HSV(90, 140,
+            0, 255, 1, 255);
 
     private List<Point> points = new ArrayList<>();
 

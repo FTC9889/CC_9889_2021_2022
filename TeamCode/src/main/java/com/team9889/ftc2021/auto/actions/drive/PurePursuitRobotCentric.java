@@ -1,13 +1,17 @@
 package com.team9889.ftc2021.auto.actions.drive;
 
+import android.util.Log;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.auto.actions.ActionVariables;
+import com.team9889.ftc2021.subsystems.Intake;
 import com.team9889.ftc2021.subsystems.Robot;
 import com.team9889.lib.CruiseLib;
 import com.team9889.lib.Pose;
@@ -25,31 +29,39 @@ import static java.lang.Math.toDegrees;
  */
 
 @Config
-public class PurePursuit extends Action {
-    public static double speedToAdd = 0.02;
+public class PurePursuitRobotCentric extends Action {
+    public static double speedToAdd = 0.08;
 
     double maxSpeed = 0, timeout = -1;
     ElapsedTime timer = new ElapsedTime();
+
+    boolean stopWhenIntake = false;
 
     ArrayList<Pose> path;
     Pose tolerance = new Pose(2, 2, 3);
     int step = 1;
 
-    public PurePursuit(ArrayList<Pose> path) {
+    public PurePursuitRobotCentric(ArrayList<Pose> path) {
         this.path = path;
     }
 
-    public PurePursuit(ArrayList<Pose> path, double timeout) {
+    public PurePursuitRobotCentric(ArrayList<Pose> path, double timeout) {
         this.path = path;
         this.timeout = timeout;
     }
 
-    public PurePursuit(ArrayList<Pose> path, Pose tolerance) {
+    public PurePursuitRobotCentric(ArrayList<Pose> path, Pose tolerance) {
         this.path = path;
         this.tolerance = tolerance;
     }
 
-    public PurePursuit(ArrayList<Pose> path, Pose tolerance, double timeout) {
+    public PurePursuitRobotCentric(ArrayList<Pose> path, Pose tolerance, boolean stopWhenIntake) {
+        this.path = path;
+        this.tolerance = tolerance;
+        this.stopWhenIntake = stopWhenIntake;
+    }
+
+    public PurePursuitRobotCentric(ArrayList<Pose> path, Pose tolerance, double timeout) {
         this.path = path;
         this.timeout = timeout;
         this.tolerance = tolerance;
@@ -88,7 +100,6 @@ public class PurePursuit extends Action {
             point = path.get(step);
         }
 
-
         // Speed
         if (maxSpeed < path.get(step).maxSpeed) {
             maxSpeed += speedToAdd;
@@ -97,21 +108,17 @@ public class PurePursuit extends Action {
         }
 
 //        double xSpeed = CruiseLib.limitValue(xPID.update(pose.getX(), point.x), 0, -maxSpeed, 0, maxSpeed);
-//        double ySpeed = CruiseLib.limitValue(yPID.update(pose.getY(), point.y), 0, -maxSpeed, 0, maxSpeed);
+//        double speed = CruiseLib.limitValue(yPID.update(pose.getY(), point.y), 0, -maxSpeed, 0, maxSpeed);
 
-        double relativeXDist = point.x - pose.getX(), relativeYDist = point.y - pose.getY();
+        double relativeDist = sqrt(pow(point.y - pose.getY(), 2) + pow(point.x - pose.getX(), 2));
 
-        double xSpeed = relativeXDist / (abs(relativeXDist) + abs(relativeYDist));
-        double ySpeed = relativeYDist / (abs(relativeXDist) + abs(relativeYDist));
+        double speed = relativeDist / abs(relativeDist) * (path.get(step).thetaFollowPoint == -1 ? -1 : 1);
 
-        xSpeed *= Range.clip((abs(relativeXDist) / path.get(step).radius),0,1);
-        ySpeed *= Range.clip((abs(relativeYDist) / path.get(step).radius),0,1);
+        speed *= Range.clip((abs(relativeDist) / path.get(step).radius),0,1);
 
-        xSpeed *= Range.clip((abs(relativeXDist) / 6.0),0,1);
-        ySpeed *= Range.clip((abs(relativeYDist) / 6.0),0,1);
+        speed *= Range.clip((abs(relativeDist) / 6.0),0,1);
 
-        xSpeed = CruiseLib.limitValue(xSpeed, -0.05, -maxSpeed, 0.05, maxSpeed);
-        ySpeed = CruiseLib.limitValue(ySpeed, -0.05, -maxSpeed, 0.05, maxSpeed);
+        speed = CruiseLib.limitValue(speed, -0.05, -maxSpeed, 0.05, maxSpeed);
 
 
         //Turn
@@ -121,74 +128,50 @@ public class PurePursuit extends Action {
 
 //        Log.v("Distance", (point.x - pose.getX()) + ", " + (point.y - pose.getY()) + ", "
 //                + sqrt(pow(point.y-pose.getY(), 2) + pow(point.x-pose.getX(), 2)));
+//
+//        Log.v("Angle to Point", "" + angleToPoint);
+//        Log.v("Robot Angle", "" + pose.getHeading());
 
-        double turnSpeed;
-        if ((sqrt(pow(point.y-pose.getY(), 2) + pow(point.x-pose.getX(), 2)) < 10 && step == path.size() - 1) || path.get(step).thetaFollowPoint == 0) {
-//            Log.v("Angle", path.get(step).theta + ", " + toDegrees(pose.getHeading()) + ", " +
-//                    -CruiseLib.angleWrap(path.get(step).theta - toDegrees(pose.getHeading())) / 180.0);
+        double kp = 1./90.;
+        double turnSpeed = CruiseLib.limitValue(kp * relativePointAngle, -0.05, -1, 0.05, 1);
 
-            turnSpeed = CruiseLib.limitValue(-CruiseLib.angleWrap(path.get(step).theta - toDegrees(pose.getHeading())) / 90.0,
-                    0, -1, 0, 1) * path.get(step).turnSpeed;
-        } else {
-//            Log.v("Angle", angleToPoint + ", " + toDegrees(pose.getHeading()));
-
-            turnSpeed = CruiseLib.limitValue(relativePointAngle / 90.0, -0.05, -1, 0.05, 1);
-        }
+        Robot.getInstance().getMecanumDrive().setPower(0, speed, turnSpeed);
 
 
-        //Error in Tolerance
-//        Pose error = Pose.getError(Pose.Pose2dToPose(Robot.getInstance().rr.getLocalizer().getPoseEstimate()), point);
-//        if (abs(error.x) < tolerance.x) {
-//            xSpeed = 0;
+//        TelemetryPacket packet = new TelemetryPacket();
+//        for (int i = 0; i < path.size() - 1; i++) {
+//            packet.fieldOverlay()
+//                    .setStroke("red")
+//                    .strokeLine(path.get(i).x, path.get(i).y, path.get(i + 1).x, path.get(i + 1).y);
 //        }
-//        if (abs(error.y) < tolerance.y) {
-//            ySpeed = 0;
-//        }
-//        if (abs(error.theta) < tolerance.theta) {
-//            turnSpeed = 0;
-//        }
-
-
-
-//        Robot.getInstance().telemetry.addData("X Speed", xSpeed);
-//        Robot.getInstance().telemetry.addData("Y Speed", ySpeed);
-//        Robot.getInstance().telemetry.addData("Turn Speed", turnSpeed);
-
-        Robot.getInstance().getMecanumDrive().setFieldCentricPowerAuto(xSpeed, ySpeed, turnSpeed);
-
-
-        TelemetryPacket packet = new TelemetryPacket();
-        for (int i = 0; i < path.size() - 1; i++) {
-            packet.fieldOverlay()
-                    .setStroke("red")
-                    .strokeLine(path.get(i).x, path.get(i).y, path.get(i + 1).x, path.get(i + 1).y);
-        }
-
-        packet.fieldOverlay()
-                .setFill("green")
-                .fillRect(pose.getX() - 6.5, pose.getY() - 6.5, 13, 13);
-
-        packet.fieldOverlay()
-                .setStroke("blue")
-                .strokeCircle(pose.getX(), pose.getY(), path.get(step).radius);
-
-        packet.fieldOverlay()
-                .setStroke("black")
-                .strokeLine(pose.getX(), pose.getY(), point.x, point.y);
-        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+//
+//        packet.fieldOverlay()
+//                .setFill("green")
+//                .fillRect(pose.getX() - 6.5, pose.getY() - 6.5, 13, 13);
+//
+//        packet.fieldOverlay()
+//                .setStroke("blue")
+//                .strokeCircle(pose.getX(), pose.getY(), path.get(step).radius);
+//
+//        packet.fieldOverlay()
+//                .setStroke("black")
+//                .strokeLine(pose.getX(), pose.getY(), point.x, point.y);
+//        FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 
     @Override
     public boolean isFinished() {
         Pose error = Pose.getError(Pose.Pose2dToPose(Robot.getInstance().rr.getLocalizer().getPoseEstimate()),
                 path.get(path.size() - 1));
-        return ((abs(error.x) < tolerance.x && abs(error.y) < tolerance.y && abs(CruiseLib.angleWrap(error.theta)) < tolerance.theta)
-                && step == path.size() - 1) || ActionVariables.stopDriving || (timeout != -1 && timer.milliseconds() > timeout);
+        return ((abs(error.x) < tolerance.x && abs(error.y) < tolerance.y)
+                && step == path.size() - 1) || ActionVariables.stopDriving ||
+                (timeout != -1 && timer.milliseconds() > timeout)
+                || (stopWhenIntake && Robot.getInstance().getIntake().loadState != Intake.LoadState.INTAKE);
     }
 
     @Override
     public void done() {
-        Robot.getInstance().getMecanumDrive().setFieldCentricPowerAuto(0, 0, 0);
+        Robot.getInstance().getMecanumDrive().setPower(0, 0, 0);
         ActionVariables.stopDriving = false;
     }
 
@@ -196,7 +179,7 @@ public class PurePursuit extends Action {
     Pose RobotToLine (Pose point1, Pose point2, Pose2d pose, double radius) {
         double xDiff = point2.x - point1.x;
         if (xDiff == 0)
-            xDiff += 0.1;
+            xDiff += 0.000001;
 
         double slope = (point2.y - point1.y) / xDiff;
         double yIntercept = point2.y - (slope * point2.x);
@@ -237,6 +220,8 @@ public class PurePursuit extends Action {
 
             return follow;
         } else {
+            Log.v("d", d + "");
+            Log.v("PurePursuit", "HELP!!!");
             return new Pose(10000, 10000, 10000);
         }
     }

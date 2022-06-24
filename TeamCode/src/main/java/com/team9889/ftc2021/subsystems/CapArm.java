@@ -31,19 +31,19 @@ public class CapArm extends Subsystem{
             switch (step) {
                 case 0:
                     // Arm Down
-                    setCapArm(intake ? 0.28 : 0.13);
+                    setCapArm(intake ? 0.3 : 0.17);
                     capClose();
                     break;
 
                 case 1:
                     // Grab Cap
-                    setCapArm(0.87);
+                    setCapArm(0.865);
                     capClose();
                     break;
 
                 case 2:
                     // Arm Up
-                    setCapArm(0.6);
+                    setCapArm(0.58);
                     capClose();
                     timer.reset();
                     break;
