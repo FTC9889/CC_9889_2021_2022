@@ -37,7 +37,7 @@ public class ScanForDuck extends OpenCvPipeline {
     private ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
     public static HSV duckHSV = new HSV(90, 100,
-            60, 255, 0, 255);
+            60, 255, 100, 255);
 
     private Point point = new Point(1e10, 1e10);
 
@@ -108,7 +108,7 @@ public class ScanForDuck extends OpenCvPipeline {
             Imgproc.circle(cvResizeOutput, mc.get(i), 4, new Scalar(255, 0, 0), -1);
         }
 
-        double minDistance = 1e10;
+        double maxDistance = 0;
         Point minPoint = new Point(cvResizeOutput.width()/2, cvResizeOutput.height());
         Imgproc.circle(cvResizeOutput, minPoint, 1, new Scalar(0, 0, 255), -1);
         for (int i = 0; i < contours.size(); i++) {
@@ -118,12 +118,12 @@ public class ScanForDuck extends OpenCvPipeline {
             double c_x = cvResizeOutput.width()/2;
             double c_y = cvResizeOutput.height();
 
-            double dist = Math.pow((x - c_x), 2) + Math.pow((y - c_y), 2);
+            double dist = y;
 
-            if(dist < minDistance) {
-                minDistance = dist;
+            if(dist > maxDistance) {
+                maxDistance = dist;
                 minPoint = mc.get(i);
-//                minPoint.x += Robot.getInstance().isRed ? -25 : 15;
+                minPoint.x += Robot.getInstance().isRed ? -10 : -20;
             }
         }
 

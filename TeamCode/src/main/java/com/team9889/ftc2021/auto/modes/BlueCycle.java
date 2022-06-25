@@ -64,6 +64,8 @@ public class BlueCycle extends AutoModeBase {
 //            Thread.yield();
 //        }
 
+        Intake.down = 0.58;
+
         // Drive into Warehouse and intake
         for (int cycle = 1; cycle <= 3; cycle++) {
             runAction(new Wait(300));
@@ -101,6 +103,7 @@ public class BlueCycle extends AutoModeBase {
         runAction(new Wait(300));
 
         Robot.getIntake().loadState = Intake.LoadState.OFF;
+        Intake.down = 0.7;
 
         path.add(new Pose(15, -62, 0, 0.3, 0, 10));
         path.add(new Pose(30, -62, 0, 0.3, 0, 10));

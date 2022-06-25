@@ -17,9 +17,11 @@ import org.openftc.revextensions2.ExpansionHubEx;
 
 @Config
 public class Intake extends Subsystem {
-    public static double power = 1, up = 0.4, down = 0.58;
+    public static double power = 1, up = 0.45, down = 0.7;
 
-    public boolean overridePower = false;
+    public boolean overridePower = false, passThroughOn = false;
+
+    ElapsedTime liftTimer = new ElapsedTime();
 
     public enum IntakeHeightState {
         UP, DOWN, NULL
@@ -47,7 +49,13 @@ public class Intake extends Subsystem {
         wantedIntakeHeightState = IntakeHeightState.UP;
 //        }
 
+        SetIntake(0);
+        SetPassThrough(0);
+
         overridePower = false;
+        passThroughOn = false;
+
+        up = 0.45;
 
         Robot.getInstance().inLeft.setGain(2);
     }
@@ -72,7 +80,10 @@ public class Intake extends Subsystem {
                     power = 0.75;
                 IntakeOn();
                 IntakeDown();
-                passThroughState = IntakeState.OFF;
+                if (passThroughOn)
+                    SetPassThrough(0.5);
+                else
+                    passThroughState = IntakeState.OFF;
 
                 if (GetFreightInIntake() && hopperTimer.milliseconds() > 500) {
                     loadState = LoadState.TRANSFER;
@@ -82,7 +93,13 @@ public class Intake extends Subsystem {
                 break;
 
             case TRANSFER:
-                power = -0.4;
+//                power = -0.4;
+                if (overridePower) {
+                    power = 0.2;
+                    IntakeOn();
+                } else {
+                    IntakeOff();
+                }
                 IntakeUp();
                 PassThroughOn();
                 break;
@@ -104,6 +121,7 @@ public class Intake extends Subsystem {
             Robot.getInstance().getCapArm().intake = true;
         } else {
             Robot.getInstance().getCapArm().intake = false;
+            liftTimer.reset();
         }
 
         if (loadState != LoadState.INTAKE) {

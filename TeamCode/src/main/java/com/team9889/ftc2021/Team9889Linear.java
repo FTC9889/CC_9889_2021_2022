@@ -104,6 +104,12 @@ public abstract class Team9889Linear extends LinearOpMode {
                     telemetry.addData("⚠️<font size=\"+2\" color=\"red\"> DO NOT RUN: CAMERA NOT INITIALIZED </font>   ⚠️", "");
                 }
 
+
+                if (!Robot.getCarousel().GetLimit()) {
+                    telemetry.addData("⚠️<font size=\"+2\" color=\"red\"> DO NOT RUN: CAROUSEL NOT IN POSITION </font>   ⚠️", "");
+                }
+
+
                 if (Robot.isRed) {
                     telemetry.addData("", "\uD83D\uDFE5 Red Auto \uD83D\uDFE5");
                 } else {
