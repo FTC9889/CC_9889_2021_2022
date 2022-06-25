@@ -34,7 +34,7 @@ public class Intake extends Subsystem {
     public IntakeState intakeState = IntakeState.OFF, passThroughState = IntakeState.OFF;
 
     public enum LoadState {
-        INTAKE, TRANSFER, OUTTAKE, OFF
+        INTAKE, TRANSFER, TELEOP_TRANSFER, OUTTAKE, OFF
     }
     public LoadState loadState = LoadState.OFF;
 
@@ -86,7 +86,10 @@ public class Intake extends Subsystem {
                     passThroughState = IntakeState.OFF;
 
                 if (GetFreightInIntake() && hopperTimer.milliseconds() > 500) {
-                    loadState = LoadState.TRANSFER;
+                    if (Robot.getInstance().auto)
+                        loadState = LoadState.TRANSFER;
+                    else
+                        loadState = LoadState.TELEOP_TRANSFER;
 
                     block = GetHue() <= 120;
                 }
@@ -101,6 +104,24 @@ public class Intake extends Subsystem {
                     IntakeOff();
                 }
                 IntakeUp();
+                PassThroughOn();
+                break;
+
+            case TELEOP_TRANSFER:
+//                power = -0.4;
+                if (overridePower) {
+                    power = 0.2;
+                    IntakeOn();
+                } else {
+                    IntakeOff();
+                }
+                if (liftTimer.milliseconds() < 400) {
+                    Robot.getInstance().intakeLift.setPosition(0.4);
+                } else if (liftTimer.milliseconds() >= 200 && liftTimer.milliseconds() < 800) {
+                    Robot.getInstance().intakeLift.setPosition(0.5);
+                } else {
+                    Robot.getInstance().intakeLift.setPosition(0.4);
+                }
                 PassThroughOn();
                 break;
 
@@ -121,6 +142,9 @@ public class Intake extends Subsystem {
             Robot.getInstance().getCapArm().intake = true;
         } else {
             Robot.getInstance().getCapArm().intake = false;
+        }
+
+        if (loadState != LoadState.TELEOP_TRANSFER) {
             liftTimer.reset();
         }
 

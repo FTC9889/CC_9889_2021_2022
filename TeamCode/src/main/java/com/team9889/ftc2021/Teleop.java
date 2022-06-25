@@ -61,7 +61,7 @@ public class Teleop extends Team9889Linear {
             } else if (driverStation.getOuttake()) {
                 Robot.getIntake().loadState = Intake.LoadState.OUTTAKE;
             } else if (gamepad1.x) {
-                Robot.getIntake().loadState = Intake.LoadState.TRANSFER;
+                Robot.getIntake().loadState = Intake.LoadState.TELEOP_TRANSFER;
             }
 
 //            if (gamepad1.dpad_up) {
