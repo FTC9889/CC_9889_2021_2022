@@ -4,6 +4,8 @@ import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.subsystems.Robot;
 import com.team9889.lib.CruiseLib;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 import static java.lang.Math.abs;
 import static java.lang.Math.toDegrees;
 
@@ -26,7 +28,7 @@ public class Turn extends Action {
     @Override
     public void update() {
         double turnSpeed = CruiseLib.limitValue(-CruiseLib.angleWrap(
-                theta - Math.toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading())) / 90.0,
+                theta - Robot.getInstance().getMecanumDrive().getAngle().getTheda(AngleUnit.DEGREES)) / 90.0,
                 -0.1, -1, 0.1, 1) * turnMultiplier;
 
         Robot.getInstance().getMecanumDrive().setPower(0, 0, turnSpeed);
@@ -34,7 +36,7 @@ public class Turn extends Action {
 
     @Override
     public boolean isFinished() {
-        return abs(CruiseLib.angleWrap(theta - Math.toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading()))) < 4;
+        return abs(CruiseLib.angleWrap(theta - Math.toDegrees(Robot.getInstance().rr.getPoseEstimate().getHeading()))) < 1;
     }
 
     @Override

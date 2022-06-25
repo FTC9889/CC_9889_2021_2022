@@ -1,7 +1,6 @@
 package com.team9889.lib.detectors;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.team9889.ftc2021.subsystems.Robot;
 import com.team9889.lib.detectors.util.HSV;
 
 import org.opencv.core.Core;
@@ -26,8 +25,8 @@ import java.util.List;
  */
 
 @Config
-public class ScanForTSE extends OpenCvPipeline {
-    public static int area = 20;
+public class ScanForTSEObject extends OpenCvPipeline {
+    public static int area = 250;
 
     //Outputs
     private Mat cvResizeOutput = new Mat();
@@ -36,21 +35,16 @@ public class ScanForTSE extends OpenCvPipeline {
     private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
     private ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
-    public static double x1, x2, y1, y2;
+    public static HSV hsv = new HSV(0, 80,
+            50, 150, 50, 255);
 
-    public static HSV blueHSV = new HSV(0, 25,
-            50, 255, 1, 255);
+    private Point point = new Point(1e10, 1e10);
 
-    public static HSV redHSV = new HSV(90, 140,
-            0, 255, 1, 255);
-
-    private List<Point> points = new ArrayList<>();
-
-    public List<Point> getPoint() {
-        return points;
+    public Point getPoint() {
+        return point;
     }
 
-    public ScanForTSE() {
+    public ScanForTSEObject() {
 
     }
 
@@ -67,21 +61,14 @@ public class ScanForTSE extends OpenCvPipeline {
         // Step Blur0:
         Mat blurInput = cvResizeOutput;
         BlurType blurType = BlurType.get("Gaussian Blur");
-        double blurRadius = 1.2;
+        double blurRadius = 2.702702702702703;
         blur(blurInput, blurType, blurRadius, blurOutput);
 
-        Imgproc.rectangle(blurOutput, new Point(0, 0), new Point(160, 85), new Scalar(0, 0, 0), -1);
-        if (Robot.getInstance().isRed)
-            Imgproc.rectangle(blurOutput, new Point(0, 0), new Point(45, 120), new Scalar(0, 0, 0), -1);
-        else
-            Imgproc.rectangle(blurOutput, new Point(180, 0), new Point(115, 120), new Scalar(0, 0, 0), -1);
+        Imgproc.rectangle(blurOutput, new Point(0, 0), new Point(200, 50), new Scalar(0, 0, 0), -1);
 
         // Step HSV_Threshold0:
         Mat hsvThresholdInput = blurOutput;
-        if (Robot.getInstance().isRed)
-            hsvThreshold(hsvThresholdInput, redHSV.getH(), redHSV.getS(), redHSV.getV(), hsvThresholdOutput);
-        else
-            hsvThreshold(hsvThresholdInput, blueHSV.getH(), blueHSV.getS(), blueHSV.getV(), hsvThresholdOutput);
+        hsvThreshold(hsvThresholdInput, hsv.getH(), hsv.getS(), hsv.getV(), hsvThresholdOutput);
 
         // Step Find_Contours0:
         Mat findContoursInput = hsvThresholdOutput;
@@ -122,8 +109,6 @@ public class ScanForTSE extends OpenCvPipeline {
         double minDistance = 1e10;
         Point minPoint = new Point(cvResizeOutput.width()/2, cvResizeOutput.height());
         Imgproc.circle(cvResizeOutput, minPoint, 1, new Scalar(0, 0, 255), -1);
-
-        List<Point> tempPoints = new ArrayList<>();
         for (int i = 0; i < contours.size(); i++) {
             double x = mc.get(i).x;
             double y = mc.get(i).x;
@@ -137,16 +122,13 @@ public class ScanForTSE extends OpenCvPipeline {
                 minDistance = dist;
                 minPoint = mc.get(i);
             }
-
-            Imgproc.circle(hsvThresholdOutput, mc.get(i), 1, new Scalar(0, 255, 0), -1);
-            tempPoints.add(mc.get(i));
         }
+
+        point = minPoint;
+        Imgproc.circle(hsvThresholdOutput, minPoint, 1, new Scalar(0, 255, 0), -1);
 
         cvResize(hsvThresholdOutput, cvResizeDsize, 3, 3, cvResizeInterpolation, hsvThresholdOutput);
 
-//        Core.bitwise_and(input, hsvThresholdOutput, hsvThresholdOutput);
-
-        points = tempPoints;
         return hsvThresholdOutput;
     }
 

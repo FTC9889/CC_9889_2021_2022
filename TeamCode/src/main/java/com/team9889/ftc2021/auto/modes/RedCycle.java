@@ -47,12 +47,12 @@ public class RedCycle extends AutoModeBase {
         }
 
         // Drive to Hub
-        ThreadAction(new Outtake(500));
-
         path.add(new Pose(5, -52, -90, 1, 0, 6));
         path.add(new Pose(5, -49, -60, 1, 0, 6));
         runAction(new PurePursuit(path));
         path.clear();
+
+        ThreadAction(new Outtake(0, -1));
 
         Robot.getLift().cycleAuto = true;
         runAction(new Score(level, false));
@@ -65,32 +65,37 @@ public class RedCycle extends AutoModeBase {
 //            Thread.yield();
 //        }
 
+        runAction(new Wait(300));
+
         Intake.down = 0.58;
 
         // Drive into Warehouse and intake
         for (int cycle = 1; cycle <= 3; cycle++) {
             Robot.getIntake().loadState = Intake.LoadState.INTAKE;
 
-            path.add(new Pose(15, -61, 0, 0.3, 0, 10));
-            path.add(new Pose(30, -61, 0, 0.3, 0, 10));
-            path.add(new Pose(45 + (cycle - 1) * 3, -60, 0, 0.3, 0, 10));
-//            if (cycle % 2 == 0) {
-//                path.add(new Pose(70, -60, 0, .15, 0, 6));
-//            } else {
-            path.add(new Pose(70, -61, 0, .15, 0, 10));
-//            }
-            runAction(new PurePursuitRobotCentric(path, new Pose(6, 6, 5), true));
+//            path.add(new Pose(15, -61, 0, 0.3, 0, 10));
+//            path.add(new Pose(30, -61, 0, 0.3, 0, 10));
+//            path.add(new Pose(45 + (cycle - 1) * 3, -60, 0, 0.3, 0, 10));
+//            path.add(new Pose(70, -61, 0, .15, 0, 10));
+//            runAction(new PurePursuitRobotCentric(path, new Pose(6, 6, 5), true));
+//            path.clear();
+
+            path.add(new Pose(10, -64, 0, 0.5, 0, 6));
+            path.add(new Pose(35, -64, 0, 0.5, 0, 6));
+            path.add(new Pose(60, -64, 0, 0.15, 0, 6));
+            runAction(new PurePursuit(path, new Pose(6, 6, 5), true));
             path.clear();
 
+
             if (Robot.rr.getPoseEstimate().getX() > 20) {
-                runAction(new Turn(0, 1));
+                runAction(new Turn(5, 1));
                 runAction(new SetUltrasonicPose(SetUltrasonicPose.Position.WH_CYCLE, 4));
 
                 // Drive to Hub
-                path.add(new Pose(30, -66, 0, 1, 0, 6));
-                path.add(new Pose(15, -66, 0, 1, 0, 6));
+                path.add(new Pose(30, -66, 5, 1, 0, 6));
+                path.add(new Pose(15, -66, 5, 1, 0, 6));
             }
-            path.add(new Pose(10, -49, -60, 1, 0, 12));
+            path.add(new Pose(12, -49, -60, 1, 0, 12));
             runAction(new PurePursuit(path));
             path.clear();
 
@@ -104,10 +109,15 @@ public class RedCycle extends AutoModeBase {
         Robot.getIntake().loadState = Intake.LoadState.OFF;
         Intake.down = 0.7;
 
-        path.add(new Pose(15, -60, 0, 0.6, 0, 10));
-        path.add(new Pose(30, -60, 0, 0.6, 0, 10));
-        path.add(new Pose(45, -62, 0, 0.6, 0, 10));
-        runAction(new PurePursuitRobotCentric(path, new Pose(6, 6, 5)));
+//        path.add(new Pose(15, -60, 0, 0.6, 0, 10));
+//        path.add(new Pose(30, -60, 0, 0.6, 0, 10));
+//        path.add(new Pose(55, -62, 0, 0.6, 0, 10));
+//        runAction(new PurePursuitRobotCentric(path, new Pose(6, 6, 5)));
+//        path.clear();
+
+        path.add(new Pose(10, -64, 0, 0.5, 0, 6));
+        path.add(new Pose(50, -64, 0, 0.5, 0, 6));
+        runAction(new PurePursuit(path, new Pose(6, 6, 5)));
         path.clear();
     }
 

@@ -123,7 +123,7 @@ public abstract class Team9889Linear extends LinearOpMode {
                 Robot.outputToTelemetry(telemetry);
                 telemetry.update();
 
-                FtcDashboard.getInstance().startCameraStream(Robot.frontCVCam, 0);
+                FtcDashboard.getInstance().startCameraStream(Robot.camera, 0);
 
                 if (gamepad1.y && buttonReleased) {
                     timeToWaitDuck += 500;

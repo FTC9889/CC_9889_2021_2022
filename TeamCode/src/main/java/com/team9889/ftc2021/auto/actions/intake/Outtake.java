@@ -35,7 +35,7 @@ public class Outtake extends Action {
 
     @Override
     public boolean isFinished() {
-        return timer.milliseconds() > timeOut + 100;
+        return timer.milliseconds() > timeOut + 200;
     }
 
     @Override

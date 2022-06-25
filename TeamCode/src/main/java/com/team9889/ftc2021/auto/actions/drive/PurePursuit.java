@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.auto.actions.ActionVariables;
+import com.team9889.ftc2021.subsystems.Intake;
 import com.team9889.ftc2021.subsystems.Robot;
 import com.team9889.lib.CruiseLib;
 import com.team9889.lib.Pose;
@@ -35,6 +36,8 @@ public class PurePursuit extends Action {
     Pose tolerance = new Pose(2, 2, 3);
     int step = 1;
 
+    boolean stopWhenIntake = false;
+
     public PurePursuit(ArrayList<Pose> path) {
         this.path = path;
     }
@@ -47,6 +50,12 @@ public class PurePursuit extends Action {
     public PurePursuit(ArrayList<Pose> path, Pose tolerance) {
         this.path = path;
         this.tolerance = tolerance;
+    }
+
+    public PurePursuit(ArrayList<Pose> path, Pose tolerance, boolean stopWhenIntake) {
+        this.path = path;
+        this.tolerance = tolerance;
+        this.stopWhenIntake = stopWhenIntake;
     }
 
     public PurePursuit(ArrayList<Pose> path, Pose tolerance, double timeout) {
@@ -183,7 +192,8 @@ public class PurePursuit extends Action {
         Pose error = Pose.getError(Pose.Pose2dToPose(Robot.getInstance().rr.getLocalizer().getPoseEstimate()),
                 path.get(path.size() - 1));
         return ((abs(error.x) < tolerance.x && abs(error.y) < tolerance.y && abs(CruiseLib.angleWrap(error.theta)) < tolerance.theta)
-                && step == path.size() - 1) || ActionVariables.stopDriving || (timeout != -1 && timer.milliseconds() > timeout);
+                && step == path.size() - 1) || ActionVariables.stopDriving || (timeout != -1 && timer.milliseconds() > timeout)
+                || (stopWhenIntake && Robot.getInstance().getIntake().loadState != Intake.LoadState.INTAKE);
     }
 
     @Override

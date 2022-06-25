@@ -1,13 +1,12 @@
 package com.team9889.ftc2021.subsystems;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.team9889.ftc2021.auto.AutoModeBase;
 import com.team9889.lib.detectors.Blank;
 import com.team9889.lib.detectors.ScanForDuck;
 import com.team9889.lib.detectors.ScanForHub;
-import com.team9889.lib.detectors.ScanForTSE;
+import com.team9889.lib.detectors.ScanForTSEObject;
+import com.team9889.lib.detectors.ScanForTSEObjectRGB;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Point;
@@ -20,7 +19,8 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Config
 public class Camera extends Subsystem{
-    ScanForTSE scanForTSE = new ScanForTSE();
+//    ScanForTSE scanForTSE = new ScanForTSE();
+    ScanForTSEObject scanForTSE = new ScanForTSEObject();
     public ScanForDuck scanForDuck = new ScanForDuck();
     public ScanForHub scanForHub = new ScanForHub();
     public Blank blank = new Blank();
@@ -105,26 +105,50 @@ public class Camera extends Subsystem{
         Robot.getInstance().frontCVCam.stopStreaming();
     }
 
+//    public AutoModeBase.Boxes getTSEPos() {
+//        AutoModeBase.Boxes box = AutoModeBase.Boxes.RIGHT;
+//
+//        if (scanForTSE.getPoint().size() > 0) {
+//            if (Robot.getInstance().isRed) {
+//                if (scanForTSE.getPoint().size() >= 2) {
+//                    box = AutoModeBase.Boxes.RIGHT;
+//                } else if (scanForTSE.getPoint().get(0).x < 75) {
+//                    box = AutoModeBase.Boxes.MIDDLE;
+//                } else if (scanForTSE.getPoint().get(0).x >= 75) {
+//                    box = AutoModeBase.Boxes.LEFT;
+//                }
+//            } else {
+//                if (scanForTSE.getPoint().size() >= 2) {
+//                    box = AutoModeBase.Boxes.LEFT;
+//                } else if (Math.abs(getPosOfTarget().x) >= 75) {
+//                    box = AutoModeBase.Boxes.MIDDLE;
+//                } else if (Math.abs(getPosOfTarget().x) < 75) {
+//                    box = AutoModeBase.Boxes.RIGHT;
+//                }
+//            }
+//        }
+//
+//        return box;
+//    }
+
     public AutoModeBase.Boxes getTSEPos() {
         AutoModeBase.Boxes box = AutoModeBase.Boxes.RIGHT;
 
-        if (scanForTSE.getPoint().size() > 0) {
-            if (Robot.getInstance().isRed) {
-                if (scanForTSE.getPoint().size() >= 2) {
-                    box = AutoModeBase.Boxes.RIGHT;
-                } else if (scanForTSE.getPoint().get(0).x < 75) {
-                    box = AutoModeBase.Boxes.MIDDLE;
-                } else if (scanForTSE.getPoint().get(0).x >= 75) {
-                    box = AutoModeBase.Boxes.LEFT;
-                }
-            } else {
-                if (scanForTSE.getPoint().size() >= 2) {
-                    box = AutoModeBase.Boxes.LEFT;
-                } else if (Math.abs(getPosOfTarget().x) >= 75) {
-                    box = AutoModeBase.Boxes.MIDDLE;
-                } else if (Math.abs(getPosOfTarget().x) < 75) {
-                    box = AutoModeBase.Boxes.RIGHT;
-                }
+        if (Robot.getInstance().isRed) {
+            if (Math.abs(getPosOfTarget().x) == 80) {
+                box = AutoModeBase.Boxes.RIGHT;
+            } else if (Math.abs(getPosOfTarget().x) < 75) {
+                box = AutoModeBase.Boxes.LEFT;
+            } else if (Math.abs(getPosOfTarget().x) >= 75) {
+                box = AutoModeBase.Boxes.MIDDLE;
+            }
+        } else {
+            if (Math.abs(getPosOfTarget().x) == 80) {
+                box = AutoModeBase.Boxes.LEFT;
+            } else if (Math.abs(getPosOfTarget().x) >= 75) {
+                box = AutoModeBase.Boxes.RIGHT;
+            } else if (Math.abs(getPosOfTarget().x) < 75) {
+                box = AutoModeBase.Boxes.MIDDLE;
             }
         }
 
@@ -149,11 +173,13 @@ public class Camera extends Subsystem{
         Point posToReturn = new Point();
         switch (currentPipeline) {
             case TSE:
-                if (scanForTSE.getPoint().size() > 0)
-                    posToReturn = scanForTSE.getPoint().get(0);
-                else
-                    posToReturn = new Point(1e10, 1e10);
-                break;
+//                if (scanForTSE.getPoint().size() > 0)
+//                    posToReturn = scanForTSE.getPoint().get(0);
+//                else
+//                    posToReturn = new Point(1e10, 1e10);
+//                break;
+
+                posToReturn = scanForTSE.getPoint();
         }
 
         return posToReturn;
