@@ -29,14 +29,14 @@ public class DriveToDuck extends Action {
 
             double xSpeed = 0, turnSpeed;
 
-            if (point.y >= 160 || point.x == 160) {
+            if (point.y >= 120 || point.x == 160) {
                 turnSpeed = 0;
             } else {
                 turnSpeed = (0.0015 * (point.x - 160)) + 0.0221;
             }
 
-            if ((point.y < 145 || Math.abs(Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160) < 6)
-                    || point.y >= 160 || point.x == 160) {
+//            if ((point.y < 145 || Math.abs(Robot.getInstance().getCamera().scanForDuck.getPoint().x - 160) < 6)
+//                    || point.y >= 160 || point.x == 160) {
                 if (Robot.getInstance().isRed) {
                     if (Robot.getInstance().rr.getPoseEstimate().getY() > -59 && Robot.getInstance().rr.getPoseEstimate().getX() > -65) {
                         xSpeed = 0.3 * CruiseLib.limitValue(-0.0556 * Robot.getInstance().rr.getPoseEstimate().getY() + 3.2222, 1, 0.3);
@@ -46,7 +46,7 @@ public class DriveToDuck extends Action {
                         xSpeed = 0.4 * CruiseLib.limitValue(-0.0556 * Robot.getInstance().rr.getPoseEstimate().getY() + 3.2222, 1, 0.4);
                     }
                 }
-            }
+//            }
 
             Robot.getInstance().getMecanumDrive().setPower(0, xSpeed, turnSpeed);
 

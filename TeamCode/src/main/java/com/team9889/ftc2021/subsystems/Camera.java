@@ -3,6 +3,7 @@ package com.team9889.ftc2021.subsystems;
 import com.acmerobotics.dashboard.config.Config;
 import com.team9889.ftc2021.auto.AutoModeBase;
 import com.team9889.lib.detectors.Blank;
+import com.team9889.lib.detectors.DetectGreenTSE;
 import com.team9889.lib.detectors.ScanForDuck;
 import com.team9889.lib.detectors.ScanForHub;
 import com.team9889.lib.detectors.ScanForTSEObject;
@@ -23,6 +24,9 @@ public class Camera extends Subsystem{
     ScanForTSEObject scanForTSE = new ScanForTSEObject();
     public ScanForDuck scanForDuck = new ScanForDuck();
     public ScanForHub scanForHub = new ScanForHub();
+
+    public DetectGreenTSE detectGreenTSE = new DetectGreenTSE();
+
     public Blank blank = new Blank();
 
     public enum CameraStates {
@@ -49,8 +53,9 @@ public class Camera extends Subsystem{
             {
                 Robot.getInstance().camera.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
                 if (auto) {
-                    setScanForTSE();
+//                    setScanForTSE();
 //                    Robot.getInstance().camera.setPipeline(blank);
+                    Robot.getInstance().camera.setPipeline(detectGreenTSE);
                 } else {
                     Robot.getInstance().camera.setPipeline(scanForHub);
                 }
@@ -132,27 +137,29 @@ public class Camera extends Subsystem{
 //    }
 
     public AutoModeBase.Boxes getTSEPos() {
-        AutoModeBase.Boxes box = AutoModeBase.Boxes.RIGHT;
+//        AutoModeBase.Boxes box = AutoModeBase.Boxes.RIGHT;
+//
+//        if (Robot.getInstance().isRed) {
+//            if (Math.abs(getPosOfTarget().x) == 80) {
+//                box = AutoModeBase.Boxes.RIGHT;
+//            } else if (Math.abs(getPosOfTarget().x) < 75) {
+//                box = AutoModeBase.Boxes.LEFT;
+//            } else if (Math.abs(getPosOfTarget().x) >= 75) {
+//                box = AutoModeBase.Boxes.MIDDLE;
+//            }
+//        } else {
+//            if (Math.abs(getPosOfTarget().x) == 80) {
+//                box = AutoModeBase.Boxes.LEFT;
+//            } else if (Math.abs(getPosOfTarget().x) >= 75) {
+//                box = AutoModeBase.Boxes.RIGHT;
+//            } else if (Math.abs(getPosOfTarget().x) < 75) {
+//                box = AutoModeBase.Boxes.MIDDLE;
+//            }
+//        }
+//
+//        return box;
 
-        if (Robot.getInstance().isRed) {
-            if (Math.abs(getPosOfTarget().x) == 80) {
-                box = AutoModeBase.Boxes.RIGHT;
-            } else if (Math.abs(getPosOfTarget().x) < 75) {
-                box = AutoModeBase.Boxes.LEFT;
-            } else if (Math.abs(getPosOfTarget().x) >= 75) {
-                box = AutoModeBase.Boxes.MIDDLE;
-            }
-        } else {
-            if (Math.abs(getPosOfTarget().x) == 80) {
-                box = AutoModeBase.Boxes.LEFT;
-            } else if (Math.abs(getPosOfTarget().x) >= 75) {
-                box = AutoModeBase.Boxes.RIGHT;
-            } else if (Math.abs(getPosOfTarget().x) < 75) {
-                box = AutoModeBase.Boxes.MIDDLE;
-            }
-        }
-
-        return box;
+        return detectGreenTSE.getPosition();
     }
 
     public void setScanForTSE() {

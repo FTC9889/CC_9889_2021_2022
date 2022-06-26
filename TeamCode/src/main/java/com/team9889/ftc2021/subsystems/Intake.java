@@ -138,7 +138,7 @@ public class Intake extends Subsystem {
                 break;
         }
 
-        if (loadState == LoadState.TRANSFER) {
+        if (loadState == LoadState.TRANSFER || loadState == LoadState.TELEOP_TRANSFER) {
             Robot.getInstance().getCapArm().intake = true;
         } else {
             Robot.getInstance().getCapArm().intake = false;

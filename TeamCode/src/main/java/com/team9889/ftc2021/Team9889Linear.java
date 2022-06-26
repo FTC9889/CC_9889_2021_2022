@@ -11,9 +11,11 @@ import com.qualcomm.robotcore.util.ReadWriteFile;
 import com.team9889.ftc2021.auto.AutoModeBase;
 import com.team9889.ftc2021.auto.actions.Action;
 import com.team9889.ftc2021.subsystems.Robot;
+import com.team9889.lib.detectors.DetectGreenTSE;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.opencv.core.Scalar;
 
 import java.io.File;
 
@@ -38,7 +40,7 @@ public abstract class Team9889Linear extends LinearOpMode {
     public FtcDashboard dashboard = FtcDashboard.getInstance();
 
     public int timeToWait = 0, timeToWaitDuck = 0;
-    boolean buttonReleased = true;
+    boolean buttonReleased = true, editDetection = false;
 
     public String angleRead = "";
 
@@ -96,6 +98,9 @@ public abstract class Team9889Linear extends LinearOpMode {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         if(autonomous){
+            if (!Robot.isRed)
+                DetectGreenTSE.rgbHigh = DetectGreenTSE.defaultBlueHigh;
+
             // Autonomous Init Loop code
             while(isInInitLoop()){
                 telemetry.addData("Waiting for Start","");
@@ -120,10 +125,43 @@ public abstract class Team9889Linear extends LinearOpMode {
                 telemetry.addData("Delay at beginning", timeToWait / 1000.0);
                 telemetry.addData("Delay at duck placement", timeToWaitDuck / 1000.0);
 
+                if (Robot.isRed) {
+                    telemetry.addData("Left Box", Robot.getCamera().detectGreenTSE.getLeftBox());
+                    telemetry.addData("Middle Box", Robot.getCamera().detectGreenTSE.getMiddleBox());
+                } else {
+                    telemetry.addData("Middle Box", Robot.getCamera().detectGreenTSE.getLeftBox());
+                    telemetry.addData("Right Box", Robot.getCamera().detectGreenTSE.getMiddleBox());
+                }
+                telemetry.addData("Lower Bounds", Robot.getCamera().detectGreenTSE.getLowBound());
+                telemetry.addData("Higher Bounds", Robot.getCamera().detectGreenTSE.getHighBound());
+
+                telemetry.addData("gamepad1 b to edit ", !editDetection ? "camera" : "time");
+                telemetry.addLine();
+
                 Robot.outputToTelemetry(telemetry);
                 telemetry.update();
 
                 FtcDashboard.getInstance().startCameraStream(Robot.camera, 0);
+
+                if (editDetection) {
+                    if (gamepad1.dpad_up && buttonReleased) {
+                        DetectGreenTSE.rgbHigh.set(new double[]{DetectGreenTSE.rgbHigh.val[0] + 2,
+                                DetectGreenTSE.rgbHigh.val[1] + 2, DetectGreenTSE.rgbHigh.val[2] + 2});
+                        buttonReleased = false;
+                    } else if (gamepad1.dpad_down && buttonReleased) {
+                        DetectGreenTSE.rgbHigh.set(new double[]{DetectGreenTSE.rgbHigh.val[0] - 2,
+                                DetectGreenTSE.rgbHigh.val[1] - 2, DetectGreenTSE.rgbHigh.val[2] - 2});
+                        buttonReleased = false;
+                    }
+                } else {
+                    if (gamepad1.dpad_up && buttonReleased) {
+                        timeToWait += 500;
+                        buttonReleased = false;
+                    } else if (gamepad1.dpad_down && buttonReleased) {
+                        timeToWait -= 500;
+                        buttonReleased = false;
+                    }
+                }
 
                 if (gamepad1.y && buttonReleased) {
                     timeToWaitDuck += 500;
@@ -133,13 +171,12 @@ public abstract class Team9889Linear extends LinearOpMode {
                     buttonReleased = false;
                 }
 
-                if (gamepad1.dpad_up && buttonReleased) {
-                    timeToWait += 500;
+                if (gamepad1.b && buttonReleased) {
+                    editDetection = !editDetection;
                     buttonReleased = false;
-                } else if (gamepad1.dpad_down && buttonReleased) {
-                    timeToWait -= 500;
-                    buttonReleased = false;
-                } else if (!gamepad1.dpad_up && !gamepad1.dpad_down && !gamepad1.y && !gamepad1.a) {
+                }
+
+                if (!gamepad1.dpad_up && !gamepad1.dpad_down && !gamepad1.y && !gamepad1.a && !gamepad1.b) {
                     buttonReleased = true;
                 }
             }
